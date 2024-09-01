@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
-import { db, auth } from "../config/config";
+import { collection, getDocs } from "firebase/firestore";
 import { toast } from 'sonner';
-import { deleteUser } from "firebase/auth";
+import { db, httpsCallable } from '../config/config';
 
 import UserForm from '../components/UserForm';
 import UserTable from '../components/UsersTable';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 
-interface Usuario {
+interface User {
     id: string;
     name: string;
     email: string;
@@ -20,9 +19,9 @@ interface Usuario {
 export default function Controlpanel() {
     const [isUserFormOpen, setIsUserFormOpen] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [userToDelete, setUserToDelete] = useState<Usuario | null>(null);
-    const [editUsuario, setEditUsuario] = useState<Usuario | null>(null);
-    const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+    const [userToDelete, setUserToDelete] = useState<User | null>(null);
+    const [editUsuario, setEditUsuario] = useState<User | null>(null);
+    const [usuarios, setUsuarios] = useState<User[]>([]);
 
     useEffect(() => {
         obtenerUsuarios();
@@ -33,9 +32,9 @@ export default function Controlpanel() {
             const usuariosCollection = collection(db, "usuarios");
             const usuariosSnapshot = await getDocs(usuariosCollection);
 
-            const usuariosData: Usuario[] = [];
+            const usuariosData: User[] = [];
             usuariosSnapshot.forEach((doc) => {
-                const usuario = { id: doc.id, ...doc.data() } as Usuario;
+                const usuario = { id: doc.id, ...doc.data() } as User;
                 usuariosData.push(usuario);
             });
 
@@ -45,12 +44,12 @@ export default function Controlpanel() {
         }
     };
 
-    const handleEditarUsuario = async (usuario: Usuario) => {
+    const handleEditarUsuario = async (usuario: User) => {
         setEditUsuario(usuario);
         setIsUserFormOpen(true);
     };
 
-    const handleEliminarUsuario = (usuario: Usuario) => {
+    const handleEliminarUsuario = (usuario: User) => {
         setUserToDelete(usuario);
         setShowDeleteModal(true);
     };
@@ -58,15 +57,8 @@ export default function Controlpanel() {
     const confirmarEliminarUsuario = async () => {
         if (userToDelete) {
             try {
-                // Eliminar usuario de Firebase Authentication
-                const user = auth.currentUser;
-                if (user) {
-                    await deleteUser(user);
-                }
-
-                // Eliminar usuario de Firestore
-                const usuariosCollection = collection(db, "usuarios");
-                await deleteDoc(doc(usuariosCollection, userToDelete.id));
+                const deleteUserFunction = httpsCallable('deleteUser');
+                await deleteUserFunction({ uid: userToDelete.id });
 
                 obtenerUsuarios();
                 toast.success("Usuario eliminado con éxito");

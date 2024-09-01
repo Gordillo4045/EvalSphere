@@ -12,11 +12,9 @@ import {
     Select,
     SelectItem
 } from "@nextui-org/react";
-import { collection, updateDoc, doc, setDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { db, storage, auth } from "../config/config";
+import { storage, httpsCallable } from "../config/config";
 import { toast } from 'sonner';
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 
 interface UserFormProps {
     isOpen: boolean;
@@ -111,61 +109,42 @@ export default function UserForm({ isOpen, onClose, editUser, onUpdate }: UserFo
                 avatarUrl = await getDownloadURL(storageRef);
             }
 
-            const usuariosCollection = collection(db, "usuarios");
-
             if (editUser) {
                 // Actualizar usuario existente
-                await updateDoc(doc(usuariosCollection, editUser.id), {
-                    name: formData.name,
+                const updateUserFunction = httpsCallable('updateUser');
+                await updateUserFunction({
+                    uid: editUser.id,
+                    email: formData.email,
+                    displayName: formData.name,
+                    photoURL: avatarUrl || null,
                     role: formData.role,
                     puestoTrabajo: formData.puestoTrabajo,
-                    avatar: avatarUrl,
                 });
-
-                // Actualizar perfil de autenticación
-                await updateProfile(auth.currentUser, {
-                    displayName: formData.name,
-                    photoURL: avatarUrl,
-                });
-
-                // Si el usuario está cambiando su propio rol, cerrar sesión
-                if (auth.currentUser && auth.currentUser.uid === editUser.id && formData.role !== editUser.role) {
-                    await auth.signOut();
-                }
             } else {
                 // Crear nuevo usuario
-                const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
-                const user = userCredential.user;
-
-                // Actualizar perfil de autenticación
-                await updateProfile(user, {
-                    displayName: formData.name,
-                    photoURL: avatarUrl,
-                });
-
-                // Agregar usuario a Firestore
-                const docuref = doc(usuariosCollection, user.uid);
-                await setDoc(docuref, {
-                    uid: user.uid,
-                    name: formData.name,
+                const createUserFunction = httpsCallable('createUser');
+                await createUserFunction({
                     email: formData.email,
+                    password: formData.password,
+                    displayName: formData.name,
+                    photoURL: avatarUrl || null,
                     role: formData.role,
                     puestoTrabajo: formData.puestoTrabajo,
-                    avatar: avatarUrl,
                 });
             }
+
+            onUpdate();
+            onClose();
         } catch (error) {
             console.error("Error en processUser:", error);
             if (error instanceof Error) {
-                if (error.message.includes('auth/email-already-in-use')) {
-                    throw new Error("Este correo electrónico ya está en uso.");
-                } else if (error.message.includes('auth/invalid-email')) {
-                    throw new Error("El correo electrónico no es válido.");
-                } else if (error.message.includes('auth/weak-password')) {
-                    throw new Error("La contraseña es demasiado débil.");
-                }
+                const errorMessage = error.message.includes('permission-denied')
+                    ? "No tienes permisos para realizar esta acción."
+                    : `Error al procesar el usuario: ${error.message}`;
+                throw new Error(errorMessage);
+            } else {
+                throw new Error("Error desconocido al procesar el usuario");
             }
-            throw error;
         }
     };
 
@@ -200,24 +179,14 @@ export default function UserForm({ isOpen, onClose, editUser, onUpdate }: UserFo
                     loading: 'Procesando usuario...',
                     success: () => {
                         const successMessage = editUser ? 'Usuario actualizado correctamente' : 'Usuario agregado correctamente';
-                        onUpdate();
                         return successMessage;
                     },
-                    error: (error) => {
+                    error: (error: Error) => {
                         console.error("Error al procesar el usuario:", error);
-                        if (error.code === 'auth/email-already-in-use') {
-                            return "Este correo electrónico ya está en uso.";
-                        } else if (error.code === 'auth/invalid-email') {
-                            return "El correo electrónico no es válido.";
-                        } else if (error.code === 'auth/weak-password') {
-                            return "La contraseña es demasiado débil.";
-                        }
-                        return `Error al procesar el usuario: ${error.message}`;
+                        return error.message;
                     },
                 }
             );
-
-            onClose();
         } catch (error) {
             console.error("Error inesperado:", error);
         }
@@ -243,7 +212,6 @@ export default function UserForm({ isOpen, onClose, editUser, onUpdate }: UserFo
                             autoFocus
                         />
                         <Input
-                            isReadOnly={editUser ? true : false}
                             label="Email"
                             labelPlacement="outside"
                             name="email"
@@ -333,3 +301,5 @@ export default function UserForm({ isOpen, onClose, editUser, onUpdate }: UserFo
         </Modal>
     );
 }
+
+
