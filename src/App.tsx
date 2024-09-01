@@ -7,6 +7,7 @@ import NavbarCustom from "./components/NavbarCustom";
 import FooterCustom from "./components/FooterCustom";
 import Controlpanel from "./pages/Controlpanel";
 import { Toaster } from "sonner";
+import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 
 function AppContent() {
   const { theme } = useTheme();
@@ -19,7 +20,9 @@ function AppContent() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/controlpanel" element={
-              <Controlpanel />
+              <ProtectedAdminRoute>
+                <Controlpanel />
+              </ProtectedAdminRoute>
             } />
           </Routes>
         </div>
