@@ -16,7 +16,7 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
     }
 
     useEffect(() => {
-        const currentTheme = localStorage.getItem("theme") ?? "dark";
+        const currentTheme = localStorage.getItem("theme") ?? "light";
         document.querySelector("body")?.classList.add(currentTheme, "text-foreground", "bg-background");
         setTheme(currentTheme);
     }, []);

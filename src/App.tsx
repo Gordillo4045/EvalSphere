@@ -5,6 +5,9 @@ import ThemeProvider from "./components/ThemeProvider";
 import { useTheme } from "./hooks/useTheme";
 import NavbarCustom from "./components/NavbarCustom";
 import FooterCustom from "./components/FooterCustom";
+import Controlpanel from "./pages/Controlpanel";
+import { Toaster } from "sonner";
+import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 
 function AppContent() {
   const { theme } = useTheme();
@@ -16,6 +19,11 @@ function AppContent() {
         <div className="flex items-center justify-center">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/controlpanel" element={
+              <ProtectedAdminRoute>
+                <Controlpanel />
+              </ProtectedAdminRoute>
+            } />
           </Routes>
         </div>
         <FooterCustom />
@@ -30,6 +38,7 @@ function App() {
     <ThemeProvider>
       <NextUIProvider navigate={navigate}>
         <AppContent />
+        <Toaster richColors position="top-right" />
       </NextUIProvider>
     </ThemeProvider>
   );
