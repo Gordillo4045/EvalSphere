@@ -78,9 +78,9 @@ export default function Controlpanel() {
     };
 
     return (
-        <div className="container min-h-screen md:mx-auto">
-            <h1 className="text-2xl font-bold mb-4">Panel de Control de Usuarios</h1>
-            <div className="flex flex-row p-4 max-w-4xl md:mx-auto shadow-inner rounded-xl mx-4">
+        <div className="w-full min-h-dvh px-4 md:px-0 md:mx-auto">
+            <h1 className="text-xl font-semibold mb-4 text-center">Panel de Control de Usuarios</h1>
+            <div className="flex flex-col p-4 max-w-4xl mx-auto shadow-inner rounded-xl overflow-x-auto">
                 <UserForm
                     isOpen={isUserFormOpen}
                     onClose={handleUserFormClose}

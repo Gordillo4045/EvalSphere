@@ -14,9 +14,9 @@ function AppContent() {
 
   return (
     <>
-      <div className={`${theme} text-foreground bg-background container min-h-dvh min-w-full grid grid-rows-[auto_1fr_auto] relative`}>
+      <div className={`${theme} text-foreground bg-background flex flex-col min-h-dvh`}>
         <NavbarCustom />
-        <div className="flex items-center justify-center">
+        <div className="flex-grow overflow-auto">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/controlpanel" element={

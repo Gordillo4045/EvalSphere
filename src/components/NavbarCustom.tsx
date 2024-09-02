@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, DropdownItem, DropdownTrigger, Dropdown, DropdownMenu, Avatar, Button } from "@nextui-org/react";
+import { Navbar, NavbarBrand, NavbarContent, Link, DropdownItem, DropdownTrigger, Dropdown, DropdownMenu, Avatar, Button } from "@nextui-org/react";
 import ThemeToggle from "./ThemeToggle";
 import { useTheme } from "../hooks/useTheme";
 import LoginForm from "./LoginForm";
@@ -28,28 +28,14 @@ export default function NavbarCustom() {
         return <div>Cargando...</div>;
     }
     return (
-        <Navbar>
+        <Navbar
+            shouldHideOnScroll
+        >
             <NavbarBrand>
-                <Link className="font-bold text-inherit" href="/">EvalSphere</Link>
+                <Link className="font-bold text-inherit text-2xl" href="/">EvalSphere</Link>
             </NavbarBrand>
 
-            <NavbarContent className="hidden sm:flex gap-4" justify="center">
-                <NavbarItem>
-                    <Link color="foreground" href="#">
-                        Features
-                    </Link>
-                </NavbarItem>
-                <NavbarItem isActive>
-                    <Link href="#" aria-current="page" color="secondary">
-                        Customers
-                    </Link>
-                </NavbarItem>
-                <NavbarItem>
-                    <Link color="foreground" href="#">
-                        Integrations
-                    </Link>
-                </NavbarItem>
-            </NavbarContent>
+
 
             <NavbarContent as="div" justify="end">
                 {user ? (
