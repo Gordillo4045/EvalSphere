@@ -8,6 +8,7 @@ import FooterCustom from "./components/FooterCustom";
 import Controlpanel from "./pages/Controlpanel";
 import { Toaster } from "sonner";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
+import Formulario from "./pages/Formulario";
 
 function AppContent() {
   const { theme } = useTheme();
@@ -24,6 +25,7 @@ function AppContent() {
                 <Controlpanel />
               </ProtectedAdminRoute>
             } />
+            <Route path="/formulario" element={<Formulario />} />
           </Routes>
         </div>
         <FooterCustom />

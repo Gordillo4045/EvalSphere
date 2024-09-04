@@ -9,7 +9,7 @@ const ProtectedAdminRoute: React.FC<ProtectedAdminRouteProps> = ({ children }) =
     const { user, isAdmin, loading } = useAuth();
 
     if (loading) {
-        return <div>Cargando...</div>;
+        return <div className='text-center w-full h-full flex items-center justify-center'>Cargando...</div>;
     }
 
     if (!user || !isAdmin) {

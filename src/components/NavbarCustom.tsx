@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navbar, NavbarBrand, NavbarContent, Link, DropdownItem, DropdownTrigger, Dropdown, DropdownMenu, Avatar, Button } from "@nextui-org/react";
+import { Navbar, NavbarBrand, NavbarContent, Link, DropdownItem, DropdownTrigger, Dropdown, DropdownMenu, Avatar, Button, NavbarItem } from "@nextui-org/react";
 import ThemeToggle from "./ThemeToggle";
 import { useTheme } from "../hooks/useTheme";
 import LoginForm from "./LoginForm";
@@ -25,7 +25,7 @@ export default function NavbarCustom() {
     };
 
     if (loading) {
-        return <div>Cargando...</div>;
+        return <div className="flex items-center justify-center h-screen">Cargando...</div>;
     }
     return (
         <Navbar
@@ -35,7 +35,16 @@ export default function NavbarCustom() {
                 <Link className="font-bold text-inherit text-2xl" href="/">EvalSphere</Link>
             </NavbarBrand>
 
-
+            <NavbarContent className="hidden sm:flex gap-4" justify="center">
+                <NavbarItem isActive={window.location.pathname === "/formulario"}>
+                    <Link
+                        href="/formulario"
+                        color="foreground"
+                    >
+                        Formulario
+                    </Link>
+                </NavbarItem>
+            </NavbarContent>
 
             <NavbarContent as="div" justify="end">
                 {user ? (
