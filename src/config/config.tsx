@@ -10,7 +10,7 @@ import { getFunctions as getFirebaseFunctions, httpsCallable as firebaseHttpsCal
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey: "AIzaSyDK2yCLaBVxFrGSCHCJg5zFufff2VkOCS8",
+    apiKey: import.meta.env.VITE_FIREBASE_APP_API_KEY,
     authDomain: "eval-sphere.firebaseapp.com",
     projectId: "eval-sphere",
     storageBucket: "eval-sphere.appspot.com",
