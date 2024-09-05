@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-    VITE_API_KEY: string;
+    VITE_FIREBASE_APP_API_KEY: string;
     VITE_AUTH_DOMAIN: string;
     VITE_PROJECT_ID: string;
     VITE_STORAGE_BUCKET: string;
