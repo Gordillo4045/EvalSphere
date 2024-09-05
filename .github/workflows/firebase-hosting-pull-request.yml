@@ -19,3 +19,5 @@ jobs:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_EVAL_SPHERE }}
           projectId: eval-sphere
+    env:
+      VITE_FIREBASE_APP_API_KEY: ${{ secrets.VITE_FIREBASE_APP_API_KEY }}

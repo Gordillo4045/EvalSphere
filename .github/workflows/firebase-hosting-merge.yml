@@ -18,3 +18,5 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_EVAL_SPHERE }}
           channelId: live
           projectId: eval-sphere
+    env:
+      VITE_FIREBASE_APP_API_KEY: ${{ secrets.VITE_FIREBASE_APP_API_KEY }}
