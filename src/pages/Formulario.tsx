@@ -1,7 +1,10 @@
-export default function Formulario() {
-    return (
-        <div>
-            <h1>Formulario</h1>
-        </div>
+import FormularioPrueba from "../components/FormularioPrueba";
+
+export default function Formulario()
+{
+    return(
+    
+        <div className="flex justify-center items-center max-w-4xl mx-auto"><FormularioPrueba/></div>
     )
+
 }
