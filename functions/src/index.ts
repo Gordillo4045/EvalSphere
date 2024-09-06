@@ -91,7 +91,6 @@ export const createCompany = functions.https.onCall(async (data, context) => {
     const { name, email, password, location, avatar, description, industry, photoURL } = data;
 
     try {
-
         const userCreateData: admin.auth.CreateRequest = {
             email,
             password,
@@ -105,7 +104,7 @@ export const createCompany = functions.https.onCall(async (data, context) => {
 
         await admin.auth().setCustomUserClaims(userRecord.uid, { role: 'company' });
 
-        await admin.firestore().collection('companies').doc(userRecord.uid).set({
+        const companyData = {
             id: userRecord.uid,
             name,
             email,
@@ -113,7 +112,20 @@ export const createCompany = functions.https.onCall(async (data, context) => {
             avatar: avatar || '',
             description: description || '',
             industry,
-        });
+        };
+
+        await admin.firestore().collection('companies').doc(userRecord.uid).set(companyData);
+
+        const userData = {
+            uid: userRecord.uid,
+            avatar: avatar || '',
+            email,
+            name,
+            role: 'company',
+            puestoTrabajo: industry,
+        };
+
+        await admin.firestore().collection('usuarios').doc(userRecord.uid).set(userData)
 
         return { success: true, message: 'Compañía creada exitosamente', id: userRecord.uid };
     } catch (error) {
@@ -167,6 +179,7 @@ export const deleteCompany = functions.https.onCall(async (data, context) => {
     try {
         await admin.auth().deleteUser(id);
         await admin.firestore().collection('companies').doc(id).delete();
+        await admin.firestore().collection('usuarios').doc(id).delete();
 
         return { success: true };
     } catch (error) {

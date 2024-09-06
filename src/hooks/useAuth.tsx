@@ -5,6 +5,7 @@ import { doc, onSnapshot } from 'firebase/firestore';
 
 interface AuthUser extends User {
     isAdmin: boolean;
+    isCompany: boolean;
 }
 
 export function useAuth() {
@@ -20,7 +21,8 @@ export function useAuth() {
                         const userData = doc.data();
                         const authUser: AuthUser = {
                             ...firebaseUser,
-                            isAdmin: userData?.role === 'admin'
+                            isAdmin: userData?.role === 'admin',
+                            isCompany: userData?.role === 'company'
                         };
                         setUser(authUser);
                     } else {
@@ -42,6 +44,7 @@ export function useAuth() {
     return {
         user,
         isAdmin: user?.isAdmin || false,
+        isCompany: user?.isCompany || false,
         loading
     };
 }

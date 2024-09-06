@@ -18,7 +18,6 @@ import { IoReload } from "react-icons/io5";
 import { FaPlus } from "react-icons/fa6";
 import { AiOutlineEdit } from "react-icons/ai";
 import { BiSolidTrashAlt } from "react-icons/bi";
-import { Company } from '../types/applicaciontypes';
 
 interface Usuario {
     id: string;
@@ -31,16 +30,15 @@ interface Usuario {
 
 interface UsersTableProps {
     usuarios: Usuario[];
-    companies: Company[];
     onAddNew: () => void;
-    onEdit: (item: Usuario | Company) => void;
-    onDelete: (item: Usuario | Company) => void;
+    onEdit: (item: Usuario) => void;
+    onDelete: (item: Usuario) => void;
     onRefresh: () => void;
 }
 
 const INITIAL_VISIBLE_COLUMNS = ["name", "email", "role", "details", "actions"];
 
-export default function UsersTable({ usuarios, companies, onAddNew, onEdit, onDelete, onRefresh }: UsersTableProps) {
+export default function UsersTable({ usuarios, onAddNew, onEdit, onDelete, onRefresh }: UsersTableProps) {
     const [filterValue, setFilterValue] = useState("");
     const [visibleColumns] = useState(new Set(INITIAL_VISIBLE_COLUMNS));
     visibleColumns;
@@ -57,38 +55,28 @@ export default function UsersTable({ usuarios, companies, onAddNew, onEdit, onDe
         { uid: "name", name: "Nombre" },
         { uid: "role", name: "Rol" },
         { uid: "details", name: "Detalles" },
-        { uid: "description", name: "Descripción" },
         { uid: "actions", name: "Acciones" },
     ], []);
 
     const filteredItems = useMemo(() => {
-        let filteredUsers = [...usuarios, ...companies];
+        let filteredUsers = [...usuarios];
 
         if (hasSearchFilter) {
             filteredUsers = filteredUsers.filter((item) => {
-                if ('role' in item) {
-                    return (
-                        item.name?.toLowerCase().includes(filterValue.toLowerCase()) ||
-                        item.email?.toLowerCase().includes(filterValue.toLowerCase()) ||
-                        item.puestoTrabajo?.toLowerCase().includes(filterValue.toLowerCase())
-                    );
-                } else {
-                    return (
-                        item.name.toLowerCase().includes(filterValue.toLowerCase()) ||
-                        item.email.toLowerCase().includes(filterValue.toLowerCase()) ||
-                        ('location' in item && item.location.toLowerCase().includes(filterValue.toLowerCase())) ||
-                        ('industry' in item && item.industry.toLowerCase().includes(filterValue.toLowerCase()))
-                    );
-                }
+                return (
+                    item.name?.toLowerCase().includes(filterValue.toLowerCase()) ||
+                    item.email?.toLowerCase().includes(filterValue.toLowerCase()) ||
+                    item.puestoTrabajo?.toLowerCase().includes(filterValue.toLowerCase())
+                );
             });
         }
         return filteredUsers;
-    }, [usuarios, companies, filterValue]);
+    }, [usuarios, filterValue]);
 
     const sortedItems = useMemo(() => {
         return [...filteredItems].sort((a, b) => {
-            const first = a[sortDescriptor.column as keyof (Usuario | Company)] || '';
-            const second = b[sortDescriptor.column as keyof (Usuario | Company)] || '';
+            const first = a[sortDescriptor.column as keyof Usuario] || '';
+            const second = b[sortDescriptor.column as keyof Usuario] || '';
             const cmp = first < second ? -1 : first > second ? 1 : 0;
 
             return sortDescriptor.direction === "descending" ? -cmp : cmp;
@@ -102,13 +90,13 @@ export default function UsersTable({ usuarios, companies, onAddNew, onEdit, onDe
         return sortedItems.slice(start, end);
     }, [sortedItems, page, rowsPerPage]);
 
-    const renderCell = (item: Usuario | Company, columnKey: React.Key) => {
+    const renderCell = (item: Usuario, columnKey: React.Key) => {
         switch (columnKey) {
             case "name":
                 return (
                     <User
-                        avatarProps={{ src: 'avatar' in item ? item.avatar : item.avatar }}
-                        name={'name' in item ? item.name : item.name}
+                        avatarProps={{ src: item.avatar }}
+                        name={item.name}
                         description={item.email}
                     >
                         {item.email}
@@ -116,17 +104,9 @@ export default function UsersTable({ usuarios, companies, onAddNew, onEdit, onDe
                 );
 
             case "role":
-                return <span>{'role' in item ? 'Administrador' : 'Compañía'}</span>;
+                return <span>{item.role === 'company' ? 'Compañía' : 'Administrador'}</span>;
             case "details":
-                return 'role' in item ?
-                    <span><span className='font-medium'>Puesto:</span> <span className='font-normal'>{item.puestoTrabajo}</span></span> :
-                    <span className='flex flex-col'>
-                        <span><span className='font-medium'>Ubicación:</span> {(item as Company).location}</span>
-                        <span><span className='font-medium'>Industria:</span> {(item as Company).industry}</span>
-                    </span>
-
-            case "description":
-                return <span>{(item as Company).description}</span>;
+                return <span>{item.puestoTrabajo}</span>;
             case "actions":
                 return (
                     <div className="flex justify-start gap-2">
@@ -202,7 +182,7 @@ export default function UsersTable({ usuarios, companies, onAddNew, onEdit, onDe
                             endContent={<FaPlus />}
                             onPress={onAddNew}
                         >
-                            Agregar Usuario/Compañía
+                            Agregar
                         </Button>
                     </div>
                 </div>
@@ -219,12 +199,12 @@ export default function UsersTable({ usuarios, companies, onAddNew, onEdit, onDe
                     }}
                     color="default"
                     page={page}
-                    total={Math.ceil(filteredItems.length / rowsPerPage)}
+                    total={usuarios.length > 0 ? Math.ceil(filteredItems.length / rowsPerPage) : 1}
                     variant="light"
                     onChange={setPage}
                 />
                 <span className="text-small text-default-400">
-                    {`${filteredItems.length} usuarios/compañías en total`}
+                    {`${filteredItems.length} usuarios`}
                 </span>
             </div>
         );
@@ -232,7 +212,7 @@ export default function UsersTable({ usuarios, companies, onAddNew, onEdit, onDe
 
     return (
         <Table
-            aria-label="Tabla de usuarios y compañías"
+            aria-label="Tabla de usuarios"
             isHeaderSticky
             bottomContent={bottomContent}
             bottomContentPlacement="outside"

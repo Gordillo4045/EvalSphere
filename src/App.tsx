@@ -9,6 +9,7 @@ import Controlpanel from "./pages/Controlpanel";
 import { Toaster } from "sonner";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import Formulario from "./pages/Formulario";
+import ProtectedCompanyRoute from "./components/ProtectedCompanyRoute";
 
 function AppContent() {
   const { theme } = useTheme();
@@ -24,6 +25,11 @@ function AppContent() {
               <ProtectedAdminRoute>
                 <Controlpanel />
               </ProtectedAdminRoute>
+            } />
+            <Route path="/company/controlpanel" element={
+              <ProtectedCompanyRoute>
+                <Controlpanel />
+              </ProtectedCompanyRoute>
             } />
             <Route path="/formulario" element={<Formulario />} />
           </Routes>

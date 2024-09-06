@@ -105,7 +105,7 @@ export default function UserForm({ isOpen, onClose, editItem, onUpdate }: UserFo
             });
             setPreviewUrl(null);
         }
-    }, [editItem]);
+    }, [editItem, isOpen]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;

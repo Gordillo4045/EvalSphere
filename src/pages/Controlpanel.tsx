@@ -6,7 +6,6 @@ import { db, httpsCallable } from '../config/config';
 import UserForm from '../components/UserForm';
 import UserTable from '../components/UsersTable';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
-import { Company } from '../types/applicaciontypes';
 
 interface Usuario {
     id: string;
@@ -17,28 +16,21 @@ interface Usuario {
     avatar?: string;
 }
 
-type Item = Usuario | Company;
-
 export default function Controlpanel() {
     const [isUserFormOpen, setIsUserFormOpen] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [itemToDelete, setItemToDelete] = useState<Usuario | Company | null>(null);
-    const [editItem, setEditItem] = useState<Usuario | Company | null>(null);
+    const [itemToDelete, setItemToDelete] = useState<Usuario | null>(null);
+    const [editItem, setEditItem] = useState<Usuario | null>(null);
     const [usuarios, setUsuarios] = useState<Usuario[]>([]);
-    const [companies, setCompanies] = useState<Company[]>([]);
 
     useEffect(() => {
-        obtenerUsuariosYCompanias();
+        obtenerUsuarios();
     }, []);
 
-    const obtenerUsuariosYCompanias = async () => {
+    const obtenerUsuarios = async () => {
         try {
             const usuariosCollection = collection(db, "usuarios");
-            const companiasCollection = collection(db, "companies");
-            const [usuariosSnapshot, companiasSnapshot] = await Promise.all([
-                getDocs(usuariosCollection),
-                getDocs(companiasCollection)
-            ]);
+            const usuariosSnapshot = await getDocs(usuariosCollection);
 
             const usuariosData: Usuario[] = [];
             usuariosSnapshot.forEach((doc) => {
@@ -46,26 +38,19 @@ export default function Controlpanel() {
                 usuariosData.push(usuario);
             });
 
-            const companiasData: Company[] = [];
-            companiasSnapshot.forEach((doc) => {
-                const compania = { id: doc.id, ...doc.data() } as Company;
-                companiasData.push(compania);
-            });
-
             setUsuarios(usuariosData);
-            setCompanies(companiasData);
         } catch (error) {
-            console.error("Error al obtener usuarios y compañías:", error);
-            toast.error("Error al obtener la lista de usuarios y compañías");
+            console.error("Error al obtener usuarios:", error);
+            toast.error("Error al obtener la lista de usuarios");
         }
     };
 
-    const handleEditar = async (item: Item) => {
+    const handleEditar = async (item: Usuario) => {
         setEditItem(item);
         setIsUserFormOpen(true);
     };
 
-    const handleEliminar = (item: Item) => {
+    const handleEliminar = (item: Usuario) => {
         setItemToDelete(item);
         setShowDeleteModal(true);
     };
@@ -73,19 +58,14 @@ export default function Controlpanel() {
     const confirmarEliminar = async () => {
         if (itemToDelete) {
             try {
-                if ('role' in itemToDelete) {
-                    const deleteUserFunction = httpsCallable('deleteUser');
-                    await deleteUserFunction({ uid: itemToDelete.id });
-                } else {
-                    const deleteCompanyFunction = httpsCallable('deleteCompany');
-                    await deleteCompanyFunction({ id: itemToDelete.id });
-                }
+                const deleteUserFunction = httpsCallable('deleteUser');
+                await deleteUserFunction({ uid: itemToDelete.id });
 
-                obtenerUsuariosYCompanias();
-                toast.success("Elemento eliminado con éxito");
+                obtenerUsuarios();
+                toast.success("Usuario eliminado con éxito");
             } catch (error) {
                 console.error(error);
-                toast.error("Error al eliminar el elemento");
+                toast.error("Error al eliminar el usuario");
             }
         }
         setItemToDelete(null);
@@ -95,27 +75,26 @@ export default function Controlpanel() {
     const handleUserFormClose = () => {
         setIsUserFormOpen(false);
         setEditItem(null);
-        obtenerUsuariosYCompanias();
+        obtenerUsuarios();
     };
 
     return (
         <div className="w-full min-h-dvh px-4 md:px-0 md:mx-auto">
-            <h1 className="text-xl font-semibold mb-4 text-center">Panel de Control de Usuarios y Compañías</h1>
+            <h1 className="text-xl font-semibold mb-4 text-center">Panel de Control de Usuarios</h1>
             <div className="flex flex-col p-4 max-w-4xl mx-auto shadow-inner rounded-xl overflow-x-auto">
                 <UserForm
                     isOpen={isUserFormOpen}
                     onClose={handleUserFormClose}
                     editItem={editItem}
-                    onUpdate={obtenerUsuariosYCompanias}
+                    onUpdate={obtenerUsuarios}
                 />
 
                 <UserTable
                     usuarios={usuarios}
-                    companies={companies}
                     onAddNew={() => setIsUserFormOpen(true)}
                     onEdit={handleEditar}
                     onDelete={handleEliminar}
-                    onRefresh={obtenerUsuariosYCompanias}
+                    onRefresh={obtenerUsuarios}
                 />
 
                 <DeleteConfirmationModal

@@ -13,7 +13,7 @@ import { FaUsersGear } from "react-icons/fa6";
 export default function NavbarCustom() {
     const { toggleTheme } = useTheme();
     const [isLoginOpen, setIsLoginOpen] = useState(false);
-    const { user, isAdmin, loading } = useAuth();
+    const { user, isAdmin, isCompany, loading } = useAuth();
 
     const handleLogout = async () => {
         try {
@@ -70,7 +70,12 @@ export default function NavbarCustom() {
                             </DropdownItem>
                             {isAdmin && (
                                 <DropdownItem key="controlpanel" href="/controlpanel" startContent={<FaUsersGear />} textValue="panel de control">
-                                    Panel de Control
+                                    Admin Panel de Control
+                                </DropdownItem>
+                            )}
+                            {isCompany && (
+                                <DropdownItem key="controlpanel" href="/company/controlpanel" startContent={<FaUsersGear />} textValue="panel de control">
+                                    Panel de Control Compañía
                                 </DropdownItem>
                             )}
                             <DropdownItem key="logout" color="danger" onClick={handleLogout} startContent={<MdOutlineLogout />} textValue="cerrar sesión">
