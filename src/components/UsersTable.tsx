@@ -18,27 +18,29 @@ import { IoReload } from "react-icons/io5";
 import { FaPlus } from "react-icons/fa6";
 import { AiOutlineEdit } from "react-icons/ai";
 import { BiSolidTrashAlt } from "react-icons/bi";
+import { Company } from '../types/applicaciontypes';
 
 interface Usuario {
     id: string;
-    name: string;
-    email: string;
-    role: string;
-    puestoTrabajo: string;
-    avatar: string;
+    name?: string;
+    email?: string;
+    role?: string;
+    puestoTrabajo?: string;
+    avatar?: string;
 }
 
 interface UsersTableProps {
     usuarios: Usuario[];
+    companies: Company[];
     onAddNew: () => void;
-    onEdit: (usuario: Usuario) => void;
-    onDelete: (usuario: Usuario) => void;
+    onEdit: (item: Usuario | Company) => void;
+    onDelete: (item: Usuario | Company) => void;
     onRefresh: () => void;
 }
 
-const INITIAL_VISIBLE_COLUMNS = ["name", "email", "role", "puestoTrabajo", "actions"];
+const INITIAL_VISIBLE_COLUMNS = ["name", "email", "role", "details", "actions"];
 
-export default function UsersTable({ usuarios, onAddNew, onEdit, onDelete, onRefresh }: UsersTableProps) {
+export default function UsersTable({ usuarios, companies, onAddNew, onEdit, onDelete, onRefresh }: UsersTableProps) {
     const [filterValue, setFilterValue] = useState("");
     const [visibleColumns] = useState(new Set(INITIAL_VISIBLE_COLUMNS));
     visibleColumns;
@@ -53,29 +55,40 @@ export default function UsersTable({ usuarios, onAddNew, onEdit, onDelete, onRef
 
     const headerColumns = useMemo(() => [
         { uid: "name", name: "Nombre" },
-        { uid: "email", name: "Email" },
         { uid: "role", name: "Rol" },
-        { uid: "puestoTrabajo", name: "Puesto de Trabajo" },
+        { uid: "details", name: "Detalles" },
+        { uid: "description", name: "Descripción" },
         { uid: "actions", name: "Acciones" },
     ], []);
 
     const filteredItems = useMemo(() => {
-        let filteredUsers = [...usuarios];
+        let filteredUsers = [...usuarios, ...companies];
 
         if (hasSearchFilter) {
-            filteredUsers = filteredUsers.filter((user) =>
-                user.name.toLowerCase().includes(filterValue.toLowerCase()) ||
-                user.email.toLowerCase().includes(filterValue.toLowerCase()) ||
-                user.puestoTrabajo.toLowerCase().includes(filterValue.toLowerCase())
-            );
+            filteredUsers = filteredUsers.filter((item) => {
+                if ('role' in item) {
+                    return (
+                        item.name?.toLowerCase().includes(filterValue.toLowerCase()) ||
+                        item.email?.toLowerCase().includes(filterValue.toLowerCase()) ||
+                        item.puestoTrabajo?.toLowerCase().includes(filterValue.toLowerCase())
+                    );
+                } else {
+                    return (
+                        item.name.toLowerCase().includes(filterValue.toLowerCase()) ||
+                        item.email.toLowerCase().includes(filterValue.toLowerCase()) ||
+                        ('location' in item && item.location.toLowerCase().includes(filterValue.toLowerCase())) ||
+                        ('industry' in item && item.industry.toLowerCase().includes(filterValue.toLowerCase()))
+                    );
+                }
+            });
         }
         return filteredUsers;
-    }, [usuarios, filterValue]);
+    }, [usuarios, companies, filterValue]);
 
     const sortedItems = useMemo(() => {
         return [...filteredItems].sort((a, b) => {
-            const first = a[sortDescriptor.column as keyof Usuario];
-            const second = b[sortDescriptor.column as keyof Usuario];
+            const first = a[sortDescriptor.column as keyof (Usuario | Company)] || '';
+            const second = b[sortDescriptor.column as keyof (Usuario | Company)] || '';
             const cmp = first < second ? -1 : first > second ? 1 : 0;
 
             return sortDescriptor.direction === "descending" ? -cmp : cmp;
@@ -87,25 +100,33 @@ export default function UsersTable({ usuarios, onAddNew, onEdit, onDelete, onRef
         const end = start + rowsPerPage;
 
         return sortedItems.slice(start, end);
-    }, [page, sortedItems]);
+    }, [sortedItems, page, rowsPerPage]);
 
-    const renderCell = (user: Usuario, columnKey: React.Key) => {
+    const renderCell = (item: Usuario | Company, columnKey: React.Key) => {
         switch (columnKey) {
             case "name":
                 return (
                     <User
-                        avatarProps={{ src: user.avatar }}
-                        name={user.name}
+                        avatarProps={{ src: 'avatar' in item ? item.avatar : item.avatar }}
+                        name={'name' in item ? item.name : item.name}
+                        description={item.email}
                     >
-                        {user.email}
+                        {item.email}
                     </User>
                 );
-            case "email":
-                return <span>{user.email}</span>;
+
             case "role":
-                return <span>{user.role === 'admin' ? 'Administrador' : 'Usuario'}</span>;
-            case "puestoTrabajo":
-                return <span>{user.puestoTrabajo}</span>;
+                return <span>{'role' in item ? 'Administrador' : 'Compañía'}</span>;
+            case "details":
+                return 'role' in item ?
+                    <span><span className='font-medium'>Puesto:</span> <span className='font-normal'>{item.puestoTrabajo}</span></span> :
+                    <span className='flex flex-col'>
+                        <span><span className='font-medium'>Ubicación:</span> {(item as Company).location}</span>
+                        <span><span className='font-medium'>Industria:</span> {(item as Company).industry}</span>
+                    </span>
+
+            case "description":
+                return <span>{(item as Company).description}</span>;
             case "actions":
                 return (
                     <div className="flex justify-start gap-2">
@@ -114,7 +135,7 @@ export default function UsersTable({ usuarios, onAddNew, onEdit, onDelete, onRef
                                 isIconOnly
                                 size="sm"
                                 variant="light"
-                                onPress={() => onEdit(user)}
+                                onPress={() => onEdit(item)}
                             >
                                 <AiOutlineEdit size={20} />
                             </Button>
@@ -125,7 +146,7 @@ export default function UsersTable({ usuarios, onAddNew, onEdit, onDelete, onRef
                                 size="sm"
                                 color="danger"
                                 variant="light"
-                                onPress={() => onDelete(user)}
+                                onPress={() => onDelete(item)}
                             >
                                 <BiSolidTrashAlt size={20} />
                             </Button>
@@ -156,7 +177,7 @@ export default function UsersTable({ usuarios, onAddNew, onEdit, onDelete, onRef
                             base: "w-full sm:max-w-[44%]",
                             inputWrapper: "border-1",
                         }}
-                        placeholder="Buscar por nombre, email o puesto de trabajo"
+                        placeholder="Buscar por nombre, email o detalles"
                         size="sm"
                         startContent={<IoIosSearch className="text-default-300" />}
                         value={filterValue}
@@ -181,7 +202,7 @@ export default function UsersTable({ usuarios, onAddNew, onEdit, onDelete, onRef
                             endContent={<FaPlus />}
                             onPress={onAddNew}
                         >
-                            Agregar Usuario
+                            Agregar Usuario/Compañía
                         </Button>
                     </div>
                 </div>
@@ -198,24 +219,21 @@ export default function UsersTable({ usuarios, onAddNew, onEdit, onDelete, onRef
                     }}
                     color="default"
                     page={page}
-                    total={usuarios.length > 0 ? Math.ceil(filteredItems.length / rowsPerPage) : 1}
+                    total={Math.ceil(filteredItems.length / rowsPerPage)}
                     variant="light"
                     onChange={setPage}
-                    initialPage={page}
-                    isCompact
                 />
-                <span className="text-[0.7rem] md:text-small text-default-400">
-                    {`${items.length} de ${filteredItems.length} usuarios`}
+                <span className="text-small text-default-400">
+                    {`${filteredItems.length} usuarios/compañías en total`}
                 </span>
             </div>
         );
-    }, [items.length, filteredItems.length, page, hasSearchFilter]);
+    }, [filteredItems.length, page, rowsPerPage]);
 
     return (
         <Table
-            aria-label="Tabla de usuarios"
+            aria-label="Tabla de usuarios y compañías"
             isHeaderSticky
-            isCompact
             bottomContent={bottomContent}
             bottomContentPlacement="outside"
             classNames={{
@@ -237,7 +255,7 @@ export default function UsersTable({ usuarios, onAddNew, onEdit, onDelete, onRef
                     </TableColumn>
                 )}
             </TableHeader>
-            <TableBody items={items} emptyContent={"No se encontraron usuarios"}>
+            <TableBody items={items} emptyContent={"No se encontraron usuarios o compañías"}>
                 {(item) => (
                     <TableRow key={item.id}>
                         {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}

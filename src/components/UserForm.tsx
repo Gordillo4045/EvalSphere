@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Modal,
     ModalContent,
@@ -15,11 +15,12 @@ import {
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { storage, httpsCallable } from "../config/config";
 import { toast } from 'sonner';
+import { Company } from '../types/applicaciontypes';
 
 interface UserFormProps {
     isOpen: boolean;
     onClose: () => void;
-    editUser?: Usuario | null;
+    editItem?: Usuario | Company | null;
     onUpdate: () => void;
 }
 
@@ -27,55 +28,84 @@ interface FormData {
     name: string;
     email: string;
     password: string;
-    role: string;
-    puestoTrabajo: string;
+    type: 'admin' | 'company';
+    puestoTrabajo?: string;
     avatar: File | null;
+    location?: string;
+    description?: string;
+    industry?: string;
 }
 
 interface Usuario {
     id: string;
-    name: string;
-    email: string;
-    role: string;
-    puestoTrabajo: string;
-    avatar: string;
+    name?: string;
+    email?: string;
+    role?: string;
+    puestoTrabajo?: string;
+    avatar?: string;
 }
 
-export default function UserForm({ isOpen, onClose, editUser, onUpdate }: UserFormProps) {
+const validateEmail = (value: string) => value.match(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+.[A-Z]{2,4}$/i);
+
+export default function UserForm({ isOpen, onClose, editItem, onUpdate }: UserFormProps) {
     const [formData, setFormData] = useState<FormData>({
         name: "",
         email: "",
         password: "",
-        role: "",
+        type: "admin",
         puestoTrabajo: "",
         avatar: null,
+        location: "",
+        description: "",
+        industry: "",
     });
 
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
     useEffect(() => {
-        if (editUser) {
-            setFormData({
-                name: editUser.name,
-                email: editUser.email,
-                password: "",
-                role: editUser.role,
-                puestoTrabajo: editUser.puestoTrabajo,
-                avatar: null,
-            });
-            setPreviewUrl(editUser.avatar);
+        if (editItem) {
+            if ('industry' in editItem) {
+                setFormData({
+                    name: editItem.name || "",
+                    email: editItem.email || "",
+                    password: "",
+                    type: "company",
+                    puestoTrabajo: "",
+                    avatar: null,
+                    location: editItem.location || "",
+                    description: editItem.description || "",
+                    industry: editItem.industry || "",
+                });
+                setPreviewUrl(editItem.avatar);
+            } else {
+                setFormData({
+                    name: editItem.name || "",
+                    email: editItem.email || "",
+                    password: "",
+                    type: "admin",
+                    puestoTrabajo: editItem.puestoTrabajo || "",
+                    avatar: null,
+                    location: "",
+                    description: "",
+                    industry: "",
+                });
+                setPreviewUrl(editItem.avatar || null);
+            }
         } else {
             setFormData({
                 name: "",
                 email: "",
                 password: "",
-                role: "",
+                type: "admin",
                 puestoTrabajo: "",
                 avatar: null,
+                location: "",
+                description: "",
+                industry: "",
             });
             setPreviewUrl(null);
         }
-    }, [editUser]);
+    }, [editItem]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -101,7 +131,7 @@ export default function UserForm({ isOpen, onClose, editUser, onUpdate }: UserFo
 
     const processUser = async () => {
         try {
-            let avatarUrl = editUser?.avatar || "";
+            let avatarUrl = previewUrl || "";
 
             if (formData.avatar) {
                 const storageRef = ref(storage, `avatares/${formData.avatar.name}`);
@@ -109,80 +139,112 @@ export default function UserForm({ isOpen, onClose, editUser, onUpdate }: UserFo
                 avatarUrl = await getDownloadURL(storageRef);
             }
 
-            if (editUser) {
-                // Actualizar usuario existente
-                const updateUserFunction = httpsCallable('updateUser');
-                await updateUserFunction({
-                    uid: editUser.id,
-                    email: formData.email,
-                    displayName: formData.name,
-                    photoURL: avatarUrl || null,
-                    role: formData.role,
-                    puestoTrabajo: formData.puestoTrabajo,
-                });
+            if (editItem) {
+                if (formData.type === "company") {
+                    const updateCompanyFunction = httpsCallable('updateCompany');
+                    await updateCompanyFunction({
+                        id: editItem.id,
+                        name: formData.name,
+                        email: formData.email,
+                        location: formData.location,
+                        avatar: avatarUrl,
+                        description: formData.description || null,
+                        industry: formData.industry,
+                        photoURL: avatarUrl || null,
+                    });
+                } else {
+                    const updateAdminFunction = httpsCallable('updateAdmin');
+                    await updateAdminFunction({
+                        uid: editItem.id,
+                        email: formData.email,
+                        displayName: formData.name,
+                        photoURL: avatarUrl || null,
+                        role: 'admin',
+                        puestoTrabajo: formData.puestoTrabajo,
+                    });
+                }
             } else {
-                // Crear nuevo usuario
-                const createUserFunction = httpsCallable('createUser');
-                await createUserFunction({
-                    email: formData.email,
-                    password: formData.password,
-                    displayName: formData.name,
-                    photoURL: avatarUrl || null,
-                    role: formData.role,
-                    puestoTrabajo: formData.puestoTrabajo,
-                });
+                if (formData.type === "company") {
+                    const createCompanyFunction = httpsCallable('createCompany');
+                    await createCompanyFunction({
+                        name: formData.name,
+                        email: formData.email,
+                        password: formData.password,
+                        location: formData.location,
+                        avatar: avatarUrl,
+                        description: formData.description || null,
+                        industry: formData.industry,
+                        photoURL: avatarUrl || null,
+                    });
+                } else {
+                    const createAdminFunction = httpsCallable('createAdmin');
+                    await createAdminFunction({
+                        email: formData.email,
+                        password: formData.password,
+                        displayName: formData.name,
+                        photoURL: avatarUrl || null,
+                        role: 'admin',
+                        puestoTrabajo: formData.puestoTrabajo,
+                    });
+                }
             }
 
             onUpdate();
             onClose();
         } catch (error) {
             console.error("Error en processUser:", error);
-            if (error instanceof Error) {
-                const errorMessage = error.message.includes('permission-denied')
-                    ? "No tienes permisos para realizar esta acción."
-                    : `Error al procesar el usuario: ${error.message}`;
-                throw new Error(errorMessage);
-            } else {
-                throw new Error("Error desconocido al procesar el usuario");
-            }
+            throw error;
         }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!formData.name.trim()) {
-            toast.error("El nombre es obligatorio.");
-            return;
-        }
-        if (!formData.email.trim() || !/\S+@\S+\.\S+/.test(formData.email)) {
+        if (!formData.email.trim() || !validateEmail(formData.email)) {
             toast.error("Por favor, ingrese un correo electrónico válido.");
             return;
         }
-        if (!editUser && formData.password.length < 6) {
+
+        if (!editItem && formData.password.length < 6) {
             toast.error("La contraseña debe tener al menos 6 caracteres.");
             return;
         }
-        if (!formData.role) {
-            toast.error("Por favor, seleccione un rol.");
-            return;
-        }
-        if (!formData.puestoTrabajo.trim()) {
-            toast.error("El puesto de trabajo es obligatorio.");
-            return;
+
+        if (formData.type === "admin") {
+            if (!formData.name.trim()) {
+                toast.error("El nombre es obligatorio.");
+                return;
+            }
+            if (!formData.puestoTrabajo?.trim()) {
+                toast.error("El puesto de trabajo es obligatorio.");
+                return;
+            }
+        } else {
+            if (!formData.name.trim()) {
+                toast.error("El nombre de la compañía es obligatorio.");
+                return;
+            }
+            if (!formData.location.trim()) {
+                toast.error("La ubicación es obligatoria.");
+                return;
+            }
+            if (!formData.industry.trim()) {
+                toast.error("La industria es obligatoria.");
+                return;
+            }
         }
 
         try {
             await toast.promise(
                 processUser(),
                 {
-                    loading: 'Procesando usuario...',
+                    loading: 'Procesando...',
                     success: () => {
-                        const successMessage = editUser ? 'Usuario actualizado correctamente' : 'Usuario agregado correctamente';
+                        const successMessage = editItem ? 'Actualizado correctamente' : 'Agregado correctamente';
                         return successMessage;
                     },
                     error: (error: Error) => {
-                        console.error("Error al procesar el usuario:", error);
+                        console.error("Error al procesar:", error);
                         return error.message;
                     },
                 }
@@ -197,20 +259,82 @@ export default function UserForm({ isOpen, onClose, editUser, onUpdate }: UserFo
             <ModalContent>
                 <ModalHeader>
                     <h2 className="text-2xl font-bold">
-                        {editUser ? "Editar Usuario" : "Agregar Usuario"}
+                        {editItem ? "Editar" : "Agregar"} {formData.type === "company" ? "Compañía" : "Administrador"}
                     </h2>
                 </ModalHeader>
                 <ModalBody>
                     <form onSubmit={handleSubmit} className="w-full items-center space-y-11 px-6">
-                        <Input
-                            label="Nombre"
-                            labelPlacement="outside"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleInputChange}
-                            variant='underlined'
-                            autoFocus
-                        />
+                        {!editItem && (
+                            <Select
+                                label="Tipo"
+                                labelPlacement="outside"
+                                name="type"
+                                value={formData.type}
+                                onChange={handleInputChange}
+                                variant='underlined'
+                                autoFocus
+                            >
+                                <SelectItem key="admin" value="admin">Administrador</SelectItem>
+                                <SelectItem key="company" value="company">Compañía</SelectItem>
+                            </Select>
+                        )}
+
+                        {formData.type === "company" ? (
+                            <>
+                                <Input
+                                    label="Nombre de la compañía"
+                                    labelPlacement="outside"
+                                    name="name"
+                                    value={formData.name}
+                                    onChange={handleInputChange}
+                                    variant='underlined'
+                                />
+                                <Input
+                                    label="Ubicación"
+                                    labelPlacement="outside"
+                                    name="location"
+                                    value={formData.location}
+                                    onChange={handleInputChange}
+                                    variant='underlined'
+                                />
+                                <Input
+                                    label="Descripción"
+                                    labelPlacement="outside"
+                                    name="description"
+                                    value={formData.description}
+                                    onChange={handleInputChange}
+                                    variant='underlined'
+                                />
+                                <Input
+                                    label="Industria"
+                                    labelPlacement="outside"
+                                    name="industry"
+                                    value={formData.industry}
+                                    onChange={handleInputChange}
+                                    variant='underlined'
+                                />
+                            </>
+                        ) : (
+                            <>
+                                <Input
+                                    label="Nombre"
+                                    labelPlacement="outside"
+                                    name="name"
+                                    value={formData.name}
+                                    onChange={handleInputChange}
+                                    variant='underlined'
+                                />
+                                <Input
+                                    label="Puesto de trabajo"
+                                    labelPlacement="outside"
+                                    name="puestoTrabajo"
+                                    value={formData.puestoTrabajo}
+                                    onChange={handleInputChange}
+                                    variant='underlined'
+                                />
+                            </>
+                        )}
+
                         <Input
                             label="Email"
                             labelPlacement="outside"
@@ -219,8 +343,10 @@ export default function UserForm({ isOpen, onClose, editUser, onUpdate }: UserFo
                             value={formData.email}
                             onChange={handleInputChange}
                             variant='underlined'
+                            isInvalid={formData.email.trim() !== "" && !validateEmail(formData.email)}
+                            errorMessage={formData.email.trim() !== "" && !validateEmail(formData.email) ? "Por favor, ingrese un correo electrónico válido." : ""}
                         />
-                        {!editUser && (
+                        {!editItem && (
                             <Input
                                 label="Contraseña"
                                 labelPlacement="outside"
@@ -231,26 +357,7 @@ export default function UserForm({ isOpen, onClose, editUser, onUpdate }: UserFo
                                 variant='underlined'
                             />
                         )}
-                        <Select
-                            label="Rol"
-                            labelPlacement="outside"
-                            name="role"
-                            value={formData.role}
-                            onChange={handleInputChange}
-                            variant='underlined'
-                            defaultSelectedKeys={[`${editUser?.role}`]}
-                        >
-                            <SelectItem key="admin" value="admin">Administrador</SelectItem>
-                            <SelectItem key="user" value="user">Usuario</SelectItem>
-                        </Select>
-                        <Input
-                            label="Puesto de trabajo"
-                            labelPlacement="outside"
-                            name="puestoTrabajo"
-                            value={formData.puestoTrabajo}
-                            onChange={handleInputChange}
-                            variant='underlined'
-                        />
+
                         {!previewUrl && (
                             <div className="flex items-center justify-center w-full">
                                 <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-38 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 ">
@@ -288,7 +395,7 @@ export default function UserForm({ isOpen, onClose, editUser, onUpdate }: UserFo
                         <div className='flex justify-end pt-0 pr-0'>
                             <ButtonGroup>
                                 <Button color="primary" type='submit'>
-                                    {editUser ? "Guardar Cambios" : "Agregar Usuario"}
+                                    {editItem ? "Guardar Cambios" : "Agregar"}
                                 </Button>
                                 <Button color="danger" variant="light" onPress={onClose}>
                                     Cancelar
