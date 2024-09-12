@@ -73,20 +73,7 @@ export default function Home() {
                         className="z-0 w-full h-full object-cover"
                         src="https://nextui.org/images/card-example-5.jpeg"
                     />
-                    <CardFooter className="absolute bg-black/40 bottom-0 z-10 border-t-1 border-default-600 dark:border-default-100">
-                        <div className="flex flex-grow gap-2 items-center">
-                            <Image
-                                alt="Breathing app icon"
-                                className="rounded-full w-10 h-11 bg-black"
-                                src="https://nextui.org/images/breathing-app-icon.jpeg"
-                            />
-                            <div className="flex flex-col">
-                                <p className="text-tiny text-white/60">Breathing App</p>
-                                <p className="text-tiny text-white/60">Get a good night's sleep.</p>
-                            </div>
-                        </div>
-                        <Button radius="full" size="sm">Get App</Button>
-                    </CardFooter>
+
                 </Card>
             </div>
         </div>
