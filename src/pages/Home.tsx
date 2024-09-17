@@ -64,7 +64,7 @@ export default function Home() {
                 </Card>
                 <Card isFooterBlurred className="w-full h-[300px] col-span-12 sm:col-span-7">
                     <CardHeader className="absolute z-10 top-1 flex-col items-start">
-                        <p className="text-tiny text-white/60 uppercase font-bold">Your day your way</p>
+                        <p className="text-tiny text-white/60 uppercase font-bold">Your day your</p>
                         <h4 className="text-white/90 font-medium text-xl">Your checklist for better sleep</h4>
                     </CardHeader>
                     <Image
