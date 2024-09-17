@@ -134,7 +134,7 @@ export default function UserForm({ isOpen, onClose, editItem, onUpdate }: UserFo
             let avatarUrl = previewUrl || "";
 
             if (formData.avatar) {
-                const storageRef = ref(storage, `avatares/${formData.avatar.name}`);
+                const storageRef = ref(storage, `avatars/${formData.avatar.name}`);
                 await uploadBytes(storageRef, formData.avatar);
                 avatarUrl = await getDownloadURL(storageRef);
             }

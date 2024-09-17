@@ -14,16 +14,17 @@ export interface Department {
     id: string;
     name: string;
     companyId: string;
-    description: string | null;
+    description?: string | null;
 }
 
 export interface Position {
     id: string;
-    name: string;
+    title: string;
+    department: string;
     departmentId: string;
     level: number;
     companyId: string;
-    description: string | null;
+    description?: string | null;
 }
 
 export interface Employee {
@@ -32,12 +33,13 @@ export interface Employee {
     email: string;
     role: string;
     position: string;
-    avatar: string;
-    company: string;
-    companyEmail: string;
-    departmentId: string;
-    positionId: string;
+    avatar?: string;
+    companyName: string;
+    companyEmail?: string;
+    departmentId?: string;
+    positionId?: string;
     companyId: string;
+    uid: string;
 }
 
 export interface Relationship {

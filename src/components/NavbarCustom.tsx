@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navbar, NavbarBrand, NavbarContent, Link, DropdownItem, DropdownTrigger, Dropdown, DropdownMenu, Avatar, Button, NavbarItem } from "@nextui-org/react";
+import { Navbar, NavbarBrand, NavbarContent, Link, DropdownItem, DropdownTrigger, Dropdown, DropdownMenu, Avatar, Button, NavbarItem, Spinner } from "@nextui-org/react";
 import ThemeToggle from "./ThemeToggle";
 import { useTheme } from "../hooks/useTheme";
 import LoginForm from "./LoginForm";
@@ -25,11 +25,13 @@ export default function NavbarCustom() {
     };
 
     if (loading) {
-        return <div className="flex items-center justify-center h-screen">Cargando...</div>;
+        return <div className="flex items-center justify-center h-screen">
+            <Spinner color="primary" label="Cargando..." />
+        </div>;
     }
     return (
         <Navbar
-            shouldHideOnScroll
+
         >
             <NavbarBrand>
                 <Link className="font-bold text-inherit text-2xl" href="/">EvalSphere</Link>
@@ -70,7 +72,7 @@ export default function NavbarCustom() {
                             </DropdownItem>
                             {isAdmin && (
                                 <DropdownItem key="controlpanel" href="/controlpanel" startContent={<FaUsersGear />} textValue="panel de control">
-                                    Admin Panel de Control
+                                    Panel de Control Admin
                                 </DropdownItem>
                             )}
                             {isCompany && (

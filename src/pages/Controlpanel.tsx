@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { toast } from 'sonner';
 import { db, httpsCallable } from '../config/config';
+import { Tabs, Tab } from "@nextui-org/react";
 
 import UserForm from '../components/UserForm';
 import UserTable from '../components/UsersTable';
@@ -21,7 +22,9 @@ export default function Controlpanel() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [itemToDelete, setItemToDelete] = useState<Usuario | null>(null);
     const [editItem, setEditItem] = useState<Usuario | null>(null);
-    const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+    const [adminUsuarios, setAdminUsuarios] = useState<Usuario[]>([]);
+    const [companyUsuarios, setCompanyUsuarios] = useState<Usuario[]>([]);
+    const [selectedTab, setSelectedTab] = useState("companias");
 
     useEffect(() => {
         obtenerUsuarios();
@@ -32,13 +35,20 @@ export default function Controlpanel() {
             const usuariosCollection = collection(db, "usuarios");
             const usuariosSnapshot = await getDocs(usuariosCollection);
 
-            const usuariosData: Usuario[] = [];
+            const adminData: Usuario[] = [];
+            const companyData: Usuario[] = [];
+
             usuariosSnapshot.forEach((doc) => {
                 const usuario = { id: doc.id, ...doc.data() } as Usuario;
-                usuariosData.push(usuario);
+                if (usuario.role === 'admin') {
+                    adminData.push(usuario);
+                } else if (usuario.role === 'company') {
+                    companyData.push(usuario);
+                }
             });
 
-            setUsuarios(usuariosData);
+            setAdminUsuarios(adminData);
+            setCompanyUsuarios(companyData);
         } catch (error) {
             console.error("Error al obtener usuarios:", error);
             toast.error("Error al obtener la lista de usuarios");
@@ -89,13 +99,32 @@ export default function Controlpanel() {
                     onUpdate={obtenerUsuarios}
                 />
 
-                <UserTable
-                    usuarios={usuarios}
-                    onAddNew={() => setIsUserFormOpen(true)}
-                    onEdit={handleEditar}
-                    onDelete={handleEliminar}
-                    onRefresh={obtenerUsuarios}
-                />
+                <Tabs
+                    selectedKey={selectedTab}
+                    onSelectionChange={(key) => setSelectedTab(key as string)}
+                    aria-label="Opciones"
+                    className='pl-1'
+                >
+                    <Tab key="companias" title="Compañías">
+                        <UserTable
+                            usuarios={companyUsuarios}
+                            onAddNew={() => setIsUserFormOpen(true)}
+                            onEdit={handleEditar}
+                            onDelete={handleEliminar}
+                            onRefresh={obtenerUsuarios}
+                        />
+                    </Tab>
+                    <Tab key="administradores" title="Administradores">
+                        <UserTable
+                            usuarios={adminUsuarios}
+                            onAddNew={() => setIsUserFormOpen(true)}
+                            onEdit={handleEditar}
+                            onDelete={handleEliminar}
+                            onRefresh={obtenerUsuarios}
+                        />
+                    </Tab>
+
+                </Tabs>
 
                 <DeleteConfirmationModal
                     isOpen={showDeleteModal}

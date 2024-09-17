@@ -1,5 +1,5 @@
-import * as functions from 'firebase-functions';
-import * as admin from 'firebase-admin';
+import * as functions from "firebase-functions";
+import * as admin from "firebase-admin";
 
 admin.initializeApp();
 
@@ -7,7 +7,10 @@ export const createAdmin = functions.https.onCall(async (data, context) => {
     const { email, password, displayName, photoURL, puestoTrabajo } = data;
 
     if (!context.auth?.token.admin) {
-        throw new functions.https.HttpsError('permission-denied', 'Debe ser un administrador para crear administradores.');
+        throw new functions.https.HttpsError(
+            "permission-denied",
+            "Debe ser un administrador para crear administradores.",
+        );
     }
 
     try {
@@ -17,38 +20,52 @@ export const createAdmin = functions.https.onCall(async (data, context) => {
             displayName,
         };
 
-        if (photoURL && typeof photoURL === 'string' && photoURL.trim() !== '') {
+        if (photoURL && typeof photoURL === "string" && photoURL.trim() !== "") {
             userCreateData.photoURL = photoURL;
         }
 
         const userRecord = await admin.auth().createUser(userCreateData);
 
-        await admin.auth().setCustomUserClaims(userRecord.uid, { role: 'admin', admin: true });
+        await admin
+            .auth()
+            .setCustomUserClaims(userRecord.uid, { role: "admin", admin: true });
 
-        await admin.firestore().collection('usuarios').doc(userRecord.uid).set({
-            uid: userRecord.uid,
-            email,
-            name: displayName,
-            role: 'admin',
-            puestoTrabajo,
-            avatar: photoURL || '',
-        });
+        await admin
+            .firestore()
+            .collection("users")
+            .doc(userRecord.uid)
+            .set({
+                uid: userRecord.uid,
+                email,
+                name: displayName,
+                role: "admin",
+                puestoTrabajo,
+                avatar: photoURL || "",
+            });
 
         return { success: true, uid: userRecord.uid };
     } catch (error) {
-        console.error('Error al crear administrador:', error);
+        console.error("Error al crear administrador:", error);
         if (error instanceof Error) {
-            throw new functions.https.HttpsError('internal', `Error al crear administrador: ${error.message}`);
+            throw new functions.https.HttpsError(
+                "internal",
+                `Error al crear administrador: ${error.message}`,
+            );
         } else {
-            throw new functions.https.HttpsError('internal', 'Error desconocido al crear administrador');
+            throw new functions.https.HttpsError(
+                "internal",
+                "Error desconocido al crear administrador",
+            );
         }
     }
 });
 
 export const updateAdmin = functions.https.onCall(async (data, context) => {
-
     if (!context.auth?.token.admin) {
-        throw new functions.https.HttpsError('permission-denied', 'Debe ser un administrador para actualizar administradores.');
+        throw new functions.https.HttpsError(
+            "permission-denied",
+            "Debe ser un administrador para actualizar administradores.",
+        );
     }
 
     const { uid, email, displayName, photoURL, puestoTrabajo } = data;
@@ -59,36 +76,58 @@ export const updateAdmin = functions.https.onCall(async (data, context) => {
             displayName,
         };
 
-        if (photoURL && typeof photoURL === 'string' && photoURL.trim() !== '') {
+        if (photoURL && typeof photoURL === "string" && photoURL.trim() !== "") {
             updateData.photoURL = photoURL;
         }
 
         await admin.auth().updateUser(uid, updateData);
 
-        await admin.firestore().collection('usuarios').doc(uid).update({
-            email,
-            name: displayName,
-            puestoTrabajo,
-            avatar: photoURL || '',
-        });
+        await admin
+            .firestore()
+            .collection("users")
+            .doc(uid)
+            .update({
+                email,
+                name: displayName,
+                puestoTrabajo,
+                avatar: photoURL || "",
+            });
 
         return { success: true };
     } catch (error) {
-        console.error('Error al actualizar administrador:', error);
+        console.error("Error al actualizar administrador:", error);
         if (error instanceof Error) {
-            throw new functions.https.HttpsError('internal', `Error al actualizar administrador: ${error.message}`);
+            throw new functions.https.HttpsError(
+                "internal",
+                `Error al actualizar administrador: ${error.message}`,
+            );
         } else {
-            throw new functions.https.HttpsError('internal', 'Error desconocido al actualizar administrador');
+            throw new functions.https.HttpsError(
+                "internal",
+                "Error desconocido al actualizar administrador",
+            );
         }
     }
 });
 
 export const createCompany = functions.https.onCall(async (data, context) => {
     if (!context.auth?.token.admin) {
-        throw new functions.https.HttpsError('permission-denied', 'Debe ser un administrador para crear compañías.');
+        throw new functions.https.HttpsError(
+            "permission-denied",
+            "Debe ser un administrador para crear compañías.",
+        );
     }
 
-    const { name, email, password, location, avatar, description, industry, photoURL } = data;
+    const {
+        name,
+        email,
+        password,
+        location,
+        avatar,
+        description,
+        industry,
+        photoURL,
+    } = data;
 
     try {
         const userCreateData: admin.auth.CreateRequest = {
@@ -97,49 +136,68 @@ export const createCompany = functions.https.onCall(async (data, context) => {
             displayName: name,
         };
 
-        if (photoURL && typeof photoURL === 'string' && photoURL.trim() !== '') {
+        if (photoURL && typeof photoURL === "string" && photoURL.trim() !== "") {
             userCreateData.photoURL = photoURL;
         }
         const userRecord = await admin.auth().createUser(userCreateData);
 
-        await admin.auth().setCustomUserClaims(userRecord.uid, { role: 'company' });
+        await admin.auth().setCustomUserClaims(userRecord.uid, { role: "company" });
 
         const companyData = {
             id: userRecord.uid,
             name,
             email,
             location,
-            avatar: avatar || '',
-            description: description || '',
+            avatar: avatar || "",
+            description: description || "",
             industry,
         };
 
-        await admin.firestore().collection('companies').doc(userRecord.uid).set(companyData);
+        await admin
+            .firestore()
+            .collection("companies")
+            .doc(userRecord.uid)
+            .set(companyData);
 
         const userData = {
             uid: userRecord.uid,
-            avatar: avatar || '',
+            avatar: avatar || "",
             email,
             name,
-            role: 'company',
+            role: "company",
             puestoTrabajo: industry,
         };
 
-        await admin.firestore().collection('usuarios').doc(userRecord.uid).set(userData)
+        await admin
+            .firestore()
+            .collection("users")
+            .doc(userRecord.uid)
+            .set(userData);
 
-        return { success: true, message: 'Compañía creada exitosamente', id: userRecord.uid };
+        return {
+            success: true,
+            message: "Compañía creada exitosamente",
+            id: userRecord.uid,
+        };
     } catch (error) {
-        console.error('Error al crear compañía:', error);
-        throw new functions.https.HttpsError('internal', `Error al crear compañía: ${error}`);
+        console.error("Error al crear compañía:", error);
+        throw new functions.https.HttpsError(
+            "internal",
+            `Error al crear compañía: ${error}`,
+        );
     }
 });
 
 export const updateCompany = functions.https.onCall(async (data, context) => {
     if (!context.auth?.token.admin) {
-        throw new functions.https.HttpsError('permission-denied', 'Debe ser un administrador para actualizar compañías.');
+        throw new functions.https.HttpsError(
+            "permission-denied",
+            "Debe ser un administrador para actualizar compañías.",
+        );
     }
 
-    const { id, name, email, location, avatar, description, industry, photoURL } = data;
+    const { id, name, email, location, avatar, description, industry, photoURL } =
+        data;
 
     try {
         const updateData: admin.auth.UpdateRequest = {
@@ -147,59 +205,228 @@ export const updateCompany = functions.https.onCall(async (data, context) => {
             email,
         };
 
-        if (photoURL && typeof photoURL === 'string' && photoURL.trim() !== '') {
+        if (photoURL && typeof photoURL === "string" && photoURL.trim() !== "") {
             updateData.photoURL = photoURL;
         }
 
         await admin.auth().updateUser(id, updateData);
 
-        await admin.firestore().collection('companies').doc(id).update({
-            name,
-            email,
-            location,
-            avatar: avatar || '',
-            description: description || '',
-            industry,
-        });
+        await admin
+            .firestore()
+            .collection("companies")
+            .doc(id)
+            .update({
+                name,
+                email,
+                location,
+                avatar: avatar || "",
+                description: description || "",
+                industry,
+            });
 
         return { success: true };
     } catch (error) {
-        console.error('Error al actualizar compañía:', error);
-        throw new functions.https.HttpsError('internal', `Error al actualizar compañía: ${error}`);
+        console.error("Error al actualizar compañía:", error);
+        throw new functions.https.HttpsError(
+            "internal",
+            `Error al actualizar compañía: ${error}`,
+        );
     }
 });
 
 export const deleteCompany = functions.https.onCall(async (data, context) => {
     if (!context.auth?.token.admin) {
-        throw new functions.https.HttpsError('permission-denied', 'Debe ser un administrador para eliminar compañías.');
+        throw new functions.https.HttpsError(
+            "permission-denied",
+            "Debe ser un administrador para eliminar compañías.",
+        );
     }
 
     const { id } = data;
 
     try {
         await admin.auth().deleteUser(id);
-        await admin.firestore().collection('companies').doc(id).delete();
-        await admin.firestore().collection('usuarios').doc(id).delete();
+        await admin.firestore().collection("companies").doc(id).delete();
+        await admin.firestore().collection("users").doc(id).delete();
 
         return { success: true };
     } catch (error) {
-        console.error('Error al eliminar compañía:', error);
-        throw new functions.https.HttpsError('internal', `Error al eliminar compañía: ${error}`);
+        console.error("Error al eliminar compañía:", error);
+        throw new functions.https.HttpsError(
+            "internal",
+            `Error al eliminar compañía: ${error}`,
+        );
     }
 });
 
 export const deleteUser = functions.https.onCall(async (data, context) => {
     if (!context.auth?.token.admin) {
-        throw new functions.https.HttpsError('permission-denied', 'Must be an admin to delete users.');
+        throw new functions.https.HttpsError(
+            "permission-denied",
+            "Must be an admin to delete users.",
+        );
     }
 
     const { uid } = data;
 
     try {
         await admin.auth().deleteUser(uid);
-        await admin.firestore().collection('usuarios').doc(uid).delete();
+        await admin.firestore().collection("users").doc(uid).delete();
         return { success: true };
     } catch (error) {
-        throw new functions.https.HttpsError('internal', 'Error deleting user');
+        throw new functions.https.HttpsError("internal", "Error deleting user");
+    }
+});
+
+export const createUser = functions.https.onCall(async (data, context) => {
+    try {
+        const userRecord = await admin.auth().createUser({
+            email: data.email,
+            password: data.password,
+            displayName: data.displayName,
+            photoURL: data.photoURL || null,
+        });
+
+        await admin
+            .firestore()
+            .collection("users")
+            .doc(userRecord.uid)
+            .set({
+                uid: userRecord.uid,
+                email: data.email,
+                name: data.displayName,
+                avatar: data.photoURL || null,
+                role: data.role,
+                puestoTrabajo: data.puestoTrabajo || null,
+            });
+
+        return { success: true, uid: userRecord.uid };
+    } catch (error) {
+        console.error("Error creando usuario:", error);
+        throw new functions.https.HttpsError("internal", "Error creando usuario");
+    }
+});
+
+export const createEmployee = functions.https.onCall(async (data, context) => {
+    const { email, password, name, avatar, companyId, companyName, departmentId, positionId } = data
+    try {
+        const userCreateData: admin.auth.CreateRequest = {
+            email: email,
+            password: password,
+            displayName: name,
+        };
+        if (
+            avatar &&
+            typeof avatar === "string" &&
+            avatar.trim() !== ""
+        ) {
+            userCreateData.photoURL = avatar;
+        }
+
+        let uid = "";
+        if (data.createAuthUser) {
+            const userData = await admin.auth().createUser(userCreateData);
+            await admin.auth().setCustomUserClaims(userData.uid, { role: "employee" });
+            uid = userData.uid;
+        }
+
+        const employeeData = {
+            name: name,
+            email: email,
+            companyId: companyId,
+            companyName: companyName,
+            departmentId: departmentId,
+            positionId: positionId,
+            role: "employee",
+            avatar: avatar,
+            uid: uid || null,
+        };
+
+        const employeeUser = {
+            email: email,
+            name: name,
+            puestoTrabajo: positionId,
+            role: "employee",
+            uid: uid,
+            avatar: avatar
+        }
+
+        await admin
+            .firestore()
+            .collection(`companies/${data.companyId}/employees`)
+            .doc(uid)
+            .set(employeeData);
+
+        await admin
+            .firestore()
+            .collection("users")
+            .doc(uid)
+            .set(employeeUser);
+
+        return { success: true, employeeId: uid };
+    } catch (error) {
+        console.error("Error creating employee:", error);
+        throw new functions.https.HttpsError("internal", "Error creating employee");
+    }
+});
+
+export const deleteEmployee = functions.https.onCall(async (data, context) => {
+    const { id } = data;
+
+    try {
+        await admin.auth().deleteUser(id);
+        await admin.firestore().collection("companies").doc(data.companyId).collection("employees").doc(id).delete();
+        await admin.firestore().collection("users").doc(id).delete();
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error al eliminar empleado:", error);
+        throw new functions.https.HttpsError(
+            "internal",
+            `Error al eliminar empleado: ${error}`,
+        );
+    }
+});
+
+export const updateEmployee = functions.https.onCall(async (data, context) => {
+    const { id, name, email, positionId, departmentId, avatar } = data;
+
+    try {
+        const updateData: admin.auth.UpdateRequest = {
+            email,
+            displayName: name,
+            photoURL: avatar || null,
+        };
+
+        await admin.auth().updateUser(id, updateData);
+
+        await admin.firestore()
+            .collection(`companies/${data.companyId}/employees`)
+            .doc(id)
+            .update({
+                name,
+                email,
+                positionId,
+                departmentId,
+                avatar,
+            });
+
+        await admin.firestore()
+            .collection('users')
+            .doc(id)
+            .update({
+                name,
+                email,
+                puestoTrabajo: positionId,
+                avatar: avatar || "",
+            })
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error al actualizar empleado:", error);
+        throw new functions.https.HttpsError(
+            "internal",
+            `Error al actualizar empleado: ${error}`,
+        );
     }
 });

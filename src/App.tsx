@@ -10,6 +10,7 @@ import { Toaster } from "sonner";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import Formulario from "./pages/Formulario";
 import ProtectedCompanyRoute from "./components/ProtectedCompanyRoute";
+import CompanyControlPanel from "./pages/CompanyControlPanel";
 
 function AppContent() {
   const { theme } = useTheme();
@@ -28,7 +29,7 @@ function AppContent() {
             } />
             <Route path="/company/controlpanel" element={
               <ProtectedCompanyRoute>
-                <Controlpanel />
+                <CompanyControlPanel />
               </ProtectedCompanyRoute>
             } />
             <Route path="/formulario" element={<Formulario />} />
@@ -46,7 +47,7 @@ function App() {
     <ThemeProvider>
       <NextUIProvider navigate={navigate}>
         <AppContent />
-        <Toaster richColors position="top-right" />
+        <Toaster richColors position="top-left" />
       </NextUIProvider>
     </ThemeProvider>
   );

@@ -6,6 +6,7 @@ import { doc, onSnapshot } from 'firebase/firestore';
 interface AuthUser extends User {
     isAdmin: boolean;
     isCompany: boolean;
+    isEmployee: boolean;
 }
 
 export function useAuth() {
@@ -15,14 +16,15 @@ export function useAuth() {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
-                const userDocRef = doc(db, 'usuarios', firebaseUser.uid);
+                const userDocRef = doc(db, 'users', firebaseUser.uid);
                 const unsubscribeDoc = onSnapshot(userDocRef, (doc) => {
                     if (doc.exists()) {
                         const userData = doc.data();
                         const authUser: AuthUser = {
                             ...firebaseUser,
                             isAdmin: userData?.role === 'admin',
-                            isCompany: userData?.role === 'company'
+                            isCompany: userData?.role === 'company',
+                            isEmployee: userData?.role === 'employee'
                         };
                         setUser(authUser);
                     } else {
@@ -45,6 +47,7 @@ export function useAuth() {
         user,
         isAdmin: user?.isAdmin || false,
         isCompany: user?.isCompany || false,
+        isEmployee: user?.isEmployee || false,
         loading
     };
 }
