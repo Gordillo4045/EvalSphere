@@ -130,6 +130,8 @@ export default function Controlpanel() {
                     isOpen={showDeleteModal}
                     onConfirm={confirmarEliminar}
                     onCancel={() => setShowDeleteModal(false)}
+                    title="Eliminar Usuario"
+                    content={`¿Estás seguro de que deseas eliminar el usuario "${itemToDelete?.name}"?`}
                 />
             </div>
         </div>

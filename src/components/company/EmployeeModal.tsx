@@ -95,15 +95,21 @@ export default function EmployeeModal({ isOpen, onClose, onUpdate, mode, company
                         companyId,
                         companyName: mode === 'add' ? companyName : newEmployee.companyName,
                         avatar: avatarUrl,
-                        createAuthUser: createAuthUser,
-                        password: password,
                     };
+
                     if (mode === 'add') {
                         const createEmployeeFunction = httpsCallable('createEmployee');
-                        await createEmployeeFunction(employeeData);
+                        await createEmployeeFunction({
+                            ...employeeData,
+                            createAuthUser,
+                            password,
+                        });
                     } else if (mode === 'edit' && currentEmployee) {
                         const updateEmployeeFunction = httpsCallable('updateEmployee');
-                        await updateEmployeeFunction({ ...newEmployee, id: currentEmployee.id });
+                        await updateEmployeeFunction({
+                            ...employeeData,
+                            id: currentEmployee.id,
+                        });
                     }
 
                     onUpdate();

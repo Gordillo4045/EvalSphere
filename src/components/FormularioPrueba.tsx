@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Button, Textarea,RadioGroup,Radio, Spacer } from '@nextui-org/react';
-import {db} from "../config/config"
+import { Button, Textarea, RadioGroup, Radio, Spacer } from '@nextui-org/react';
+import { db } from "../config/config"
 import { addDoc, collection } from 'firebase/firestore';
+import { toast } from 'sonner';
 
 
 const FormularioPrueba = () => {
@@ -23,12 +24,12 @@ const FormularioPrueba = () => {
   const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
 
-  try {
-    const docRef = await addDoc(collection(db, "evaluations"), formData);
-    console.log("Document written with ID: ", docRef.id);
-  } catch (e) {
-    console.error("Error adding document: ", e);
-  }
+    try {
+      await addDoc(collection(db, "evaluations"), formData);
+      toast.success('Evaluación enviada correctamente');
+    } catch (e) {
+      console.error("Error adding document: ", e);
+    }
   };
 
   return (

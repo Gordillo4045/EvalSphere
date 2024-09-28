@@ -31,7 +31,6 @@ export default function NavbarCustom() {
     }
     return (
         <Navbar
-
         >
             <NavbarBrand>
                 <Link className="font-bold text-inherit text-2xl" href="/">EvalSphere</Link>

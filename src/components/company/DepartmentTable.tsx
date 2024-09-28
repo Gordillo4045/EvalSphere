@@ -27,6 +27,7 @@ import { BiSolidTrashAlt } from "react-icons/bi";
 import { collection, addDoc, deleteDoc, doc, onSnapshot, query, updateDoc } from 'firebase/firestore';
 import { db } from '../../config/config';
 import { Department } from '../../types/applicaciontypes';
+import DeleteConfirmationModal from '../DeleteConfirmationModal';
 
 interface DepartmentTableProps {
     companyId: string;
@@ -50,6 +51,9 @@ export default function DepartmentTable({ companyId }: DepartmentTableProps) {
     const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
     const [currentDepartment, setCurrentDepartment] = useState<Department | null>(null);
     const [newDepartment, setNewDepartment] = useState<Partial<Department>>({});
+
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [departmentToDelete, setDepartmentToDelete] = useState<Department | null>(null);
 
     useEffect(() => {
         const departmentsRef = collection(db, `companies/${companyId}/departments`);
@@ -162,12 +166,21 @@ export default function DepartmentTable({ companyId }: DepartmentTableProps) {
         onOpen();
     };
 
-    const onDelete = async (item: Department) => {
-        try {
-            const departmentRef = doc(db, `companies/${companyId}/departments`, item.id);
-            await deleteDoc(departmentRef);
-        } catch (error) {
-            console.error("Error al eliminar departamento: ", error);
+    const onDelete = (item: Department) => {
+        setDepartmentToDelete(item);
+        setDeleteModalOpen(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (departmentToDelete) {
+            try {
+                const departmentRef = doc(db, `companies/${companyId}/departments`, departmentToDelete.id);
+                await deleteDoc(departmentRef);
+                setDeleteModalOpen(false);
+                setDepartmentToDelete(null);
+            } catch (error) {
+                console.error("Error al eliminar departamento: ", error);
+            }
         }
     };
 
@@ -331,6 +344,14 @@ export default function DepartmentTable({ companyId }: DepartmentTableProps) {
 
                 </ModalContent>
             </Modal>
+
+            <DeleteConfirmationModal
+                isOpen={deleteModalOpen}
+                onCancel={() => setDeleteModalOpen(false)}
+                onConfirm={handleDeleteConfirm}
+                title="Eliminar Departamento"
+                content={`¿Estás seguro de que deseas eliminar el departamento "${departmentToDelete?.name}"?`}
+            />
         </>
     );
 }

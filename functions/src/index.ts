@@ -389,37 +389,52 @@ export const deleteEmployee = functions.https.onCall(async (data, context) => {
 });
 
 export const updateEmployee = functions.https.onCall(async (data, context) => {
-    const { id, name, email, positionId, departmentId, avatar } = data;
+    const { id, name, email, positionId, departmentId, avatar, companyId } = data;
 
     try {
         const updateData: admin.auth.UpdateRequest = {
             email,
             displayName: name,
-            photoURL: avatar || null,
         };
+
+        if (avatar && typeof avatar === "string" && avatar.trim() !== "") {
+            updateData.photoURL = avatar;
+        }
 
         await admin.auth().updateUser(id, updateData);
 
+        const employeeData = {
+            name,
+            email,
+            positionId,
+            departmentId,
+            avatar: avatar,
+        };
+
+        if (avatar) {
+            employeeData.avatar = avatar;
+        }
+
         await admin.firestore()
-            .collection(`companies/${data.companyId}/employees`)
+            .collection(`companies/${companyId}/employees`)
             .doc(id)
-            .update({
-                name,
-                email,
-                positionId,
-                departmentId,
-                avatar,
-            });
+            .update(employeeData);
+
+        const userData = {
+            name,
+            email,
+            puestoTrabajo: positionId,
+            avatar: avatar,
+        };
+
+        if (avatar) {
+            userData.avatar = avatar;
+        }
 
         await admin.firestore()
             .collection('users')
             .doc(id)
-            .update({
-                name,
-                email,
-                puestoTrabajo: positionId,
-                avatar: avatar || "",
-            })
+            .update(userData);
 
         return { success: true };
     } catch (error) {
