@@ -32,7 +32,7 @@ export default function Controlpanel() {
 
     const obtenerUsuarios = async () => {
         try {
-            const usuariosCollection = collection(db, "usuarios");
+            const usuariosCollection = collection(db, "users");
             const usuariosSnapshot = await getDocs(usuariosCollection);
 
             const adminData: Usuario[] = [];

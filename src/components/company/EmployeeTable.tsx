@@ -340,6 +340,7 @@ export default function EmployeeTable({ companyId, companyName }: EmployeeTableP
                 companyId={companyId}
                 companyName={companyName}
                 currentEmployee={currentEmployee}
+                isCompanyAdding={true}
             />
 
             <DeleteConfirmationModal

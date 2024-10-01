@@ -16,9 +16,11 @@ const ThemeToggleSlide = ({ isOpen }: ThemeToggleSlideProps) => {
 
     return (
         <>
-            <label className={`relative flex items-center justify-center cursor-pointer text-xl text-center select-none fill-current ${isOpen
-                ? 'pl-4 hover:bg-gray-600/10 hover:dark:bg-gray-700/40 rounded-lg p-1 w-full'
-                : 'p-1 hover:bg-gray-600/10 hover:dark:bg-gray-700/40 rounded-lg w-9 h-9'
+            <label className={`relative flex items-center justify-center cursor-pointer text-xl text-center select-none fill-current
+             hover:bg-gray-600/10 hover:dark:bg-gray-700/40 rounded-lg hover:transition-all 
+             ${isOpen
+                    ? 'pl-4 p-1 w-full'
+                    : 'p-1 w-9 h-9'
                 }`}>
                 <input
                     type="checkbox"

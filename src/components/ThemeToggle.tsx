@@ -21,10 +21,10 @@ const ThemeToggle = () => {
     };
 
     return (
-        <div className=" " >
+        <div className="flex items-center justify-center px-2" >
             <motion.svg
                 viewBox="0 0 384 512"
-                className="inset-0 h-[1em]"
+                className="absolute h-[1em]"
                 xmlns="http://www.w3.org/2000/svg"
                 variants={iconVariants}
                 animate={isLight ? 'visible' : 'hidden'}
@@ -34,7 +34,7 @@ const ThemeToggle = () => {
             </motion.svg>
             <motion.svg
                 viewBox="0 0 512 512"
-                className="inset-0 h-[1em]"
+                className="absolute  h-[1em]"
                 xmlns="http://www.w3.org/2000/svg"
                 variants={iconVariants}
                 animate={isLight ? 'hidden' : 'visible'}

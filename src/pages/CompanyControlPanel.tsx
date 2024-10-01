@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Card, CardBody, CardHeader, Select, SelectItem, Spinner } from "@nextui-org/react";
+import { Button, Card, CardBody, CardHeader, Select, SelectItem, Spinner, Input, ButtonGroup, Snippet } from "@nextui-org/react";
 import DepartmentTable from "../components/company/DepartmentTable";
 import PositionTable from "../components/company/PositionTable";
 import EmployeeTable from "../components/company/EmployeeTable";
-import { collection, doc, getDoc, onSnapshot, query } from 'firebase/firestore';
+import { collection, doc, getDoc, onSnapshot, query, updateDoc } from 'firebase/firestore';
 import { db } from '../config/config';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -12,6 +12,8 @@ import SurveyQuestionsTab from '../components/company/SurveyQuestionsTab';
 import RadarCharts from '../components/company/RadarCharts';
 import Sidebar from '../components/Sidebar';
 import BarCharts from '../components/company/BarCharts';
+import { toast } from 'sonner';
+import { MdEdit } from 'react-icons/md';
 
 function CompanyControlPanel() {
     const [company, setCompany] = useState<Company | null>(null);
@@ -20,6 +22,9 @@ function CompanyControlPanel() {
     const [activeTab, setActiveTab] = useState<string>('home');
     const [departments, setDepartments] = useState<Department[]>([]);
     const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null);
+    const [invitationCode, setInvitationCode] = useState<string>('');
+    const [isEditingCode, setIsEditingCode] = useState<boolean>(false);
+    const [newInvitationCode, setNewInvitationCode] = useState<string>('');
 
     useEffect(() => {
         const fetchCompanyData = async () => {
@@ -28,7 +33,9 @@ function CompanyControlPanel() {
                     const companyRef = doc(db, 'companies', user.uid);
                     const companySnap = await getDoc(companyRef);
                     if (companySnap.exists()) {
-                        setCompany({ id: companySnap.id, ...companySnap.data() } as Company);
+                        const companyData = { id: companySnap.id, ...companySnap.data() } as Company;
+                        setCompany(companyData);
+                        setInvitationCode(companyData.invitationCode || '');
                     } else {
                         console.error("No se encontró la compañía");
                     }
@@ -65,6 +72,27 @@ function CompanyControlPanel() {
 
         return () => unsubscribe();
     }, [company?.id, selectedDepartment]);
+
+    const handleChangeInvitationCode = async () => {
+        if (!newInvitationCode) {
+            toast.error("Por favor, ingrese un nuevo código de invitación.");
+            return;
+        }
+
+        try {
+            const companyRef = doc(db, 'companies', company!.id);
+            await updateDoc(companyRef, {
+                invitationCode: newInvitationCode
+            });
+            setInvitationCode(newInvitationCode);
+            setNewInvitationCode('');
+            setIsEditingCode(false);
+            toast.success("Código de invitación actualizado exitosamente.");
+        } catch (error) {
+            console.error("Error al actualizar el código de invitación:", error);
+            toast.error("Error al actualizar el código de invitación.");
+        }
+    };
 
     if (!company) {
         return <div className='flex justify-center items-center min-h-dvh'>
@@ -144,6 +172,7 @@ function CompanyControlPanel() {
                                     </Select>
                                 </CardBody>
                             </Card>
+
                             <Card className="w-full col-span-12 row-span-6 md:col-span-8 md:row-span-3" >
                                 <CardHeader>
                                     <h2 className="text-xl font-semibold">Informe de {selectedDepartment?.name || 'Departamento'}</h2>
@@ -153,11 +182,17 @@ function CompanyControlPanel() {
                                     <BarCharts />
                                 </CardBody>
                             </Card>
-                            <Card className="w-full col-span-12 row-span-6 md:col-span-4 md:row-span-5">
+
+                            <Card className="w-full col-span-12 row-span-6 order-4 md:order-none md:col-span-4 md:row-span-4">
                                 <CardHeader>
-                                    <h2 className="text-xl font-semibold">Aqui k</h2>
+                                    <h2 className="text-xl font-semibold">Opciones de Edición</h2>
                                 </CardHeader>
-                                <CardBody className="overflow-auto h-full">
+                                <CardBody className="overflow-auto h-full flex flex-col justify-between">
+                                    <div className="flex flex-col gap-4">
+                                        <Button color="primary" onClick={() => setActiveTab('editForm')}>Editar Formulario</Button>
+                                        <Button color="primary" onClick={() => setActiveTab('editDepartment')}>Editar Departamento</Button>
+                                        <Button color="primary" onClick={() => setActiveTab('viewEvaluations')}>Ver Evaluaciones</Button>
+                                    </div>
                                 </CardBody>
                             </Card>
 
@@ -169,6 +204,42 @@ function CompanyControlPanel() {
                                 </CardBody>
                             </Card>
 
+                            <Card className="w-full col-span-12 row-span-6 md:col-span-4 md:row-span-1">
+                                <CardHeader>
+                                    <h2 className="text-xl font-semibold">Código de Invitación</h2>
+                                </CardHeader>
+                                <CardBody className="overflow-auto h-full flex flex-col justify-between">
+                                    {isEditingCode ? (
+                                        <div className="flex flex-col gap-2">
+                                            <Input
+                                                placeholder="Nuevo código de invitación"
+                                                value={newInvitationCode}
+                                                onChange={(e) => setNewInvitationCode(e.target.value)}
+                                                variant='bordered'
+                                            />
+                                            <div className="flex justify-end gap-2">
+                                                <ButtonGroup>
+                                                    <Button color="primary" onClick={handleChangeInvitationCode}>
+                                                        Guardar
+                                                    </Button>
+                                                    <Button color="danger" variant="light" onClick={() => setIsEditingCode(false)}>
+                                                        Cancelar
+                                                    </Button>
+                                                </ButtonGroup>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-2">
+                                            <Snippet symbol="" size='md' className='min-w-[90%]' >
+                                                {invitationCode}
+                                            </Snippet>
+                                            <Button isIconOnly color="default" variant="light" size='md' onClick={() => setIsEditingCode(true)}>
+                                                <MdEdit size={20} />
+                                            </Button>
+                                        </div>
+                                    )}
+                                </CardBody>
+                            </Card>
                         </div>
                     )}
                 </div>
