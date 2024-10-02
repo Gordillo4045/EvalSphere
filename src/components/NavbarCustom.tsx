@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navbar, NavbarBrand, NavbarContent, Link, DropdownItem, DropdownTrigger, Dropdown, DropdownMenu, Avatar, Spinner, Button } from "@nextui-org/react";
+import { Navbar, NavbarContent, Link, DropdownItem, DropdownTrigger, Dropdown, DropdownMenu, Avatar, Spinner, Button, NavbarMenu, NavbarMenuItem, NavbarMenuToggle } from "@nextui-org/react";
 import ThemeToggle from "./ThemeToggle";
 import { useTheme } from "../hooks/useTheme";
 import LoginForm from "./LoginForm";
@@ -17,6 +17,7 @@ export default function NavbarCustom() {
     const [isLoginOpen, setIsLoginOpen] = useState(false);
     const { user, isAdmin, isCompany, loading } = useAuth();
     const [isEmployeeSignUpOpen, setIsEmployeeSignUpOpen] = useState(false);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const handleEmployeeSignUp = () => {
         setIsEmployeeSignUpOpen(true);
@@ -38,26 +39,42 @@ export default function NavbarCustom() {
     return (
         <>
             <Navbar
+                shouldHideOnScroll
+                isBlurred={false}
+                className="bg-transparent py-2"
+                classNames={{
+                    wrapper: "px-0 w-full justify-center bg-transparent h-fit",
+                    menu: "mx-auto mt-1 max-h-[40vh] max-w-[80vw] rounded-large border-small border-default-200/20 bg-background/60 py-6 shadow-medium backdrop-blur-sm backdrop-saturate-150 dark:bg-default-100/50",
+                }}
+                isMenuOpen={isMenuOpen}
+                onMenuOpenChange={setIsMenuOpen}
             >
-                <NavbarBrand>
-                    <Link className="font-bold text-inherit text-2xl" href="/">EvalSphere</Link>
-                </NavbarBrand>
 
-                <NavbarContent as="div" justify="end">
-                    {user ? (
-                        <Dropdown placement="bottom-end">
+
+                <NavbarContent
+                    justify="center"
+                    className=" gap-4 py-2 rounded-full border-small border-default-200/20 bg-background/60 px-2 shadow-medium backdrop-blur-sm backdrop-saturate-150 dark:bg-default-100/50"
+                >
+
+                    <NavbarMenuToggle className="md:hidden pl-2 h-8 w-8" />
+
+                    <Link className=" text-inherit text-xl font-bold md:mx-2" href="/">EvalSphere</Link>
+
+                    {user && (
+                        <Dropdown placement="bottom-end" >
                             <DropdownTrigger>
                                 <Avatar
                                     isBordered
                                     as="button"
-                                    className="transition-transform"
+                                    className="transition-transform ml-32 md:ml-96"
                                     color="secondary"
                                     name={user.displayName || "Usuario"}
                                     size="sm"
                                     src={user.photoURL || "https://i.pravatar.cc/150"}
+
                                 />
                             </DropdownTrigger>
-                            <DropdownMenu aria-label="Acciones de perfil" variant="flat">
+                            <DropdownMenu aria-label="Acciones de perfil" variant="flat" >
                                 <DropdownItem key="profile" textValue="perfil" className="h-14 gap-2">
                                     <p className="font-semibold">{user.displayName}</p>
                                     <p className="font-semibold">{user.email}</p>
@@ -80,22 +97,33 @@ export default function NavbarCustom() {
                                 </DropdownItem>
                             </DropdownMenu>
                         </Dropdown>
-                    ) : (
-                        <>
+                    )}
+                </NavbarContent>
+
+                {!user && (
+                    <NavbarContent
+                        justify="center"
+                        className=" gap-4 py-2 rounded-full border-small border-default-200/20 bg-background/60 px-2 shadow-medium backdrop-blur-md backdrop-saturate-150 dark:bg-default-100/50"
+                    >
+                        <div className="flex items-center justify-center gap-2 h-8 w-8 md:h-fit md:w-fit">
                             <Button
                                 color="primary"
                                 variant="light"
                                 onClick={() => setIsLoginOpen(true)}
                                 startContent={<MdOutlineLogin />}
+                                className="hidden md:flex h-7"
+                                size="sm"
                             >
                                 Iniciar Sesión
                             </Button>
-                            <Dropdown placement="bottom-end">
+                            <Dropdown placement="bottom-end" offset={12}>
                                 <DropdownTrigger>
                                     <Button
                                         color="secondary"
                                         variant="light"
                                         startContent={<FaUserPlus />}
+                                        className="hidden md:flex h-7"
+                                        size="sm"
                                     >
                                         Registrarse
                                     </Button>
@@ -106,12 +134,30 @@ export default function NavbarCustom() {
                                     </DropdownItem>
                                 </DropdownMenu>
                             </Dropdown>
-                            <Button isIconOnly variant="light" onPress={toggleTheme} >
+                            <Button isIconOnly variant="solid" className="bg-transparent md:h-7 md:w-7" onPress={toggleTheme}>
                                 <ThemeToggle />
                             </Button>
-                        </>
-                    )}
-                </NavbarContent>
+                        </div>
+                    </NavbarContent>
+                )}
+                <NavbarMenu>
+                    <NavbarMenuItem>
+                        <Link href="/">
+                            Inicio
+                        </Link>
+                    </NavbarMenuItem>
+                    <NavbarMenuItem>
+                        <Button
+                            as={Link}
+                            href="#"
+                            variant="light"
+                            onPress={() => setIsLoginOpen(true)}
+                            startContent={<MdOutlineLogin />}
+                        >
+                            Iniciar Sesión
+                        </Button>
+                    </NavbarMenuItem>
+                </NavbarMenu>
 
                 <LoginForm isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
 

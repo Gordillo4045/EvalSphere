@@ -14,6 +14,7 @@ import Sidebar from '../components/Sidebar';
 import BarCharts from '../components/company/BarCharts';
 import { toast } from 'sonner';
 import { MdEdit } from 'react-icons/md';
+import ResultTable from '../components/company/ResultTable';
 
 function CompanyControlPanel() {
     const [company, setCompany] = useState<Company | null>(null);
@@ -104,7 +105,7 @@ function CompanyControlPanel() {
         <div className="flex min-h-dvh">
             <Sidebar setActiveTab={setActiveTab} />
             <main className="flex-1 flex flex-col overflow-hidden ml-20 p-5">
-                <h1 className="text-xl font-semibold p-4 text-center">Panel de Control de {company.name}</h1>
+                <h1 className="text-xl font-semibold pb-4 text-center">Panel de Control de {company.name}</h1>
                 <div className={`w-full ${activeTab === 'home' ? 'h-fit' : 'max-w-5xl mx-auto'} flex flex-col shadow-inner rounded-xl overflow-x-auto p-3`}>
                     {activeTab === 'departments' && (
                         <Card className="w-full">
@@ -187,20 +188,33 @@ function CompanyControlPanel() {
                                 <CardHeader>
                                     <h2 className="text-xl font-semibold">Opciones de Edición</h2>
                                 </CardHeader>
-                                <CardBody className="overflow-auto h-full flex flex-col justify-between">
+                                <CardBody >
                                     <div className="flex flex-col gap-4">
-                                        <Button color="primary" onClick={() => setActiveTab('editForm')}>Editar Formulario</Button>
-                                        <Button color="primary" onClick={() => setActiveTab('editDepartment')}>Editar Departamento</Button>
-                                        <Button color="primary" onClick={() => setActiveTab('viewEvaluations')}>Ver Evaluaciones</Button>
+                                        <Card
+                                            isPressable
+                                            shadow="sm"
+                                        >
+                                            <CardBody className="flex flex-row gap-2 items-center">
+                                                <div className="flex items-center justify-center h-fit rounded-medium border p-2 bg-default-50 border-default-100">
+                                                    <MdEdit size={20} />
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <p className="text-medium">Create a new agreement</p>
+                                                    <p className="text-small text-default-400">Create a new Direct Employee Agreement template.</p>
+                                                </div>
+                                            </CardBody>
+                                        </Card>
+
                                     </div>
                                 </CardBody>
                             </Card>
 
                             <Card className="w-full col-span-12 row-span-6 md:col-span-8 md:row-span-3">
                                 <CardHeader>
-                                    <h2 className="text-xl font-semibold">Tabla de Resultados</h2>
+                                    <h2 className="text-xl font-semibold p-0">Tabla de Resultados</h2>
                                 </CardHeader>
                                 <CardBody className="overflow-auto h-full">
+                                    <ResultTable />
                                 </CardBody>
                             </Card>
 

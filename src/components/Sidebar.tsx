@@ -97,7 +97,7 @@ const Sidebar = ({ setActiveTab }: Props) => {
                 variants={containerVariants}
                 animate={containerControls}
                 initial="close"
-                className="fixed flex flex-col rounded-r-md z-50 gap-20 p-5 top-15 sm:absolute left-0 h-dvh shadow backdrop-blur-sm border-r border-gray-300 dark:border-gray-700/50"
+                className="fixed flex flex-col rounded-r-md z-50 gap-20 p-5 top-15 sm:absolute left-0 h-dvh shadow backdrop-blur-sm backdrop-saturate-150 border-r border-gray-300 dark:border-gray-700/50"
             >
                 <div className="flex flex-row w-full justify-between place-items-center">
                     <div className="relative group">
@@ -155,7 +155,7 @@ const Sidebar = ({ setActiveTab }: Props) => {
                 <div className="flex flex-col flex-grow basis-0 gap-3">
                     <Link
                         onPress={() => { setActiveTab('home'); }}
-                        className="overflow-clip whitespace-nowrap tracking-wide flex gap-3 "
+                        className="overflow-clip whitespace-nowrap tracking-wide flex gap-3 cursor-pointer"
                         color="foreground"
                         isBlock
                     >
@@ -166,7 +166,7 @@ const Sidebar = ({ setActiveTab }: Props) => {
                     </Link>
                     <Link
                         onPress={() => { setActiveTab('positions'); }}
-                        className="overflow-clip whitespace-nowrap tracking-wide flex gap-3"
+                        className="overflow-clip whitespace-nowrap tracking-wide flex gap-3 cursor-pointer"
                         color="foreground"
                         isBlock
                     >
@@ -194,7 +194,7 @@ const Sidebar = ({ setActiveTab }: Props) => {
                         >
                             <Link
                                 onPress={() => { setActiveTab('employees'); }}
-                                className="overflow-clip whitespace-nowrap tracking-wide flex gap-3"
+                                className="overflow-clip whitespace-nowrap tracking-wide flex gap-3 cursor-pointer"
                                 color="foreground"
                                 isBlock
                             >
@@ -205,7 +205,7 @@ const Sidebar = ({ setActiveTab }: Props) => {
                             </Link>
                             <Link
                                 onPress={() => { setActiveTab('departments'); }}
-                                className="overflow-clip whitespace-nowrap tracking-wide flex gap-3"
+                                className="overflow-clip whitespace-nowrap tracking-wide flex gap-3 cursor-pointer"
                                 color="foreground"
                                 isBlock
                             >
@@ -216,7 +216,7 @@ const Sidebar = ({ setActiveTab }: Props) => {
                             </Link>
                             <Link
                                 onPress={() => { setActiveTab('positions'); }}
-                                className="overflow-clip whitespace-nowrap tracking-wide flex gap-3"
+                                className="overflow-clip whitespace-nowrap tracking-wide flex gap-3 cursor-pointer"
                                 color="foreground"
                                 isBlock
                             >
@@ -227,7 +227,7 @@ const Sidebar = ({ setActiveTab }: Props) => {
                             </Link>
                             <Link
                                 onPress={() => { setActiveTab('surveyQuestions'); }}
-                                className="overflow-clip whitespace-nowrap tracking-wide flex gap-3"
+                                className="overflow-clip whitespace-nowrap tracking-wide flex gap-3 cursor-pointer"
                                 color="foreground"
                                 isBlock
                             >
@@ -240,7 +240,7 @@ const Sidebar = ({ setActiveTab }: Props) => {
                     </Accordion>
                     <Link
                         onPress={() => { setActiveTab('employees'); }}
-                        className="overflow-clip whitespace-nowrap tracking-wide flex gap-3"
+                        className="overflow-clip whitespace-nowrap tracking-wide flex gap-3 cursor-pointer"
                         color="foreground"
                         isBlock
                     >
