@@ -8,6 +8,7 @@ export interface Company {
     industry: string;
     email: string;
     password: string;
+    invitationCode: string;
 }
 
 export interface Department {

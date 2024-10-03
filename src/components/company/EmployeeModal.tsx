@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Checkbox, Select, SelectItem, Modal, Image, Tooltip, ButtonGroup } from "@nextui-org/react";
+import { ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Select, SelectItem, Modal, Image, Tooltip, ButtonGroup } from "@nextui-org/react";
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage, httpsCallable } from '../../config/config';
 import { Employee, Department, Position } from '../../types/applicaciontypes';
@@ -14,18 +14,19 @@ interface EmployeeModalProps {
     companyId: string;
     companyName: string;
     currentEmployee: Employee | null;
+    isCompanyAdding?: boolean;
 }
 
 const validateEmail = (value: string) => value.match(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+.[A-Z]{2,4}$/i);
 
-export default function EmployeeModal({ isOpen, onClose, onUpdate, mode, companyId, companyName, currentEmployee }: EmployeeModalProps) {
+export default function EmployeeModal({ isOpen, onClose, onUpdate, mode, companyId, companyName, currentEmployee, isCompanyAdding = false }: EmployeeModalProps) {
     const [newEmployee, setNewEmployee] = useState<Partial<Employee>>(currentEmployee || {});
     const [password, setPassword] = useState("");
-    const [createAuthUser, setCreateAuthUser] = useState(false);
     const [departments, setDepartments] = useState<Department[]>([]);
     const [positions, setPositions] = useState<Position[]>([]);
     const [avatar, setAvatar] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [invitationCode, setInvitationCode] = useState("");
 
     useEffect(() => {
         if (mode === 'edit' && currentEmployee) {
@@ -80,6 +81,11 @@ export default function EmployeeModal({ isOpen, onClose, onUpdate, mode, company
             return;
         }
 
+        if (mode === 'add' && !isCompanyAdding && !invitationCode) {
+            toast.error("Por favor, ingrese el código de invitación.");
+            return;
+        }
+
         try {
             await toast.promise(
                 async () => {
@@ -95,22 +101,28 @@ export default function EmployeeModal({ isOpen, onClose, onUpdate, mode, company
                         companyId,
                         companyName: mode === 'add' ? companyName : newEmployee.companyName,
                         avatar: avatarUrl,
-                        createAuthUser: createAuthUser,
-                        password: password,
                     };
+
                     if (mode === 'add') {
                         const createEmployeeFunction = httpsCallable('createEmployee');
-                        await createEmployeeFunction(employeeData);
+                        await createEmployeeFunction({
+                            ...employeeData,
+                            password,
+                            invitationCode: isCompanyAdding ? null : invitationCode,
+                            addedByCompany: isCompanyAdding,
+                        });
                     } else if (mode === 'edit' && currentEmployee) {
                         const updateEmployeeFunction = httpsCallable('updateEmployee');
-                        await updateEmployeeFunction({ ...newEmployee, id: currentEmployee.id });
+                        await updateEmployeeFunction({
+                            ...employeeData,
+                            id: currentEmployee.id,
+                        });
                     }
 
                     onUpdate();
                     onClose();
                     setNewEmployee({});
                     setPassword("");
-                    setCreateAuthUser(false);
                     setAvatar(null);
                     setPreviewUrl(null);
                 },
@@ -192,25 +204,26 @@ export default function EmployeeModal({ isOpen, onClose, onUpdate, mode, company
                                 ))}
                         </Select>
 
-                        {mode === 'add' && (
-                            <>
-                                <Checkbox
-                                    isSelected={createAuthUser}
-                                    onValueChange={setCreateAuthUser}
-                                >
-                                    Crear usuario de autenticación
-                                </Checkbox>
-                                {createAuthUser && (
-                                    <Input
-                                        label="Contraseña"
-                                        variant='underlined'
-                                        type="password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                    />
-                                )}
-                            </>
+                        {mode === 'add' && !isCompanyAdding && (
+                            <Input
+                                label="Código de Invitación"
+                                variant='underlined'
+                                value={invitationCode}
+                                onChange={(e) => setInvitationCode(e.target.value)}
+                                required
+                            />
                         )}
+
+                        {mode === 'add' && (
+                            <Input
+                                label="Contraseña"
+                                variant='underlined'
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                        )}
+
                         {!previewUrl && (
                             <div className="flex items-center justify-center w-full">
                                 <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-38 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 ">
@@ -247,7 +260,6 @@ export default function EmployeeModal({ isOpen, onClose, onUpdate, mode, company
 
                         <ModalFooter>
                             <ButtonGroup>
-
                                 <Button color="primary" type="submit">
                                     {mode === 'add' ? 'Agregar' : 'Guardar'}
                                 </Button>
@@ -255,12 +267,9 @@ export default function EmployeeModal({ isOpen, onClose, onUpdate, mode, company
                                     Cancelar
                                 </Button>
                             </ButtonGroup>
-
                         </ModalFooter>
-
                     </form>
                 </ModalBody>
-
             </ModalContent>
         </Modal>
     );

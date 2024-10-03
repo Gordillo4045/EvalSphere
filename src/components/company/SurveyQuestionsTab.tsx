@@ -24,6 +24,7 @@ import { toast } from 'sonner';
 import { AiOutlineEdit } from "react-icons/ai";
 import { BiSolidTrashAlt } from "react-icons/bi";
 import { FaPlus } from 'react-icons/fa6';
+import DeleteConfirmationModal from '../DeleteConfirmationModal';
 
 interface SurveyQuestion {
     id: string;
@@ -49,6 +50,8 @@ export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProp
     const [newQuestion, setNewQuestion] = useState({ question: '', category: '' });
     const [editingQuestion, setEditingQuestion] = useState<SurveyQuestion | null>(null);
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [questionToDelete, setQuestionToDelete] = useState<SurveyQuestion | null>(null);
 
     useEffect(() => {
         const questionsRef = collection(db, `companies/${companyId}/surveyQuestions`);
@@ -103,13 +106,22 @@ export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProp
         }
     };
 
-    const handleDeleteQuestion = async (questionId: string) => {
-        try {
-            await deleteDoc(doc(db, `companies/${companyId}/surveyQuestions`, questionId));
-            toast.success("Pregunta eliminada exitosamente.");
-        } catch (error) {
-            console.error("Error al eliminar pregunta:", error);
-            toast.error("Error al eliminar pregunta.");
+    const handleDeleteQuestion = async (question: SurveyQuestion) => {
+        setQuestionToDelete(question);
+        setDeleteModalOpen(true);
+    };
+
+    const confirmDeleteQuestion = async () => {
+        if (questionToDelete) {
+            try {
+                await deleteDoc(doc(db, `companies/${companyId}/surveyQuestions`, questionToDelete.id));
+                setDeleteModalOpen(false);
+                setQuestionToDelete(null);
+                toast.success("Pregunta eliminada exitosamente.");
+            } catch (error) {
+                console.error("Error al eliminar pregunta:", error);
+                toast.error("Error al eliminar pregunta.");
+            }
         }
     };
 
@@ -180,7 +192,7 @@ export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProp
                                                     size="sm"
                                                     color="danger"
                                                     variant="light"
-                                                    onPress={() => handleDeleteQuestion(question.id)}
+                                                    onPress={() => handleDeleteQuestion(question)}
                                                 >
                                                     <BiSolidTrashAlt size={20} />
                                                 </Button>
@@ -225,6 +237,14 @@ export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProp
                     </ModalFooter>
                 </ModalContent>
             </Modal>
+
+            <DeleteConfirmationModal
+                isOpen={deleteModalOpen}
+                onCancel={() => setDeleteModalOpen(false)}
+                onConfirm={confirmDeleteQuestion}
+                title="Eliminar Pregunta"
+                content={`¿Estás seguro de que deseas eliminar la pregunta "${questionToDelete?.question}"?`}
+            />
         </div>
     );
 }

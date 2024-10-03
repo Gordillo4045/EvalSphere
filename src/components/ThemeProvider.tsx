@@ -10,14 +10,22 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
 
     const toggleTheme = () => {
         const newTheme = theme === "dark" ? "light" : "dark";
-        document.querySelector("body")?.classList.replace(theme, newTheme);
+        applyTheme(newTheme);
         localStorage.setItem("theme", newTheme);
         setTheme(newTheme);
     }
 
+    const applyTheme = (currentTheme: string) => {
+        const body = document.querySelector("body");
+        if (body) {
+            body.classList.remove("light", "dark");
+            body.classList.add(currentTheme, "text-foreground", "bg-transparent");
+        }
+    }
+
     useEffect(() => {
-        const currentTheme = localStorage.getItem("theme") ?? "light";
-        document.querySelector("body")?.classList.add(currentTheme, "text-foreground", "bg-background");
+        const currentTheme = localStorage.getItem("theme") ?? "dark";
+        applyTheme(currentTheme);
         setTheme(currentTheme);
     }, []);
 

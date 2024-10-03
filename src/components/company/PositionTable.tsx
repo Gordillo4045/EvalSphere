@@ -29,6 +29,7 @@ import { BiSolidTrashAlt } from "react-icons/bi";
 import { collection, addDoc, deleteDoc, doc, onSnapshot, query, updateDoc, collectionGroup } from 'firebase/firestore';
 import { db } from '../../config/config';
 import { Position, Department } from '../../types/applicaciontypes';
+import DeleteConfirmationModal from '../DeleteConfirmationModal';
 
 interface PositionTableProps {
     companyId: string;
@@ -53,6 +54,9 @@ export default function PositionTable({ companyId }: PositionTableProps) {
     const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
     const [currentPosition, setCurrentPosition] = useState<Position | null>(null);
     const [newPosition, setNewPosition] = useState<Partial<Position>>({});
+
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [positionToDelete, setPositionToDelete] = useState<Position | null>(null);
 
     useEffect(() => {
         const positionsQuery = query(collectionGroup(db, 'positions'));
@@ -110,12 +114,21 @@ export default function PositionTable({ companyId }: PositionTableProps) {
         }
     };
 
-    const onDelete = async (item: Position) => {
-        try {
-            const positionRef = doc(db, `companies/${companyId}/departments/${item.department}/positions`, item.id);
-            await deleteDoc(positionRef);
-        } catch (error) {
-            console.error("Error al eliminar posición: ", error);
+    const onDelete = (item: Position) => {
+        setPositionToDelete(item);
+        setDeleteModalOpen(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (positionToDelete) {
+            try {
+                const positionRef = doc(db, `companies/${companyId}/departments/${positionToDelete.department}/positions`, positionToDelete.id);
+                await deleteDoc(positionRef);
+                setDeleteModalOpen(false);
+                setPositionToDelete(null);
+            } catch (error) {
+                console.error("Error al eliminar posición: ", error);
+            }
         }
     };
 
@@ -377,6 +390,14 @@ export default function PositionTable({ companyId }: PositionTableProps) {
 
                 </ModalContent>
             </Modal>
+
+            <DeleteConfirmationModal
+                isOpen={deleteModalOpen}
+                onCancel={() => setDeleteModalOpen(false)}
+                onConfirm={handleDeleteConfirm}
+                title="Eliminar Posición"
+                content={`¿Estás seguro de que deseas eliminar la posición "${positionToDelete?.title}"?`}
+            />
         </>
     );
 }

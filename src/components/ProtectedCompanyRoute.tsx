@@ -11,7 +11,7 @@ const ProtectedCompanyRoute: React.FC<ProtectedCompanyRouteProps> = ({ children 
     const { user, isCompany, loading } = useAuth();
 
     if (loading) {
-        return <div className='text-center w-full h-full flex items-center justify-center'>
+        return <div className='flex justify-center items-center min-h-dvh'>
             <Spinner color="primary" label="Cargando..." />
         </div>;
     }

@@ -25,6 +25,7 @@ import { Employee, Department, Position } from '../../types/applicaciontypes';
 import EmployeeModal from './EmployeeModal';
 import DeleteConfirmationModal from '../DeleteConfirmationModal';
 import { IoReload } from 'react-icons/io5';
+import { toast } from 'sonner';
 
 interface EmployeeTableProps {
     companyId: string;
@@ -63,32 +64,39 @@ export default function EmployeeTable({ companyId, companyName }: EmployeeTableP
 
     const fetchData = async () => {
         setIsLoading(true);
-        const employeesRef = collection(db, `companies/${companyId}/employees`);
-        const employeesSnapshot = await getDocs(employeesRef);
-        const employeesData = employeesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Employee));
-        setEmployees(employeesData);
+        try {
+            const employeesRef = collection(db, `companies/${companyId}/employees`);
+            const employeesSnapshot = await getDocs(employeesRef);
+            const employeesData = employeesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Employee));
+            setEmployees(employeesData);
 
-        const departmentsRef = collection(db, `companies/${companyId}/departments`);
-        const departmentsSnapshot = await getDocs(departmentsRef);
-        const departmentsData: Department[] = [];
-        const positionsData: Position[] = [];
+            const departmentsRef = collection(db, `companies/${companyId}/departments`);
+            const departmentsSnapshot = await getDocs(departmentsRef);
+            const departmentsData: Department[] = [];
+            const positionsData: Position[] = [];
 
-        for (const departmentDoc of departmentsSnapshot.docs) {
-            const department = { id: departmentDoc.id, ...departmentDoc.data() } as Department;
-            departmentsData.push(department);
+            for (const departmentDoc of departmentsSnapshot.docs) {
+                const department = { id: departmentDoc.id, ...departmentDoc.data() } as Department;
+                departmentsData.push(department);
 
-            const positionsRef = collection(db, `companies/${companyId}/departments/${department.id}/positions`);
-            const positionsSnapshot = await getDocs(positionsRef);
-            positionsSnapshot.forEach(positionDoc => {
-                const position = { id: positionDoc.id, ...positionDoc.data(), departmentId: department.id } as Position;
-                positionsData.push(position);
-            });
+                const positionsRef = collection(db, `companies/${companyId}/departments/${department.id}/positions`);
+                const positionsSnapshot = await getDocs(positionsRef);
+                positionsSnapshot.forEach(positionDoc => {
+                    const position = { id: positionDoc.id, ...positionDoc.data(), departmentId: department.id } as Position;
+                    positionsData.push(position);
+                });
+            }
+
+            setDepartments(departmentsData);
+            setPositions(positionsData);
+            setIsLoading(false);
+        } catch (error) {
+            console.error("Error al cargar datos:", error);
+            toast.error("Error al cargar los datos de empleados.");
+            setIsLoading(false);
         }
-
-        setDepartments(departmentsData);
-        setPositions(positionsData);
-        setIsLoading(false);
     };
+
     useEffect(() => {
         fetchData();
     }, [companyId]);
@@ -112,10 +120,26 @@ export default function EmployeeTable({ companyId, companyName }: EmployeeTableP
 
     const handleDeleteConfirmation = async () => {
         if (employeeToDelete) {
-            const deleteEmployeeFunction = httpsCallable('deleteEmployee');
-            deleteEmployeeFunction(employeeToDelete);
-            setDeleteConfirmationOpen(false);
-            fetchData();
+            try {
+                await toast.promise(
+                    async () => {
+                        const deleteEmployeeFunction = httpsCallable('deleteEmployee');
+                        await deleteEmployeeFunction(employeeToDelete);
+                        setDeleteConfirmationOpen(false);
+                        await fetchData();
+                    },
+                    {
+                        loading: 'Eliminando empleado...',
+                        success: 'Empleado eliminado exitosamente.',
+                        error: (error: Error) => {
+                            console.error("Error al eliminar empleado:", error);
+                            return "Error al eliminar el empleado.";
+                        },
+                    }
+                );
+            } catch (error) {
+                console.error("Error inesperado:", error);
+            }
         }
     };
 
@@ -316,12 +340,15 @@ export default function EmployeeTable({ companyId, companyName }: EmployeeTableP
                 companyId={companyId}
                 companyName={companyName}
                 currentEmployee={currentEmployee}
+                isCompanyAdding={true}
             />
 
             <DeleteConfirmationModal
                 isOpen={deleteConfirmationOpen}
                 onConfirm={handleDeleteConfirmation}
                 onCancel={() => setDeleteConfirmationOpen(false)}
+                title="Eliminar Empleado"
+                content={`¿Estás seguro de que deseas eliminar el empleado "${employeeToDelete?.name}"?`}
             />
         </>
     );

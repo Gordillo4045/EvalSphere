@@ -32,7 +32,7 @@ export default function Controlpanel() {
 
     const obtenerUsuarios = async () => {
         try {
-            const usuariosCollection = collection(db, "usuarios");
+            const usuariosCollection = collection(db, "users");
             const usuariosSnapshot = await getDocs(usuariosCollection);
 
             const adminData: Usuario[] = [];
@@ -130,6 +130,8 @@ export default function Controlpanel() {
                     isOpen={showDeleteModal}
                     onConfirm={confirmarEliminar}
                     onCancel={() => setShowDeleteModal(false)}
+                    title="Eliminar Usuario"
+                    content={`¿Estás seguro de que deseas eliminar el usuario "${itemToDelete?.name}"?`}
                 />
             </div>
         </div>

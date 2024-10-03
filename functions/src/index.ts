@@ -143,6 +143,8 @@ export const createCompany = functions.https.onCall(async (data, context) => {
 
         await admin.auth().setCustomUserClaims(userRecord.uid, { role: "company" });
 
+        const invitationCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+
         const companyData = {
             id: userRecord.uid,
             name,
@@ -151,6 +153,7 @@ export const createCompany = functions.https.onCall(async (data, context) => {
             avatar: avatar || "",
             description: description || "",
             industry,
+            invitationCode,
         };
 
         await admin
@@ -308,27 +311,30 @@ export const createUser = functions.https.onCall(async (data, context) => {
 });
 
 export const createEmployee = functions.https.onCall(async (data, context) => {
-    const { email, password, name, avatar, companyId, companyName, departmentId, positionId } = data
+    const { email, password, name, avatar, companyId, companyName, departmentId, positionId, invitationCode, addedByCompany } = data;
     try {
+        if (!addedByCompany) {
+            const companyDoc = await admin.firestore().collection('companies').doc(companyId).get();
+            if (!companyDoc.exists) {
+                throw new functions.https.HttpsError('not-found', 'Compañía no encontrada.');
+            }
+            const companyData = companyDoc.data();
+            if (companyData?.invitationCode !== invitationCode) {
+                throw new functions.https.HttpsError('invalid-argument', 'Código de invitación inválido.');
+            }
+        }
+
         const userCreateData: admin.auth.CreateRequest = {
             email: email,
             password: password,
             displayName: name,
         };
-        if (
-            avatar &&
-            typeof avatar === "string" &&
-            avatar.trim() !== ""
-        ) {
+        if (avatar && typeof avatar === "string" && avatar.trim() !== "") {
             userCreateData.photoURL = avatar;
         }
 
-        let uid = "";
-        if (data.createAuthUser) {
-            const userData = await admin.auth().createUser(userCreateData);
-            await admin.auth().setCustomUserClaims(userData.uid, { role: "employee" });
-            uid = userData.uid;
-        }
+        const userData = await admin.auth().createUser(userCreateData);
+        await admin.auth().setCustomUserClaims(userData.uid, { role: "employee" });
 
         const employeeData = {
             name: name,
@@ -339,7 +345,7 @@ export const createEmployee = functions.https.onCall(async (data, context) => {
             positionId: positionId,
             role: "employee",
             avatar: avatar,
-            uid: uid || null,
+            uid: userData.uid,
         };
 
         const employeeUser = {
@@ -347,26 +353,26 @@ export const createEmployee = functions.https.onCall(async (data, context) => {
             name: name,
             puestoTrabajo: positionId,
             role: "employee",
-            uid: uid,
+            uid: userData.uid,
             avatar: avatar
-        }
+        };
 
         await admin
             .firestore()
-            .collection(`companies/${data.companyId}/employees`)
-            .doc(uid)
+            .collection(`companies/${companyId}/employees`)
+            .doc(userData.uid)
             .set(employeeData);
 
         await admin
             .firestore()
             .collection("users")
-            .doc(uid)
+            .doc(userData.uid)
             .set(employeeUser);
 
-        return { success: true, employeeId: uid };
+        return { success: true, employeeId: userData.uid };
     } catch (error) {
-        console.error("Error creating employee:", error);
-        throw new functions.https.HttpsError("internal", "Error creating employee");
+        console.error("Error al crear empleado:", error);
+        throw new functions.https.HttpsError('internal', `Error al crear empleado: ${error}`);
     }
 });
 
@@ -389,37 +395,52 @@ export const deleteEmployee = functions.https.onCall(async (data, context) => {
 });
 
 export const updateEmployee = functions.https.onCall(async (data, context) => {
-    const { id, name, email, positionId, departmentId, avatar } = data;
+    const { id, name, email, positionId, departmentId, avatar, companyId } = data;
 
     try {
         const updateData: admin.auth.UpdateRequest = {
             email,
             displayName: name,
-            photoURL: avatar || null,
         };
+
+        if (avatar && typeof avatar === "string" && avatar.trim() !== "") {
+            updateData.photoURL = avatar;
+        }
 
         await admin.auth().updateUser(id, updateData);
 
+        const employeeData = {
+            name,
+            email,
+            positionId,
+            departmentId,
+            avatar: avatar,
+        };
+
+        if (avatar) {
+            employeeData.avatar = avatar;
+        }
+
         await admin.firestore()
-            .collection(`companies/${data.companyId}/employees`)
+            .collection(`companies/${companyId}/employees`)
             .doc(id)
-            .update({
-                name,
-                email,
-                positionId,
-                departmentId,
-                avatar,
-            });
+            .update(employeeData);
+
+        const userData = {
+            name,
+            email,
+            puestoTrabajo: positionId,
+            avatar: avatar,
+        };
+
+        if (avatar) {
+            userData.avatar = avatar;
+        }
 
         await admin.firestore()
             .collection('users')
             .doc(id)
-            .update({
-                name,
-                email,
-                puestoTrabajo: positionId,
-                avatar: avatar || "",
-            })
+            .update(userData);
 
         return { success: true };
     } catch (error) {
