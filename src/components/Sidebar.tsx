@@ -8,7 +8,7 @@ import { AiFillSetting } from "react-icons/ai";
 import { signOut } from "firebase/auth"
 import { toast } from "sonner"
 import { auth } from "../config/config";
-import { MdGroupWork, MdOutlineLogout } from "react-icons/md"
+import { MdGroupWork, MdOutlineHistory, MdOutlineLogout } from "react-icons/md"
 import { IoMdHome } from "react-icons/io";
 import { FaClipboardQuestion, FaUsers } from "react-icons/fa6"
 import { BsPersonBadgeFill } from "react-icons/bs"
@@ -121,6 +121,7 @@ const Sidebar = ({ setActiveTab }: Props) => {
                                 </PopoverTrigger>
                                 <PopoverContent className="p-1">
                                     <div className="">{user.email}</div>
+                                    <Link href="/" isBlock className="cursor-pointer w-full" color="foreground">Inicio</Link>
                                 </PopoverContent>
                             </Popover>
                         )}
@@ -171,9 +172,9 @@ const Sidebar = ({ setActiveTab }: Props) => {
                         isBlock
                     >
                         {isOpen ? <>
-                            <MdOutlineLogout size={25} />
+                            <MdOutlineHistory size={25} />
                             Historial
-                        </> : (<MdOutlineLogout size={30} />)}
+                        </> : (<MdOutlineHistory size={30} />)}
                     </Link>
 
 

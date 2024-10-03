@@ -13,8 +13,11 @@ import RadarCharts from '../components/company/RadarCharts';
 import Sidebar from '../components/Sidebar';
 import BarCharts from '../components/company/BarCharts';
 import { toast } from 'sonner';
-import { MdEdit } from 'react-icons/md';
+import { MdEdit, MdGroupWork } from 'react-icons/md';
 import ResultTable from '../components/company/ResultTable';
+import { FaFileExport, FaUsers } from 'react-icons/fa6';
+import { BsPersonBadgeFill } from 'react-icons/bs';
+import { FaQuestionCircle } from 'react-icons/fa';
 
 function CompanyControlPanel() {
     const [company, setCompany] = useState<Company | null>(null);
@@ -193,18 +196,78 @@ function CompanyControlPanel() {
                                         <Card
                                             isPressable
                                             shadow="sm"
+                                            onPress={() => { setActiveTab('employees'); }}
                                         >
                                             <CardBody className="flex flex-row gap-2 items-center">
                                                 <div className="flex items-center justify-center h-fit rounded-medium border p-2 bg-default-50 border-default-100">
-                                                    <MdEdit size={20} />
+                                                    <FaUsers size={20} />
                                                 </div>
                                                 <div className="flex flex-col">
-                                                    <p className="text-medium">Create a new agreement</p>
-                                                    <p className="text-small text-default-400">Create a new Direct Employee Agreement template.</p>
+                                                    <p className="text-medium">Editar Empleados</p>
+                                                    <p className="text-small text-default-400">Editar los datos de los empleados.</p>
                                                 </div>
                                             </CardBody>
                                         </Card>
-
+                                        <Card
+                                            isPressable
+                                            shadow="sm"
+                                            onPress={() => { setActiveTab('departments'); }}
+                                        >
+                                            <CardBody className="flex flex-row gap-2 items-center">
+                                                <div className="flex items-center justify-center h-fit rounded-medium border p-2 bg-default-50 border-default-100 ">
+                                                    <MdGroupWork size={22} />
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <p className="text-medium">Editar Departamentos</p>
+                                                    <p className="text-small text-default-400">Editar los datos de los departamentos.</p>
+                                                </div>
+                                            </CardBody>
+                                        </Card>
+                                        <Card
+                                            isPressable
+                                            shadow="sm"
+                                            onPress={() => { setActiveTab('positions'); }}
+                                        >
+                                            <CardBody className="flex flex-row gap-2 items-center">
+                                                <div className="flex items-center justify-center h-fit rounded-medium border p-2 bg-default-50 border-default-100">
+                                                    <BsPersonBadgeFill size={20} />
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <p className="text-medium">Editar Puestos</p>
+                                                    <p className="text-small text-default-400">Editar los datos de los puestos.</p>
+                                                </div>
+                                            </CardBody>
+                                        </Card>
+                                        <Card
+                                            isPressable
+                                            shadow="sm"
+                                            onPress={() => { setActiveTab('surveyQuestions'); }}
+                                        >
+                                            <CardBody className="flex flex-row gap-2 items-center">
+                                                <div className="flex items-center justify-center h-fit rounded-medium border p-2 bg-default-50 border-default-100">
+                                                    <FaQuestionCircle size={20} />
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <p className="text-medium">Editar Preguntas</p>
+                                                    <p className="text-small text-default-400">Editar las preguntas de la encuesta.</p>
+                                                </div>
+                                            </CardBody>
+                                        </Card>
+                                        <Card
+                                            isPressable
+                                            shadow="sm"
+                                            onPress={() => { setActiveTab('results'); }}
+                                        >
+                                            <CardBody className="flex flex-row gap-2 items-center">
+                                                <div className="flex items-center justify-center h-fit rounded-medium border p-2 bg-default-50 border-default-100">
+                                                    <FaFileExport size={20} />
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <p className="text-medium">Exportar Resultados</p>
+                                                    <p className="text-small text-default-400">Exportar los resultados de la encuesta.</p>
+                                                </div>
+                                            </CardBody>
+                                        </Card>
                                     </div>
                                 </CardBody>
                             </Card>
@@ -257,8 +320,8 @@ function CompanyControlPanel() {
                         </div>
                     )}
                 </div>
-            </main>
-        </div>
+            </main >
+        </div >
     );
 }
 
