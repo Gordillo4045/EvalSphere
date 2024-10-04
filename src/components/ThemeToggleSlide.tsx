@@ -1,12 +1,12 @@
 import { motion } from 'framer-motion';
-import { useTheme } from '../hooks/useTheme';
+import { useTheme } from '@/components/ThemeProvider';
 
 interface ThemeToggleSlideProps {
     isOpen: boolean;
 }
 
 const ThemeToggleSlide = ({ isOpen }: ThemeToggleSlideProps) => {
-    const { theme, toggleTheme } = useTheme();
+    const { setTheme, theme } = useTheme()
     const isChecked = theme === 'light';
 
     const toggleVariants = {
@@ -26,7 +26,7 @@ const ThemeToggleSlide = ({ isOpen }: ThemeToggleSlideProps) => {
                     type="checkbox"
                     className="absolute opacity-0 cursor-pointer h-0 w-0"
                     checked={isChecked}
-                    onChange={toggleTheme}
+                    onChange={() => { setTheme(theme === 'light' ? 'dark' : 'light') }}
                 />
                 <div className={`flex items-center ${isOpen ? 'w-full' : 'w-6 h-6 pl-1 ml-1'}`}>
                     <motion.svg

@@ -1,23 +1,25 @@
 import { useState } from "react";
 import { Navbar, NavbarContent, Link, DropdownItem, DropdownTrigger, Dropdown, DropdownMenu, Avatar, Spinner, Button, NavbarMenu, NavbarMenuItem, NavbarMenuToggle } from "@nextui-org/react";
-import ThemeToggle from "./ThemeToggle";
-import { useTheme } from "../hooks/useTheme";
-import LoginForm from "./LoginForm";
+import ThemeToggle from "@/components/ThemeToggle";
+import { useTheme } from "@/hooks/useTheme";
+import LoginForm from "@/components/LoginForm";
 import { signOut } from "firebase/auth";
-import { auth } from "../config/config";
+import { auth } from "@/config/config";
 import { toast } from "sonner";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";
 import { MdOutlineLogin, MdOutlineLogout } from "react-icons/md";
 import { FaUsersGear } from "react-icons/fa6";
-import EmployeeSignUpForm from "./company/EmployeeSignUpForm";
+import EmployeeSignUpForm from "@/components/company/EmployeeSignUpForm";
 import { FaUserPlus } from "react-icons/fa";
 
+
 export default function NavbarCustom() {
-    const { toggleTheme } = useTheme();
+    const { setTheme, theme } = useTheme();
     const [isLoginOpen, setIsLoginOpen] = useState(false);
     const { user, isAdmin, isCompany, loading } = useAuth();
     const [isEmployeeSignUpOpen, setIsEmployeeSignUpOpen] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const { isEmployee } = useAuth();
 
     const handleEmployeeSignUp = () => {
         setIsEmployeeSignUpOpen(true);
@@ -61,42 +63,49 @@ export default function NavbarCustom() {
                     <Link className=" text-inherit text-xl font-bold md:mx-2" href="/">EvalSphere</Link>
 
                     {user && (
-                        <Dropdown placement="bottom-end" >
-                            <DropdownTrigger>
-                                <Avatar
-                                    isBordered
-                                    as="button"
-                                    className="transition-transform ml-32 md:ml-96"
-                                    color="secondary"
-                                    name={user.displayName || "Usuario"}
-                                    size="sm"
-                                    src={user.photoURL || "https://i.pravatar.cc/150"}
+                        <>
+                            {isEmployee && (
+                                <div className="hidden md:flex items-center justify-center mx-48">
+                                    <Link href="/employee/formulario" color="foreground">Formulario</Link>
+                                </div>
+                            )}
+                            <Dropdown placement="bottom-end" >
+                                <DropdownTrigger>
+                                    <Avatar
+                                        isBordered
+                                        as="button"
+                                        className={`transition-transform ml-32 ${isEmployee ? 'md:ml-20' : 'md:ml-80'}`}
+                                        color="secondary"
+                                        name={user.displayName || "Usuario"}
+                                        size="sm"
+                                        src={user.photoURL || "https://i.pravatar.cc/150"}
 
-                                />
-                            </DropdownTrigger>
-                            <DropdownMenu aria-label="Acciones de perfil" variant="flat" >
-                                <DropdownItem key="profile" textValue="perfil" className="h-14 gap-2">
-                                    <p className="font-semibold">{user.displayName}</p>
-                                    <p className="font-semibold">{user.email}</p>
-                                </DropdownItem>
-                                <DropdownItem key="theme" onClick={toggleTheme} textValue='tema' startContent={<ThemeToggle />} className="pl-2 ">
-                                    Tema
-                                </DropdownItem>
-                                {isAdmin && (
-                                    <DropdownItem key="controlpanel" href="/controlpanel" startContent={<FaUsersGear />} textValue="panel de control">
-                                        Panel de Control Admin
+                                    />
+                                </DropdownTrigger>
+                                <DropdownMenu aria-label="Acciones de perfil" variant="flat" >
+                                    <DropdownItem key="profile" textValue="perfil" className="h-14 gap-2">
+                                        <p className="font-semibold">{user.displayName}</p>
+                                        <p className="font-semibold">{user.email}</p>
                                     </DropdownItem>
-                                )}
-                                {isCompany && (
-                                    <DropdownItem key="controlpanel" href="/company/controlpanel" startContent={<FaUsersGear />} textValue="panel de control">
-                                        Panel de Control Compañía
+                                    <DropdownItem key="theme" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} textValue='tema' startContent={<ThemeToggle />} className="pl-2 ">
+                                        Tema
                                     </DropdownItem>
-                                )}
-                                <DropdownItem key="logout" color="danger" onClick={handleLogout} startContent={<MdOutlineLogout />} textValue="cerrar sesión">
-                                    Cerrar Sesión
-                                </DropdownItem>
-                            </DropdownMenu>
-                        </Dropdown>
+                                    {isAdmin && (
+                                        <DropdownItem key="controlpanel" href="/controlpanel" startContent={<FaUsersGear />} textValue="panel de control">
+                                            Panel de Control Admin
+                                        </DropdownItem>
+                                    )}
+                                    {isCompany && (
+                                        <DropdownItem key="controlpanel" href="/company/controlpanel" startContent={<FaUsersGear />} textValue="panel de control">
+                                            Panel de Control Compañía
+                                        </DropdownItem>
+                                    )}
+                                    <DropdownItem key="logout" color="danger" onClick={handleLogout} startContent={<MdOutlineLogout />} textValue="cerrar sesión">
+                                        Cerrar Sesión
+                                    </DropdownItem>
+                                </DropdownMenu>
+                            </Dropdown>
+                        </>
                     )}
                 </NavbarContent>
 
@@ -111,7 +120,7 @@ export default function NavbarCustom() {
                                 variant="light"
                                 onClick={() => setIsLoginOpen(true)}
                                 startContent={<MdOutlineLogin />}
-                                className="hidden md:flex h-7"
+                                className="hidden md:flex h-7 p-2"
                                 size="sm"
                             >
                                 Iniciar Sesión
@@ -119,7 +128,6 @@ export default function NavbarCustom() {
                             <Dropdown placement="bottom-end" offset={12}>
                                 <DropdownTrigger>
                                     <Button
-                                        color="secondary"
                                         variant="light"
                                         startContent={<FaUserPlus />}
                                         className="hidden md:flex h-7"
@@ -134,7 +142,7 @@ export default function NavbarCustom() {
                                     </DropdownItem>
                                 </DropdownMenu>
                             </Dropdown>
-                            <Button isIconOnly variant="solid" className="bg-transparent md:h-7 md:w-7" onPress={toggleTheme}>
+                            <Button isIconOnly variant="solid" className="bg-transparent md:h-7 md:w-7" onPress={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
                                 <ThemeToggle />
                             </Button>
                         </div>

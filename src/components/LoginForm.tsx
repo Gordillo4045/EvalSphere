@@ -9,7 +9,7 @@ import {
     Button
 } from "@nextui-org/react";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../config/config";
+import { auth } from "@/config/config";
 import { toast } from 'sonner';
 import { IoMail as MailIcon } from "react-icons/io5";
 import { IoLockClosed as LockIcon } from "react-icons/io5";

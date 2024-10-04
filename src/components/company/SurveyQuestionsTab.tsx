@@ -19,7 +19,7 @@ import {
     SelectItem
 } from "@nextui-org/react";
 import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query } from 'firebase/firestore';
-import { db } from '../../config/config';
+import { db } from '@/config/config';
 import { toast } from 'sonner';
 import { AiOutlineEdit } from "react-icons/ai";
 import { BiSolidTrashAlt } from "react-icons/bi";

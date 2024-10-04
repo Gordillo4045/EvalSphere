@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Image, Tooltip, Select, SelectItem } from "@nextui-org/react";
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage, httpsCallable, db } from '../../config/config';
+import { storage, httpsCallable, db } from '@/config/config';
 import { toast } from 'sonner';
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
-import { Company, Department, Position } from '../../types/applicaciontypes';
+import { Company, Department, Position } from '@/types/applicaciontypes';
 
 interface EmployeeSignUpFormProps {
     isOpen: boolean;

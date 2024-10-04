@@ -27,9 +27,9 @@ import { FaPlus } from "react-icons/fa6";
 import { AiOutlineEdit } from "react-icons/ai";
 import { BiSolidTrashAlt } from "react-icons/bi";
 import { collection, addDoc, deleteDoc, doc, onSnapshot, query, updateDoc, collectionGroup } from 'firebase/firestore';
-import { db } from '../../config/config';
-import { Position, Department } from '../../types/applicaciontypes';
-import DeleteConfirmationModal from '../DeleteConfirmationModal';
+import { db } from '@/config/config';
+import { Position, Department } from '@/types/applicaciontypes';
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 
 interface PositionTableProps {
     companyId: string;
