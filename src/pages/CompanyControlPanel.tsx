@@ -1,24 +1,27 @@
 import { useState, useEffect } from 'react';
 import { Button, Card, CardBody, CardHeader, Select, SelectItem, Spinner, Input, ButtonGroup, Snippet } from "@nextui-org/react";
-import DepartmentTable from "@/components/company/DepartmentTable";
-import PositionTable from "@/components/company/PositionTable";
-import EmployeeTable from "@/components/company/EmployeeTable";
 import { collection, doc, getDoc, onSnapshot, query, updateDoc } from 'firebase/firestore';
 import { db } from '@/config/config';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { Company, Department } from '@/types/applicaciontypes';
-import SurveyQuestionsTab from '@/components/company/SurveyQuestionsTab';
 import Sidebar from '@/components/Sidebar';
 import { toast } from 'sonner';
 import { MdEdit, MdGroupWork } from 'react-icons/md';
-import ResultTable from '@/components/company/ResultTable';
 import { FaFileExport, FaUsers } from 'react-icons/fa6';
 import { BsPersonBadgeFill } from 'react-icons/bs';
 import { FaQuestionCircle } from 'react-icons/fa';
+import React, { Suspense } from 'react';
 import { RadarCharts } from '@/components/company/RadarCharts';
 import { BarCharts } from '@/components/company/BarCharts';
 import { LineCharts } from '@/components/company/LineCharts';
+
+const DepartmentTable = React.lazy(() => import("@/components/company/DepartmentTable"));
+const PositionTable = React.lazy(() => import("@/components/company/PositionTable"));
+const EmployeeTable = React.lazy(() => import("@/components/company/EmployeeTable"));
+const SurveyQuestionsTab = React.lazy(() => import("@/components/company/SurveyQuestionsTab"));
+const ResultTable = React.lazy(() => import("@/components/company/ResultTable"));
+
 
 function CompanyControlPanel() {
     const [company, setCompany] = useState<Company | null>(null);
@@ -116,7 +119,9 @@ function CompanyControlPanel() {
                                 <h2 className="text-xl font-semibold">Departamentos</h2>
                             </CardHeader>
                             <CardBody>
-                                <DepartmentTable companyId={company.id} />
+                                <Suspense fallback={<div>Cargando...</div>}>
+                                    <DepartmentTable companyId={company.id} />
+                                </Suspense>
                             </CardBody>
                         </Card>
                     )}
@@ -126,7 +131,9 @@ function CompanyControlPanel() {
                                 <h2 className="text-xl font-semibold">Puestos</h2>
                             </CardHeader>
                             <CardBody>
-                                <PositionTable companyId={company.id} />
+                                <Suspense fallback={<div>Cargando...</div>}>
+                                    <PositionTable companyId={company.id} />
+                                </Suspense>
                             </CardBody>
                         </Card>
                     )}
@@ -136,7 +143,9 @@ function CompanyControlPanel() {
                                 <h2 className="text-xl font-semibold">Empleados</h2>
                             </CardHeader>
                             <CardBody>
-                                <EmployeeTable companyId={company.id} companyName={company.name} />
+                                <Suspense fallback={<div>Cargando...</div>}>
+                                    <EmployeeTable companyId={company.id} companyName={company.name} />
+                                </Suspense>
                             </CardBody>
                         </Card>
                     )}
@@ -146,7 +155,9 @@ function CompanyControlPanel() {
                                 <h2 className="text-xl font-semibold">Preguntas</h2>
                             </CardHeader>
                             <CardBody>
-                                <SurveyQuestionsTab companyId={company.id} />
+                                <Suspense fallback={<div>Cargando...</div>}>
+                                    <SurveyQuestionsTab companyId={company.id} />
+                                </Suspense>
                             </CardBody>
                         </Card>
                     )}
@@ -182,9 +193,11 @@ function CompanyControlPanel() {
                                     <h2 className="text-xl font-semibold">Informe de {selectedDepartment?.name || 'Departamento'}</h2>
                                 </CardHeader>
                                 <CardBody className="overflow-auto h-full flex flex-col md:flex-row gap-2">
-                                    <RadarCharts />
-                                    <BarCharts />
-                                    <LineCharts />
+                                    <Suspense fallback={<div>Cargando...</div>}>
+                                        <RadarCharts />
+                                        <BarCharts />
+                                        <LineCharts />
+                                    </Suspense>
                                 </CardBody>
                             </Card>
 
@@ -278,7 +291,9 @@ function CompanyControlPanel() {
                                     <h2 className="text-xl font-semibold p-0">Tabla de Resultados</h2>
                                 </CardHeader>
                                 <CardBody className="overflow-auto h-full">
-                                    <ResultTable />
+                                    <Suspense fallback={<div>Cargando...</div>}>
+                                        <ResultTable />
+                                    </Suspense>
                                 </CardBody>
                             </Card>
 
