@@ -130,13 +130,18 @@ export default function EmployeeModal({ isOpen, onClose, onUpdate, mode, company
                 },
                 {
                     loading: 'Procesando...',
-                    success: () => mode === 'add' ? 'Empleado agregado exitosamente.' : 'Empleado actualizado exitosamente.',
-                    error: (error) => `Error: ${error.message}`,
+                    success: () => {
+                        setIsSubmitting(false);
+                        return mode === 'add' ? 'Empleado agregado exitosamente.' : 'Empleado actualizado exitosamente.';
+                    },
+                    error: (error) => {
+                        setIsSubmitting(false);
+                        return `Error: ${error.message}`;
+                    },
                 }
             );
         } catch (error) {
             console.error("Error al guardar empleado: ", error);
-        } finally {
             setIsSubmitting(false);
         }
     };
@@ -269,7 +274,7 @@ export default function EmployeeModal({ isOpen, onClose, onUpdate, mode, company
                                     type="submit"
                                     isDisabled={isSubmitting}
                                 >
-                                    {mode === 'add' ? 'Agregar' : 'Guardar'}
+                                    {isSubmitting ? 'Procesando...' : (mode === 'add' ? 'Agregar' : 'Guardar')}
                                 </Button>
                                 <Button
                                     color="danger"
