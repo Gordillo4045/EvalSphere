@@ -361,6 +361,19 @@ export const createEmployee = functions.https.onCall(async (data, context) => {
             .firestore()
             .collection(`companies/${companyId}/employees`)
             .doc(userData.uid)
+            .set({
+                uid: userData.uid,
+                name: name,
+                email: email,
+                departmentId: departmentId,
+                positionId: positionId,
+                avatar: avatar
+            });
+
+        await admin
+            .firestore()
+            .collection(`employees`)
+            .doc(userData.uid)
             .set(employeeData);
 
         await admin
@@ -368,6 +381,7 @@ export const createEmployee = functions.https.onCall(async (data, context) => {
             .collection("users")
             .doc(userData.uid)
             .set(employeeUser);
+
 
         return { success: true, employeeId: userData.uid };
     } catch (error) {
@@ -381,6 +395,7 @@ export const deleteEmployee = functions.https.onCall(async (data, context) => {
 
     try {
         await admin.auth().deleteUser(id);
+        await admin.firestore().collection("employees").doc(id).delete();
         await admin.firestore().collection("companies").doc(data.companyId).collection("employees").doc(id).delete();
         await admin.firestore().collection("users").doc(id).delete();
 
@@ -424,7 +439,13 @@ export const updateEmployee = functions.https.onCall(async (data, context) => {
         await admin.firestore()
             .collection(`companies/${companyId}/employees`)
             .doc(id)
-            .update(employeeData);
+            .update({
+                name,
+                email,
+                positionId,
+                departmentId,
+                avatar: avatar,
+            });
 
         const userData = {
             name,
@@ -441,6 +462,8 @@ export const updateEmployee = functions.https.onCall(async (data, context) => {
             .collection('users')
             .doc(id)
             .update(userData);
+
+        await admin.firestore().collection('employees').doc(id).update(employeeData);
 
         return { success: true };
     } catch (error) {

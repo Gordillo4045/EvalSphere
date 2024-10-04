@@ -98,7 +98,7 @@ const Sidebar = ({ setActiveTab }: Props) => {
                 variants={containerVariants}
                 animate={containerControls}
                 initial="close"
-                className="fixed flex flex-col rounded-r-md z-50 gap-20 p-2 md:p-5 top-15 sm:absolute left-0 h-dvh shadow backdrop-blur-sm backdrop-saturate-150 border-r border-gray-300 dark:border-gray-700/50"
+                className="fixed flex flex-col rounded-r-md z-50 gap-20 p-2 md:p-5 top-15  left-0 h-dvh shadow backdrop-blur-sm backdrop-saturate-150 border-r border-gray-300 dark:border-gray-700/50"
             >
                 <div className="flex flex-row w-full justify-between place-items-center">
                     <div className="relative group">
@@ -113,11 +113,12 @@ const Sidebar = ({ setActiveTab }: Props) => {
                                                 {user.email}
                                             </span>
                                         }
-                                        avatarProps={{ src: user.photoURL || "https://i.pravatar.cc/150", size: isMobile ? "sm" : "md" }}
+                                        avatarProps={{ src: user.photoURL || "https://i.pravatar.cc/150", size: isMobile ? "sm" : "md", showFallback: true }}
                                         classNames={{
                                             wrapper: "max-w-[120px] md:max-w-[150px]",
                                             description: "text-xs",
                                         }}
+
                                     />
                                 </PopoverTrigger>
                                 <PopoverContent className="p-1">

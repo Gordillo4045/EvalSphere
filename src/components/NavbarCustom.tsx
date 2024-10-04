@@ -79,7 +79,7 @@ export default function NavbarCustom() {
                                         name={user.displayName || "Usuario"}
                                         size="sm"
                                         src={user.photoURL || "https://i.pravatar.cc/150"}
-
+                                        showFallback
                                     />
                                 </DropdownTrigger>
                                 <DropdownMenu aria-label="Acciones de perfil" variant="flat" >

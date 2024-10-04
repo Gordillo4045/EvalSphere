@@ -27,6 +27,7 @@ export default function EmployeeModal({ isOpen, onClose, onUpdate, mode, company
     const [avatar, setAvatar] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [invitationCode, setInvitationCode] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         if (mode === 'edit' && currentEmployee) {
@@ -87,6 +88,7 @@ export default function EmployeeModal({ isOpen, onClose, onUpdate, mode, company
         }
 
         try {
+            setIsSubmitting(true);
             await toast.promise(
                 async () => {
                     let avatarUrl = newEmployee.avatar || '';
@@ -134,6 +136,8 @@ export default function EmployeeModal({ isOpen, onClose, onUpdate, mode, company
             );
         } catch (error) {
             console.error("Error al guardar empleado: ", error);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -260,10 +264,19 @@ export default function EmployeeModal({ isOpen, onClose, onUpdate, mode, company
 
                         <ModalFooter>
                             <ButtonGroup>
-                                <Button color="primary" type="submit">
+                                <Button
+                                    color="primary"
+                                    type="submit"
+                                    isDisabled={isSubmitting}
+                                >
                                     {mode === 'add' ? 'Agregar' : 'Guardar'}
                                 </Button>
-                                <Button color="danger" variant="light" onPress={onClose}>
+                                <Button
+                                    color="danger"
+                                    variant="light"
+                                    onPress={onClose}
+                                    isDisabled={isSubmitting}
+                                >
                                     Cancelar
                                 </Button>
                             </ButtonGroup>

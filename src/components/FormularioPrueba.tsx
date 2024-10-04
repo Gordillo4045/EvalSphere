@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Slider, Textarea, Button, Spinner, Card, CardHeader, CardBody } from '@nextui-org/react';
+import { Slider, Textarea, Button, Spinner, Card, CardHeader, CardBody, Autocomplete, AutocompleteItem, Avatar, Divider } from '@nextui-org/react';
 import { db, auth } from "@/config/config";
 import { addDoc, collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { toast } from 'sonner';
+import { Position } from '@/types/applicaciontypes';
 
 interface FormData {
   [key: string]: number | string;
@@ -21,11 +22,18 @@ const FormularioPrueba = () => {
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [comments, setComments] = useState('');
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [evaluatedUserId, setEvaluatedUserId] = useState<string>('');
+  const [employees, setEmployees] = useState<Array<{ id: string, name: string, avatar: string, email: string, positionId: string, departmentId: string }>>([]);
+  const [currentUserPositionId, setCurrentUserPositionId] = useState<string | null>(null);
+  const [positions, setPositions] = useState<Position[]>([]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        fetchCompanyIdAndQuestions(user.uid);
+        setCurrentUserId(user.uid);
+        fetchUserData(user.uid);
+        fetchEmployees(user.uid);
       } else {
         setLoading(false);
         toast.error('No hay usuario autenticado');
@@ -35,32 +43,98 @@ const FormularioPrueba = () => {
     return () => unsubscribe();
   }, []);
 
-  const fetchCompanyIdAndQuestions = async (userId: string) => {
+  const fetchUserData = async (userId: string) => {
+    try {
+      const employeeDocRef = doc(db, 'employees', userId);
+      const employeeDocSnap = await getDoc(employeeDocRef);
+
+      if (employeeDocSnap.exists()) {
+        const userData = employeeDocSnap.data();
+        setCompanyId(userData.companyId);
+        setCurrentUserPositionId(userData.positionId);
+
+        await fetchCompanyQuestions(userData.companyId);
+        await fetchPositions(userData.companyId, userData.departmentId);
+      } else {
+        toast.error('No se encontró el usuario en ninguna empresa');
+      }
+    } catch (error) {
+      console.error("Error al buscar los datos del usuario:", error);
+      toast.error('Error al cargar los datos del usuario');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCompanyQuestions = async (companyId: string) => {
+    try {
+      const questionsSnapshot = await getDocs(collection(db, `companies/${companyId}/surveyQuestions`));
+      const questionsData = questionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Question[];
+      setQuestions(questionsData);
+
+      const initialFormData: FormData = {};
+      questionsData.forEach(question => {
+        initialFormData[question.id] = 1;
+      });
+      setFormData(initialFormData);
+    } catch (error) {
+      console.error("Error al obtener las preguntas de la empresa:", error);
+      toast.error('Error al cargar las preguntas');
+    }
+  };
+
+  const fetchEmployees = async (userId: string) => {
     try {
       const employeeDocRef = doc(db, 'employees', userId);
       const employeeDocSnap = await getDoc(employeeDocRef);
 
       if (employeeDocSnap.exists()) {
         const companyId = employeeDocSnap.data().companyId;
-        setCompanyId(companyId);
-
-        const questionsSnapshot = await getDocs(collection(db, `companies/${companyId}/surveyQuestions`));
-        const questionsData = questionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Question[];
-        setQuestions(questionsData);
-
-        const initialFormData: FormData = {};
-        questionsData.forEach(question => {
-          initialFormData[question.id] = 1;
-        });
-        setFormData(initialFormData);
-      } else {
-        toast.error('No se encontró el usuario en ninguna empresa');
+        const employeesSnapshot = await getDocs(collection(db, `companies/${companyId}/employees`));
+        const employeesData = employeesSnapshot.docs
+          .map(doc => ({ id: doc.id, name: doc.data().name, avatar: doc.data().avatar, email: doc.data().email, positionId: doc.data().positionId, departmentId: doc.data().departmentId }))
+          .filter(emp => emp.id !== userId);
+        setEmployees(employeesData);
       }
     } catch (error) {
-      console.error("Error al buscar la empresa del usuario:", error);
-      toast.error('Error al cargar los datos');
-    } finally {
-      setLoading(false);
+      console.error("Error al obtener la lista de empleados:", error);
+      toast.error('Error al cargar la lista de empleados');
+    }
+  };
+
+  const fetchPositions = async (companyId: string, departmentId: string) => {
+    try {
+      const positionsSnapshot = await getDocs(collection(db, `companies/${companyId}/departments/${departmentId}/positions`));
+      const positionsData = positionsSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Position));
+      setPositions(positionsData);
+    } catch (error) {
+      console.error("Error al obtener las posiciones:", error);
+      toast.error('Error al cargar las posiciones');
+    }
+  };
+
+  const getRelationshipType = (evaluatorPositionId: string | null, evaluatedPositionId: string): string => {
+    if (!evaluatorPositionId || !evaluatedPositionId) {
+      return 'No especificado';
+    }
+
+    const evaluatorPosition = positions.find(p => p.id === evaluatorPositionId);
+    const evaluatedPosition = positions.find(p => p.id === evaluatedPositionId);
+
+    if (!evaluatorPosition || !evaluatedPosition) {
+      return 'No especificado';
+    }
+
+    if (evaluatorPosition.department === evaluatedPosition.department) {
+      if (evaluatorPosition.level > evaluatedPosition.level) {
+        return 'Jefe';
+      } else if (evaluatorPosition.level < evaluatedPosition.level) {
+        return 'Subordinado';
+      } else {
+        return 'Colega';
+      }
+    } else {
+      return 'Colega de otro departamento';
     }
   };
 
@@ -70,13 +144,19 @@ const FormularioPrueba = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!companyId) {
-      toast.error('No se pudo determinar la empresa del usuario');
+    if (!companyId || !currentUserId || !evaluatedUserId) {
+      toast.error('Faltan datos necesarios para enviar la evaluación');
       return;
     }
 
     try {
-      const dataToSubmit = { ...formData, comments };
+      const dataToSubmit = {
+        ...formData,
+        comments,
+        evaluatorId: currentUserId,
+        evaluatedId: evaluatedUserId,
+        timestamp: new Date()
+      };
       await addDoc(collection(db, `companies/${companyId}/evaluations`), dataToSubmit);
       toast.success('Evaluación enviada correctamente');
     } catch (error) {
@@ -101,14 +181,50 @@ const FormularioPrueba = () => {
 
   return (
     <div className={`w-full h-fit flex flex-col shadow-inner dark:shadow-slate-300/20 rounded-xl p-3`}>
-      <Card >
+      <Card>
         <CardHeader>
-          <h1 className="text-lg font-bold mb-6">Evaluación de Habilidades</h1>
+          <h1 className="text-lg font-bold mb-6">Evaluación de Habilidades 360°</h1>
         </CardHeader>
         <CardBody>
-          <form onSubmit={handleSubmit} className="space-y-10 mx-auto  ">
+          <form onSubmit={handleSubmit} className="space-y-10 mx-auto mb-2">
+            <div className="w-full mb-4">
+              <Autocomplete
+                defaultItems={employees}
+                label="Selecciona a quién evaluar"
+                value={evaluatedUserId}
+                onValueChange={setEvaluatedUserId}
+                required
+                size="sm"
+                variant="bordered"
+                labelPlacement="outside"
+              >
+                {(employee) => {
+                  const relationshipType = getRelationshipType(currentUserPositionId, employee.positionId);
+
+                  return (
+                    <AutocompleteItem key={employee.id} value={employee.id} textValue={employee.name}>
+                      <div className="flex gap-2 items-center">
+                        <Avatar alt={employee.name} className="flex-shrink-0" size="sm" src={employee.avatar} />
+                        <div className="flex flex-col">
+                          <div className="flex flex-row gap-2 items-center">
+                            <span className="text-small">{employee.name}</span>
+                            <span className="text-tiny text-default-400">{employee.email}</span>
+                          </div>
+                          <span className="text-tiny text-default-500">
+                            {relationshipType}
+                          </span>
+                        </div>
+                      </div>
+                    </AutocompleteItem>
+                  );
+                }}
+              </Autocomplete>
+
+            </div>
+
             {Object.entries(groupedQuestions).map(([category, categoryQuestions]) => (
               <div key={category} className="space-y-4">
+                <Divider />
                 <h3 className="text-base font-semibold">{category}</h3>
                 {categoryQuestions.map((question) => (
                   <div key={question.id} className=" w-full">
@@ -129,7 +245,7 @@ const FormularioPrueba = () => {
                       defaultValue={1}
                       value={formData[question.id] as number}
                       onChange={(value) => handleSliderChange(question.id, value as number)}
-                      className="w-full mb-4"
+                      className="w-full mb-10"
                       hideValue
                     />
                   </div>

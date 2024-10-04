@@ -44,7 +44,10 @@ export interface Employee {
 }
 
 export interface Relationship {
-    employeeId: string;
-    relationshipType: 'jefe' | 'subordinado' | 'colega';
-    relatedEmployeeId: string;
+    companyId: string;
+    department: string;
+    description: string;
+    id: string;
+    level: number;
+    title: string;
 }

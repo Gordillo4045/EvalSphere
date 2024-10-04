@@ -65,7 +65,7 @@ export default function EmployeeTable({ companyId, companyName }: EmployeeTableP
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            const employeesRef = collection(db, `employees`);
+            const employeesRef = collection(db, `companies/${companyId}/employees`);
             const employeesSnapshot = await getDocs(employeesRef);
             const employeesData = employeesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Employee));
             setEmployees(employeesData);
