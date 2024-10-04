@@ -1,25 +1,23 @@
 import { NextUIProvider } from "@nextui-org/react";
 import { Route, Routes, useNavigate } from "react-router-dom";
-import Home from "./pages/Home";
-import ThemeProvider from "./components/ThemeProvider";
-import { useTheme } from "./hooks/useTheme";
-import NavbarCustom from "./components/NavbarCustom";
-import FooterCustom from "./components/FooterCustom";
-import Controlpanel from "./pages/Controlpanel";
+import Home from "@/pages/Home";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import NavbarCustom from "@/components/NavbarCustom";
+import FooterCustom from "@/components/FooterCustom";
+import Controlpanel from "@/pages/Controlpanel";
 import { Toaster } from "sonner";
-import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
-import Formulario from "./pages/Formulario";
-import ProtectedCompanyRoute from "./components/ProtectedCompanyRoute";
-import CompanyControlPanel from "./pages/CompanyControlPanel";
+import ProtectedAdminRoute from "@/components/ProtectedAdminRoute";
+import Formulario from "@/pages/Formulario";
+import ProtectedCompanyRoute from "@/components/ProtectedCompanyRoute";
+import CompanyControlPanel from "@/pages/CompanyControlPanel";
 import { useLocation } from "react-router-dom";
 
 function AppContent() {
-  const { theme } = useTheme();
   const location = useLocation();
   const isCompanyControlPanel = location.pathname === "/company/controlpanel";
 
   return (
-    <div className={`${theme} text-foreground bg-background flex flex-col min-h-dvh`}>
+    <div className={`text-foreground bg-background flex flex-col min-h-dvh`}>
       {!isCompanyControlPanel && <NavbarCustom />}
       <div className="flex-grow overflow-auto">
         <Routes>
@@ -34,7 +32,7 @@ function AppContent() {
               <CompanyControlPanel />
             </ProtectedCompanyRoute>
           } />
-          <Route path="/formulario" element={<Formulario />} />
+          <Route path="/employee/formulario" element={<Formulario />} />
         </Routes>
       </div>
       <FooterCustom />
@@ -45,7 +43,7 @@ function AppContent() {
 function App() {
   const navigate = useNavigate();
   return (
-    <ThemeProvider>
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme" >
       <NextUIProvider navigate={navigate}>
         <AppContent />
         <Toaster richColors position="top-left" />

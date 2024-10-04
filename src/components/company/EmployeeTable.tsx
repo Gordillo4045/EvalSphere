@@ -20,10 +20,10 @@ import { FaPlus } from "react-icons/fa6";
 import { AiOutlineEdit } from "react-icons/ai";
 import { BiSolidTrashAlt } from "react-icons/bi";
 import { collection, getDocs } from 'firebase/firestore';
-import { db, httpsCallable } from '../../config/config';
-import { Employee, Department, Position } from '../../types/applicaciontypes';
-import EmployeeModal from './EmployeeModal';
-import DeleteConfirmationModal from '../DeleteConfirmationModal';
+import { db, httpsCallable } from "@/config/config";
+import { Employee, Department, Position } from "@/types/applicaciontypes";
+import EmployeeModal from "@/components/company/EmployeeModal";
+import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import { IoReload } from 'react-icons/io5';
 import { toast } from 'sonner';
 
@@ -65,7 +65,7 @@ export default function EmployeeTable({ companyId, companyName }: EmployeeTableP
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            const employeesRef = collection(db, `companies/${companyId}/employees`);
+            const employeesRef = collection(db, `employees`);
             const employeesSnapshot = await getDocs(employeesRef);
             const employeesData = employeesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Employee));
             setEmployees(employeesData);
@@ -322,7 +322,7 @@ export default function EmployeeTable({ companyId, companyName }: EmployeeTableP
                             </TableColumn>
                         )}
                     </TableHeader>
-                    <TableBody items={items} emptyContent="Cargando datos...">
+                    <TableBody items={items} emptyContent="No hay datos para mostrar">
                         {(item) => (
                             <TableRow key={item.id}>
                                 {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}

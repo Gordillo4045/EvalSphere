@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Select, SelectItem, Modal, Image, Tooltip, ButtonGroup } from "@nextui-org/react";
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage, httpsCallable } from '../../config/config';
-import { Employee, Department, Position } from '../../types/applicaciontypes';
+import { db, storage, httpsCallable } from '@/config/config';
+import { Employee, Department, Position } from '@/types/applicaciontypes';
 import { toast } from 'sonner';
 import { collection, getDocs } from 'firebase/firestore';
 

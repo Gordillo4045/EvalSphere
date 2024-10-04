@@ -1,23 +1,24 @@
 import { useState, useEffect } from 'react';
 import { Button, Card, CardBody, CardHeader, Select, SelectItem, Spinner, Input, ButtonGroup, Snippet } from "@nextui-org/react";
-import DepartmentTable from "../components/company/DepartmentTable";
-import PositionTable from "../components/company/PositionTable";
-import EmployeeTable from "../components/company/EmployeeTable";
+import DepartmentTable from "@/components/company/DepartmentTable";
+import PositionTable from "@/components/company/PositionTable";
+import EmployeeTable from "@/components/company/EmployeeTable";
 import { collection, doc, getDoc, onSnapshot, query, updateDoc } from 'firebase/firestore';
-import { db } from '../config/config';
-import { useAuth } from '../hooks/useAuth';
+import { db } from '@/config/config';
+import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { Company, Department } from '../types/applicaciontypes';
-import SurveyQuestionsTab from '../components/company/SurveyQuestionsTab';
-import RadarCharts from '../components/company/RadarCharts';
-import Sidebar from '../components/Sidebar';
-import BarCharts from '../components/company/BarCharts';
+import { Company, Department } from '@/types/applicaciontypes';
+import SurveyQuestionsTab from '@/components/company/SurveyQuestionsTab';
+import Sidebar from '@/components/Sidebar';
 import { toast } from 'sonner';
 import { MdEdit, MdGroupWork } from 'react-icons/md';
-import ResultTable from '../components/company/ResultTable';
+import ResultTable from '@/components/company/ResultTable';
 import { FaFileExport, FaUsers } from 'react-icons/fa6';
 import { BsPersonBadgeFill } from 'react-icons/bs';
 import { FaQuestionCircle } from 'react-icons/fa';
+import { RadarCharts } from '@/components/company/RadarCharts';
+import { BarCharts } from '@/components/company/BarCharts';
+import { LineCharts } from '@/components/company/LineCharts';
 
 function CompanyControlPanel() {
     const [company, setCompany] = useState<Company | null>(null);
@@ -68,7 +69,6 @@ function CompanyControlPanel() {
                 departmentsData.push({ id: doc.id, ...doc.data() } as Department);
             });
             setDepartments(departmentsData);
-            // Establecer el primer departamento como seleccionado por defecto
             if (departmentsData.length > 0 && !selectedDepartment) {
                 setSelectedDepartment(departmentsData[0]);
             }
@@ -107,9 +107,9 @@ function CompanyControlPanel() {
     return (
         <div className="flex min-h-dvh">
             <Sidebar setActiveTab={setActiveTab} />
-            <main className="flex-1 flex flex-col overflow-hidden ml-20 p-5">
+            <main className="flex-1 flex flex-col overflow-hidden ml-[3.5rem] md:ml-20 p-2 md:p-5">
                 <h1 className="text-xl font-semibold pb-4 text-center">Panel de Control de {company.name}</h1>
-                <div className={`w-full ${activeTab === 'home' ? 'h-fit' : 'max-w-5xl mx-auto'} flex flex-col shadow-inner rounded-xl overflow-x-auto p-3`}>
+                <div className={`w-full ${activeTab === 'home' ? 'h-fit' : 'max-w-5xl mx-auto'} flex flex-col shadow-inner rounded-xl dark:shadow-slate-300/20 overflow-x-auto p-3`}>
                     {activeTab === 'departments' && (
                         <Card className="w-full">
                             <CardHeader>
@@ -184,6 +184,7 @@ function CompanyControlPanel() {
                                 <CardBody className="overflow-auto h-full flex flex-col md:flex-row gap-2">
                                     <RadarCharts />
                                     <BarCharts />
+                                    <LineCharts />
                                 </CardBody>
                             </Card>
 
@@ -307,7 +308,7 @@ function CompanyControlPanel() {
                                         </div>
                                     ) : (
                                         <div className="flex items-center gap-2">
-                                            <Snippet symbol="" size='md' className='min-w-[90%]' >
+                                            <Snippet symbol="" size='md' className='min-w-[80%] md:min-w-[83%] lg:min-w-[90%]' >
                                                 {invitationCode}
                                             </Snippet>
                                             <Button isIconOnly color="default" variant="light" size='md' onClick={() => setIsEditingCode(true)}>

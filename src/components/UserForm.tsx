@@ -13,9 +13,9 @@ import {
     SelectItem
 } from "@nextui-org/react";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { storage, httpsCallable } from "../config/config";
+import { storage, httpsCallable } from "@/config/config";
 import { toast } from 'sonner';
-import { Company } from '../types/applicaciontypes';
+import { Company } from '@/types/applicaciontypes';
 
 interface UserFormProps {
     isOpen: boolean;

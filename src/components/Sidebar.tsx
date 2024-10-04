@@ -1,23 +1,24 @@
 import { Accordion, AccordionItem, Button, Link, Popover, PopoverContent, PopoverTrigger, User } from "@nextui-org/react"
 import { motion, useAnimationControls } from "framer-motion"
 import { useState, useEffect, useRef } from "react"
-import { useAuth } from "../hooks/useAuth"
-import ThemeToggleSlide from "./ThemeToggleSlide"
+import { useAuth } from "@/hooks/useAuth"
+import ThemeToggleSlide from "@/components/ThemeToggleSlide"
 import type { Selection } from "@nextui-org/react";
 import { AiFillSetting } from "react-icons/ai";
 import { signOut } from "firebase/auth"
 import { toast } from "sonner"
-import { auth } from "../config/config";
+import { auth } from "@/config/config";
 import { MdGroupWork, MdOutlineHistory, MdOutlineLogout } from "react-icons/md"
 import { IoMdHome } from "react-icons/io";
 import { FaClipboardQuestion, FaUsers } from "react-icons/fa6"
 import { BsPersonBadgeFill } from "react-icons/bs"
 import { FaQuestionCircle } from "react-icons/fa"
 
+const isMobile = window.innerWidth <= 768;
 
 const containerVariants = {
     close: {
-        width: "5rem",
+        width: isMobile ? "3.5rem" : "5rem",
         transition: {
             type: "spring",
             damping: 15,
@@ -25,7 +26,7 @@ const containerVariants = {
         },
     },
     open: {
-        width: "16rem",
+        width: isMobile ? "13rem" : "16rem",
         transition: {
             type: "spring",
             damping: 15,
@@ -97,7 +98,7 @@ const Sidebar = ({ setActiveTab }: Props) => {
                 variants={containerVariants}
                 animate={containerControls}
                 initial="close"
-                className="fixed flex flex-col rounded-r-md z-50 gap-20 p-5 top-15 sm:absolute left-0 h-dvh shadow backdrop-blur-sm backdrop-saturate-150 border-r border-gray-300 dark:border-gray-700/50"
+                className="fixed flex flex-col rounded-r-md z-50 gap-20 p-2 md:p-5 top-15 sm:absolute left-0 h-dvh shadow backdrop-blur-sm backdrop-saturate-150 border-r border-gray-300 dark:border-gray-700/50"
             >
                 <div className="flex flex-row w-full justify-between place-items-center">
                     <div className="relative group">
@@ -108,20 +109,20 @@ const Sidebar = ({ setActiveTab }: Props) => {
                                         as="button"
                                         name={user.displayName || "Usuario"}
                                         description={
-                                            <span className="truncate block max-w-[150px] ">
+                                            <span className="truncate max-w-[150px] hidden md:block">
                                                 {user.email}
                                             </span>
                                         }
-                                        avatarProps={{ src: user.photoURL || "https://i.pravatar.cc/150" }}
+                                        avatarProps={{ src: user.photoURL || "https://i.pravatar.cc/150", size: isMobile ? "sm" : "md" }}
                                         classNames={{
-                                            wrapper: "max-w-[150px]",
+                                            wrapper: "max-w-[120px] md:max-w-[150px]",
                                             description: "text-xs",
                                         }}
                                     />
                                 </PopoverTrigger>
                                 <PopoverContent className="p-1">
                                     <div className="">{user.email}</div>
-                                    <Link href="/" isBlock className="cursor-pointer w-full" color="foreground">Inicio</Link>
+                                    <Link href="/" isBlock className="cursor-pointer w-full text-xs md:text-base" color="foreground">Regresar a Home</Link>
                                 </PopoverContent>
                             </Popover>
                         )}
@@ -137,7 +138,7 @@ const Sidebar = ({ setActiveTab }: Props) => {
                             viewBox="0 0 24 24"
                             strokeWidth={1}
                             stroke="currentColor"
-                            className="w-8 h-8 "
+                            className="size-6 -ml-1 md:ml-0 md:size-8"
                         >
                             <motion.path
                                 strokeLinecap="round"
@@ -212,7 +213,7 @@ const Sidebar = ({ setActiveTab }: Props) => {
                             >
                                 {isOpen ? <>
                                     <MdGroupWork size={25} />
-                                    Departamentos
+                                    <span className="truncate ">Departamentos</span>
                                 </> : (<MdGroupWork size={30} />)}
                             </Link>
                             <Link

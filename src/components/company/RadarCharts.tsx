@@ -1,52 +1,64 @@
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
+import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from "recharts"
 
-export default function RadarCharts() {
-  const data = [
-    {
-      subject: 'Math',
-      A: 120,
-      B: 120,
-      fullMark: 150,
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card"
+import {
+    ChartConfig,
+    ChartContainer,
+    ChartTooltip,
+    ChartTooltipContent,
+} from "@/components/ui/chart"
+
+export const description = "A radar chart"
+
+const chartData = [
+    { month: "January", desktop: 186 },
+    { month: "February", desktop: 305 },
+    { month: "March", desktop: 237 },
+    { month: "April", desktop: 273 },
+    { month: "May", desktop: 209 },
+    { month: "June", desktop: 214 },
+]
+
+const chartConfig = {
+    desktop: {
+        label: "Desktop",
+        color: "hsl(var(--chart-1))",
     },
-    {
-      subject: 'Chinese',
-      A: 120,
-      B: 130,
-      fullMark: 150,
-    },
-    {
-      subject: 'English',
-      A: 86,
-      B: 130,
-      fullMark: 150,
-    },
-    {
-      subject: 'Geography',
-      A: 99,
-      B: 100,
-      fullMark: 150,
-    },
-    {
-      subject: 'Physics',
-      A: 85,
-      B: 90,
-      fullMark: 150,
-    },
-    {
-      subject: 'History',
-      A: 65,
-      B: 85,
-      fullMark: 150,
-    },
-  ];
-  return (
-    <ResponsiveContainer width="70%" height={300}>
-      <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
-        <PolarGrid />
-        <PolarAngleAxis dataKey="subject" />
-        <PolarRadiusAxis />
-        <Radar name="Mike" dataKey="A" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
-      </RadarChart>
-    </ResponsiveContainer>
-  );
+} satisfies ChartConfig
+
+export function RadarCharts() {
+    return (
+        <Card>
+            <CardHeader className="items-center pb-4">
+                <CardTitle>Radar Chart</CardTitle>
+                <CardDescription>
+                    Showing total visitors for the last 6 months
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="pb-0">
+                <ChartContainer
+                    config={chartConfig}
+                    className="mx-auto aspect-square max-h-[250px]"
+                >
+                    <RadarChart data={chartData}>
+                        <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                        <PolarAngleAxis dataKey="month" />
+                        <PolarGrid />
+                        <Radar
+                            dataKey="desktop"
+                            fill="var(--color-desktop)"
+                            fillOpacity={0.6}
+                        />
+                    </RadarChart>
+                </ChartContainer>
+            </CardContent>
+
+        </Card>
+    )
 }
