@@ -61,6 +61,7 @@ export default function UserForm({ isOpen, onClose, editItem, onUpdate }: UserFo
     });
 
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         if (editItem) {
@@ -130,6 +131,7 @@ export default function UserForm({ isOpen, onClose, editItem, onUpdate }: UserFo
     };
 
     const processUser = async () => {
+        setIsSubmitting(true);
         try {
             let avatarUrl = previewUrl || "";
 
@@ -194,6 +196,8 @@ export default function UserForm({ isOpen, onClose, editItem, onUpdate }: UserFo
         } catch (error) {
             console.error("Error en processUser:", error);
             throw error;
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -235,6 +239,7 @@ export default function UserForm({ isOpen, onClose, editItem, onUpdate }: UserFo
         }
 
         try {
+            setIsSubmitting(true);
             await toast.promise(
                 processUser(),
                 {
@@ -251,6 +256,8 @@ export default function UserForm({ isOpen, onClose, editItem, onUpdate }: UserFo
             );
         } catch (error) {
             console.error("Error inesperado:", error);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -394,10 +401,19 @@ export default function UserForm({ isOpen, onClose, editItem, onUpdate }: UserFo
 
                         <div className='flex justify-end pt-0 pr-0'>
                             <ButtonGroup>
-                                <Button color="primary" type='submit'>
-                                    {editItem ? "Guardar Cambios" : "Agregar"}
+                                <Button
+                                    color="primary"
+                                    type='submit'
+                                    isDisabled={isSubmitting}
+                                >
+                                    {isSubmitting ? 'Procesando...' : (editItem ? "Guardar Cambios" : "Agregar")}
                                 </Button>
-                                <Button color="danger" variant="light" onPress={onClose}>
+                                <Button
+                                    color="danger"
+                                    variant="light"
+                                    onPress={onClose}
+                                    isDisabled={isSubmitting}
+                                >
                                     Cancelar
                                 </Button>
                             </ButtonGroup>
@@ -408,5 +424,3 @@ export default function UserForm({ isOpen, onClose, editItem, onUpdate }: UserFo
         </Modal>
     );
 }
-
-

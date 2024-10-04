@@ -15,6 +15,7 @@ import React, { Suspense } from 'react';
 import { RadarCharts } from '@/components/company/RadarCharts';
 import { BarCharts } from '@/components/company/BarCharts';
 import { LineCharts } from '@/components/company/LineCharts';
+import { IoMdArrowBack } from "react-icons/io";
 
 const DepartmentTable = React.lazy(() => import("@/components/company/DepartmentTable"));
 const PositionTable = React.lazy(() => import("@/components/company/PositionTable"));
@@ -101,6 +102,10 @@ function CompanyControlPanel() {
         }
     };
 
+    const handleGoBack = () => {
+        setActiveTab('home');
+    };
+
     if (!company) {
         return <div className='flex justify-center items-center min-h-dvh'>
             <Spinner color="primary" label="Cargando datos..." />
@@ -111,7 +116,22 @@ function CompanyControlPanel() {
         <div className="flex min-h-dvh">
             <Sidebar setActiveTab={setActiveTab} />
             <main className="flex-1 flex flex-col overflow-hidden ml-[3.5rem] md:ml-20 p-2 md:p-5">
-                <h1 className="text-xl font-semibold pb-4 text-center">Panel de Control de {company.name}</h1>
+                <div className="flex flex-col items-center pb-4">
+                    <div className="w-full flex justify-between items-center">
+                        {activeTab !== 'home' && (
+                            <Button
+                                color="primary"
+                                variant="light"
+                                startContent={<IoMdArrowBack />}
+                                onPress={handleGoBack}
+                            >
+                                Volver
+                            </Button>
+                        )}
+                        <h1 className="text-xl font-semibold text-center flex-grow">Panel de Control de {company.name}</h1>
+                        {activeTab !== 'home' && <div className="w-[70px]"></div>}
+                    </div>
+                </div>
                 <div className={`w-full ${activeTab === 'home' ? 'h-fit' : 'max-w-5xl mx-auto'} flex flex-col shadow-inner rounded-xl dark:shadow-slate-300/20 overflow-x-auto p-3`}>
                     {activeTab === 'departments' && (
                         <Card className="w-full">
