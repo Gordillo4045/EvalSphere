@@ -249,6 +249,8 @@ export default function EmployeeModal({ isOpen, onClose, onUpdate, mode, company
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                     required
+                                    isInvalid={password !== confirmPassword}
+                                    errorMessage={password !== confirmPassword ? "Las contraseñas no coinciden" : ""}
                                 />
                             </>
                         )}

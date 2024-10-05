@@ -20,6 +20,7 @@ export default function EmployeeSignUpForm({ isOpen, onClose }: EmployeeSignUpFo
         name: '',
         email: '',
         password: '',
+        confirmPassword: '', // Nuevo campo para confirmar contraseña
         companyId: '',
         departmentId: '',
         positionId: '',
@@ -113,6 +114,7 @@ export default function EmployeeSignUpForm({ isOpen, onClose }: EmployeeSignUpFo
                         name: '',
                         email: '',
                         password: '',
+                        confirmPassword: '',
                         companyId: '',
                         departmentId: '',
                         positionId: '',
@@ -155,6 +157,11 @@ export default function EmployeeSignUpForm({ isOpen, onClose }: EmployeeSignUpFo
         return validateEmail(newEmployee.email) ? false : true;
     }, [newEmployee.email]);
 
+    const isPasswordInvalid = useMemo(() => {
+        if (newEmployee.password === "" && newEmployee.confirmPassword === "") return false;
+        return newEmployee.password !== newEmployee.confirmPassword;
+    }, [newEmployee.password, newEmployee.confirmPassword]);
+
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
             <ModalContent>
@@ -193,7 +200,6 @@ export default function EmployeeSignUpForm({ isOpen, onClose }: EmployeeSignUpFo
                                 onChange={(e) => setNewEmployee({ ...newEmployee, email: e.target.value })}
                                 isRequired
                                 isInvalid={isInvalid}
-                                color={isInvalid ? "danger" : "success"}
                                 errorMessage={isInvalid ? "Por favor, ingrese un correo electrónico válido" : ""}
                             />
                             <Input
@@ -203,6 +209,16 @@ export default function EmployeeSignUpForm({ isOpen, onClose }: EmployeeSignUpFo
                                 value={newEmployee.password}
                                 onChange={(e) => setNewEmployee({ ...newEmployee, password: e.target.value })}
                                 isRequired
+                            />
+                            <Input
+                                label="Confirmar Contraseña"
+                                variant='underlined'
+                                type="password"
+                                value={newEmployee.confirmPassword}
+                                onChange={(e) => setNewEmployee({ ...newEmployee, confirmPassword: e.target.value })}
+                                isRequired
+                                isInvalid={isPasswordInvalid}
+                                errorMessage={isPasswordInvalid ? "Las contraseñas no coinciden" : ""}
                             />
                             <Select
                                 label="Departamento"

@@ -31,7 +31,6 @@ const FormularioPrueba = () => {
   const [currentUserPositionId, setCurrentUserPositionId] = useState<string | null>(null);
   const [positions, setPositions] = useState<Position[]>([]);
   const [evaluatedEmployees, setEvaluatedEmployees] = useState<Set<string>>(new Set());
-  const [showAllEvaluatedAlert, setShowAllEvaluatedAlert] = useState(false);
   const [currentUserData, setCurrentUserData] = useState<{ id: string, name: string, avatar: string, email: string, positionId: string, departmentId: string, position: string } | null>(null);
   const [allEvaluated, setAllEvaluated] = useState(false);
   const [autocompleteKey, setAutocompleteKey] = useState<number>(0);
@@ -61,7 +60,6 @@ const FormularioPrueba = () => {
     if (employees.length > 0 && currentUserId) {
       const isAllEvaluated = evaluatedEmployees.size === employees.length + 1 && evaluatedEmployees.has(currentUserId);
       setAllEvaluated(isAllEvaluated);
-      setShowAllEvaluatedAlert(isAllEvaluated);
     }
   }, [evaluatedEmployees, employees, currentUserId]);
 
@@ -248,7 +246,6 @@ const FormularioPrueba = () => {
       toast.success('Evaluación enviada correctamente');
 
       if (evaluatedEmployees.size + 1 === employees.length + 1) {
-        setShowAllEvaluatedAlert(true);
         setAllEvaluated(true);
       }
     } catch (error) {
@@ -273,16 +270,7 @@ const FormularioPrueba = () => {
 
   return (
     <div className={`w-full h-fit flex flex-col shadow-inner dark:shadow-slate-300/20 rounded-xl p-3`}>
-      {showAllEvaluatedAlert && (
-        <Alert className="mb-2">
-          <CheckCircle2 className="h-4 w-4" />
-          <AlertTitle>¡Felicidades!</AlertTitle>
-          <AlertDescription>
-            Has completado la evaluación de todos tus compañeros y tu autoevaluación.
-          </AlertDescription>
-        </Alert>
-      )}
-      <Card>
+      <Card className='min-h-[calc(100vh-200px)]'>
         <CardHeader className="flex justify-center">
           <h1 className="text-lg font-bold mb-6 text-center">Evaluación de Habilidades 360°</h1>
         </CardHeader>
@@ -302,6 +290,9 @@ const FormularioPrueba = () => {
                 className="w-full"
                 startContent={<UserRound className="text-default-400" />}
                 disabledKeys={Array.from(evaluatedEmployees)}
+                scrollShadowProps={{
+                  isEnabled: false,
+                }}
               >
                 {Object.entries(groupEmployeesByRelationship()).map(([relationshipType, groupEmployees]) => (
                   groupEmployees.length > 0 && (
@@ -396,10 +387,11 @@ const FormularioPrueba = () => {
               </>
             )}
             {allEvaluated && (
-              <Alert>
-                <AlertTitle>Evaluaciones completadas</AlertTitle>
+              <Alert className="mb-2">
+                <CheckCircle2 className="h-4 w-4" />
+                <AlertTitle>¡Felicidades!</AlertTitle>
                 <AlertDescription>
-                  Has completado todas las evaluaciones, incluyendo tu autoevaluación.
+                  Has completado la evaluación de todos tus compañeros y tu autoevaluación.
                 </AlertDescription>
               </Alert>
             )}
