@@ -30,6 +30,7 @@ import { collection, addDoc, deleteDoc, doc, onSnapshot, query, updateDoc, colle
 import { db } from '@/config/config';
 import { Position, Department } from '@/types/applicaciontypes';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
+import { toast } from 'sonner';
 
 interface PositionTableProps {
     companyId: string;
@@ -126,6 +127,7 @@ export default function PositionTable({ companyId }: PositionTableProps) {
                 await deleteDoc(positionRef);
                 setDeleteModalOpen(false);
                 setPositionToDelete(null);
+                toast.success("Posición eliminada correctamente");
             } catch (error) {
                 console.error("Error al eliminar posición: ", error);
             }
@@ -368,6 +370,9 @@ export default function PositionTable({ companyId }: PositionTableProps) {
                                 variant='underlined'
                                 value={newPosition.level?.toString() || ''}
                                 onChange={(e) => setNewPosition({ ...newPosition, level: parseInt(e.target.value, 10) })}
+                                min={1}
+                                max={10}
+                                description="Nivel de la posición en la jerarquía de la empresa (1-10)"
                             />
                             <Input
                                 label="Descripción (opcional)"

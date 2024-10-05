@@ -10,8 +10,8 @@ export default {
 	theme: {
 		extend: {
 			fontFamily: {
-				poppins: ["Poppins", "sans-serif"],
-				spaceGrotesk: ["Space Grotesk", "sans-serif"]
+				poppins: ["Poppins", "system-ui", "sans-serif"],
+				spaceGrotesk: ["Space Grotesk", "system-ui", "sans-serif"]
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

@@ -115,7 +115,7 @@ function CompanyControlPanel() {
     return (
         <div className="flex min-h-dvh">
             <Sidebar setActiveTab={setActiveTab} />
-            <main className="flex-1 flex flex-col overflow-hidden ml-[3.5rem] md:ml-20 p-2 md:p-5">
+            <main className="flex-1 flex flex-col overflow-hidden ml-[3.5rem] md:ml-20 p-2 md:p-3">
                 <div className="flex flex-col items-center pb-4">
                     <div className="w-full flex justify-between items-center">
                         {activeTab !== 'home' && (
@@ -185,7 +185,7 @@ function CompanyControlPanel() {
                         <div className="grid grid-cols-12 grid-rows-6 gap-2">
                             <Card className="w-full col-span-12 row-span-6 md:col-span-4 md:row-span-1 " >
                                 <CardHeader>
-                                    <h2 className="text-xl font-semibold">Selecciona un departamento</h2>
+                                    <h2 className="text-lg font-semibold">Selecciona un departamento</h2>
                                 </CardHeader>
                                 <CardBody className="overflow-auto h-full">
                                     <Select size='lg'
@@ -210,20 +210,22 @@ function CompanyControlPanel() {
 
                             <Card className="w-full col-span-12 row-span-6 md:col-span-8 md:row-span-3" >
                                 <CardHeader>
-                                    <h2 className="text-xl font-semibold">Informe de {selectedDepartment?.name || 'Departamento'}</h2>
+                                    <h2 className="text-lg font-semibold">Informe de {selectedDepartment?.name || 'Departamento'}</h2>
                                 </CardHeader>
                                 <CardBody className="overflow-auto h-full flex flex-col md:flex-row gap-2">
                                     <Suspense fallback={<div>Cargando...</div>}>
-                                        <RadarCharts />
-                                        <BarCharts />
-                                        <LineCharts />
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-1 h-full">
+                                            <RadarCharts />
+                                            <BarCharts />
+                                            <LineCharts />
+                                        </div>
                                     </Suspense>
                                 </CardBody>
                             </Card>
 
                             <Card className="w-full col-span-12 row-span-6 order-4 md:order-none md:col-span-4 md:row-span-4">
                                 <CardHeader>
-                                    <h2 className="text-xl font-semibold">Opciones de Edición</h2>
+                                    <h2 className="text-lg font-semibold">Opciones de Edición</h2>
                                 </CardHeader>
                                 <CardBody >
                                     <div className="flex flex-col gap-4">
@@ -308,7 +310,7 @@ function CompanyControlPanel() {
 
                             <Card className="w-full col-span-12 row-span-6 md:col-span-8 md:row-span-3">
                                 <CardHeader>
-                                    <h2 className="text-xl font-semibold p-0">Tabla de Resultados</h2>
+                                    <h2 className="text-lg font-semibold p-0">Tabla de Resultados</h2>
                                 </CardHeader>
                                 <CardBody className="overflow-auto h-full">
                                     <Suspense fallback={<div>Cargando...</div>}>
@@ -319,7 +321,7 @@ function CompanyControlPanel() {
 
                             <Card className="w-full col-span-12 row-span-6 md:col-span-4 md:row-span-1">
                                 <CardHeader>
-                                    <h2 className="text-xl font-semibold">Código de Invitación</h2>
+                                    <h2 className="text-lg font-semibold">Código de Invitación</h2>
                                 </CardHeader>
                                 <CardBody className="overflow-auto h-full flex flex-col justify-between">
                                     {isEditingCode ? (

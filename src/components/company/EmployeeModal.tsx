@@ -22,6 +22,7 @@ const validateEmail = (value: string) => value.match(/^[A-Z0-9._%+-]+@[A-Z0-9.-]
 export default function EmployeeModal({ isOpen, onClose, onUpdate, mode, companyId, companyName, currentEmployee, isCompanyAdding = false }: EmployeeModalProps) {
     const [newEmployee, setNewEmployee] = useState<Partial<Employee>>(currentEmployee || {});
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [departments, setDepartments] = useState<Department[]>([]);
     const [positions, setPositions] = useState<Position[]>([]);
     const [avatar, setAvatar] = useState<File | null>(null);
@@ -35,6 +36,8 @@ export default function EmployeeModal({ isOpen, onClose, onUpdate, mode, company
             setPreviewUrl(currentEmployee.avatar || null);
         } else {
             setNewEmployee({});
+            setPassword("");
+            setConfirmPassword("");
             setPreviewUrl(null);
         }
     }, [currentEmployee, mode]);
@@ -87,6 +90,11 @@ export default function EmployeeModal({ isOpen, onClose, onUpdate, mode, company
             return;
         }
 
+        if (mode === 'add' && password !== confirmPassword) {
+            toast.error("Las contraseñas no coinciden.");
+            return;
+        }
+
         try {
             setIsSubmitting(true);
             await toast.promise(
@@ -125,6 +133,7 @@ export default function EmployeeModal({ isOpen, onClose, onUpdate, mode, company
                     onClose();
                     setNewEmployee({});
                     setPassword("");
+                    setConfirmPassword("");
                     setAvatar(null);
                     setPreviewUrl(null);
                 },
@@ -224,13 +233,24 @@ export default function EmployeeModal({ isOpen, onClose, onUpdate, mode, company
                         )}
 
                         {mode === 'add' && (
-                            <Input
-                                label="Contraseña"
-                                variant='underlined'
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
+                            <>
+                                <Input
+                                    label="Contraseña"
+                                    variant='underlined'
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                />
+                                <Input
+                                    label="Confirmar Contraseña"
+                                    variant='underlined'
+                                    type="password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    required
+                                />
+                            </>
                         )}
 
                         {!previewUrl && (

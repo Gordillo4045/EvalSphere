@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Slider, Textarea, Button, Spinner, Card, CardHeader, CardBody, Autocomplete, AutocompleteItem, Avatar, Divider } from '@nextui-org/react';
+import { Slider, Textarea, Button, Spinner, Card, CardHeader, CardBody, Autocomplete, AutocompleteItem, AutocompleteSection, Avatar, Divider, Chip } from '@nextui-org/react';
 import { db, auth } from "@/config/config";
-import { addDoc, collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { addDoc, collection, getDocs, doc, getDoc, query, where } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { toast } from 'sonner';
 import { Position } from '@/types/applicaciontypes';
+import { UserRound } from 'lucide-react';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { CheckCircle2 } from 'lucide-react';
 
 interface FormData {
   [key: string]: number | string;
@@ -24,9 +27,14 @@ const FormularioPrueba = () => {
   const [comments, setComments] = useState('');
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [evaluatedUserId, setEvaluatedUserId] = useState<string>('');
-  const [employees, setEmployees] = useState<Array<{ id: string, name: string, avatar: string, email: string, positionId: string, departmentId: string }>>([]);
+  const [employees, setEmployees] = useState<Array<{ id: string, name: string, avatar: string, email: string, positionId: string, departmentId: string, position: string }>>([]);
   const [currentUserPositionId, setCurrentUserPositionId] = useState<string | null>(null);
   const [positions, setPositions] = useState<Position[]>([]);
+  const [evaluatedEmployees, setEvaluatedEmployees] = useState<Set<string>>(new Set());
+  const [showAllEvaluatedAlert, setShowAllEvaluatedAlert] = useState(false);
+  const [currentUserData, setCurrentUserData] = useState<{ id: string, name: string, avatar: string, email: string, positionId: string, departmentId: string, position: string } | null>(null);
+  const [allEvaluated, setAllEvaluated] = useState(false);
+  const [autocompleteKey, setAutocompleteKey] = useState<number>(0);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -42,6 +50,20 @@ const FormularioPrueba = () => {
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (currentUserId && companyId) {
+      fetchEvaluatedEmployees(currentUserId, companyId);
+    }
+  }, [currentUserId, companyId]);
+
+  useEffect(() => {
+    if (employees.length > 0 && currentUserId) {
+      const isAllEvaluated = evaluatedEmployees.size === employees.length + 1 && evaluatedEmployees.has(currentUserId);
+      setAllEvaluated(isAllEvaluated);
+      setShowAllEvaluatedAlert(isAllEvaluated);
+    }
+  }, [evaluatedEmployees, employees, currentUserId]);
 
   const fetchUserData = async (userId: string) => {
     try {
@@ -89,12 +111,36 @@ const FormularioPrueba = () => {
       const employeeDocSnap = await getDoc(employeeDocRef);
 
       if (employeeDocSnap.exists()) {
-        const companyId = employeeDocSnap.data().companyId;
+        const userData = employeeDocSnap.data();
+        const companyId = userData.companyId;
+        const userDepartmentId = userData.departmentId;
         const employeesSnapshot = await getDocs(collection(db, `companies/${companyId}/employees`));
         const employeesData = employeesSnapshot.docs
-          .map(doc => ({ id: doc.id, name: doc.data().name, avatar: doc.data().avatar, email: doc.data().email, positionId: doc.data().positionId, departmentId: doc.data().departmentId }))
-          .filter(emp => emp.id !== userId);
-        setEmployees(employeesData);
+          .map(doc => ({
+            id: doc.id,
+            name: doc.data().name,
+            avatar: doc.data().avatar,
+            email: doc.data().email,
+            positionId: doc.data().positionId,
+            departmentId: doc.data().departmentId,
+            position: ''
+          }))
+          .filter(emp => emp.departmentId === userDepartmentId);
+
+        for (let employee of employeesData) {
+          const positionDoc = await getDoc(doc(db, `companies/${companyId}/departments/${employee.departmentId}/positions/${employee.positionId}`));
+          if (positionDoc.exists()) {
+            employee.position = positionDoc.data().title;
+          }
+        }
+
+        const currentUser = employeesData.find(emp => emp.id === userId);
+        if (currentUser) {
+          setCurrentUserData(currentUser);
+          setEmployees(employeesData.filter(emp => emp.id !== userId));
+        } else {
+          setEmployees(employeesData);
+        }
       }
     } catch (error) {
       console.error("Error al obtener la lista de empleados:", error);
@@ -113,6 +159,23 @@ const FormularioPrueba = () => {
     }
   };
 
+  const fetchEvaluatedEmployees = async (userId: string, companyId: string) => {
+    try {
+      const evaluationsRef = collection(db, `companies/${companyId}/evaluations`);
+      const q = query(evaluationsRef, where("evaluatorId", "==", userId));
+      const querySnapshot = await getDocs(q);
+      const evaluatedIds = new Set(querySnapshot.docs.map(doc => doc.data().evaluatedId));
+      setEvaluatedEmployees(evaluatedIds);
+    } catch (error) {
+      console.error("Error al obtener las evaluaciones realizadas:", error);
+      toast.error('Error al cargar las evaluaciones realizadas');
+    }
+  };
+
+  const isEmployeeEvaluated = (employeeId: string) => {
+    return evaluatedEmployees.has(employeeId);
+  };
+
   const getRelationshipType = (evaluatorPositionId: string | null, evaluatedPositionId: string): string => {
     if (!evaluatorPositionId || !evaluatedPositionId) {
       return 'No especificado';
@@ -126,16 +189,32 @@ const FormularioPrueba = () => {
     }
 
     if (evaluatorPosition.department === evaluatedPosition.department) {
-      if (evaluatorPosition.level > evaluatedPosition.level) {
+      if (evaluatorPosition.level < evaluatedPosition.level) {
         return 'Jefe';
-      } else if (evaluatorPosition.level < evaluatedPosition.level) {
+      } else if (evaluatorPosition.level > evaluatedPosition.level) {
         return 'Subordinado';
       } else {
         return 'Colega';
       }
-    } else {
-      return 'Colega de otro departamento';
     }
+  };
+
+  const groupEmployeesByRelationship = () => {
+    const groups: Record<string, Array<{ id: string, name: string, avatar: string, email: string, positionId: string, departmentId: string, position: string }>> = {
+      Autoevaluación: currentUserData ? [currentUserData] : [],
+      Jefe: [],
+      Subordinado: [],
+      Colega: [],
+    };
+
+    employees.forEach(employee => {
+      const relationshipType = getRelationshipType(currentUserPositionId, employee.positionId);
+      if (groups[relationshipType]) {
+        groups[relationshipType].push(employee);
+      }
+    });
+
+    return groups;
   };
 
   const handleSliderChange = (name: string, value: number) => {
@@ -158,7 +237,20 @@ const FormularioPrueba = () => {
         timestamp: new Date()
       };
       await addDoc(collection(db, `companies/${companyId}/evaluations`), dataToSubmit);
+
+      setEvaluatedEmployees(prev => new Set(prev).add(evaluatedUserId));
+
+      setEvaluatedUserId('');
+      setComments('');
+      setFormData({});
+      setAutocompleteKey(prevKey => prevKey + 1);
+
       toast.success('Evaluación enviada correctamente');
+
+      if (evaluatedEmployees.size + 1 === employees.length + 1) {
+        setShowAllEvaluatedAlert(true);
+        setAllEvaluated(true);
+      }
     } catch (error) {
       console.error("Error al añadir documento: ", error);
       toast.error('Error al enviar la evaluación');
@@ -181,92 +273,136 @@ const FormularioPrueba = () => {
 
   return (
     <div className={`w-full h-fit flex flex-col shadow-inner dark:shadow-slate-300/20 rounded-xl p-3`}>
+      {showAllEvaluatedAlert && (
+        <Alert className="mb-2">
+          <CheckCircle2 className="h-4 w-4" />
+          <AlertTitle>¡Felicidades!</AlertTitle>
+          <AlertDescription>
+            Has completado la evaluación de todos tus compañeros y tu autoevaluación.
+          </AlertDescription>
+        </Alert>
+      )}
       <Card>
-        <CardHeader>
-          <h1 className="text-lg font-bold mb-6">Evaluación de Habilidades 360°</h1>
+        <CardHeader className="flex justify-center">
+          <h1 className="text-lg font-bold mb-6 text-center">Evaluación de Habilidades 360°</h1>
         </CardHeader>
         <CardBody>
           <form onSubmit={handleSubmit} className="space-y-10 mx-auto mb-2">
-            <div className="w-full mb-4">
+            <div className="w-full mb-4 relative">
               <Autocomplete
-                defaultItems={employees}
+                key={autocompleteKey}
+                defaultItems={[...(currentUserData ? [currentUserData] : []), ...employees]}
                 label="Selecciona a quién evaluar"
+                placeholder="Buscar empleado..."
                 value={evaluatedUserId}
-                onValueChange={setEvaluatedUserId}
+                onSelectionChange={(key) => setEvaluatedUserId(key as string)}
                 required
-                size="sm"
                 variant="bordered"
                 labelPlacement="outside"
+                className="w-full"
+                startContent={<UserRound className="text-default-400" />}
+                disabledKeys={Array.from(evaluatedEmployees)}
               >
-                {(employee) => {
-                  const relationshipType = getRelationshipType(currentUserPositionId, employee.positionId);
-
-                  return (
-                    <AutocompleteItem key={employee.id} value={employee.id} textValue={employee.name}>
-                      <div className="flex gap-2 items-center">
-                        <Avatar alt={employee.name} className="flex-shrink-0" size="sm" src={employee.avatar} />
-                        <div className="flex flex-col">
-                          <div className="flex flex-row gap-2 items-center">
-                            <span className="text-small">{employee.name}</span>
-                            <span className="text-tiny text-default-400">{employee.email}</span>
+                {Object.entries(groupEmployeesByRelationship()).map(([relationshipType, groupEmployees]) => (
+                  groupEmployees.length > 0 && (
+                    <AutocompleteSection
+                      key={relationshipType}
+                      title={relationshipType}
+                      classNames={{
+                        heading: "flex w-full sticky top-1 z-20 py-1.5 px-2 bg-default-100 shadow-small rounded-small",
+                      }}
+                    >
+                      {groupEmployees.map((employee) => (
+                        <AutocompleteItem
+                          key={employee.id}
+                          value={employee.id}
+                          textValue={employee.name}
+                        >
+                          <div className="flex justify-between items-center w-full">
+                            <div className="flex gap-2 items-center">
+                              <Avatar
+                                alt={employee.name}
+                                className="flex-shrink-0"
+                                size="sm"
+                                src={employee.avatar}
+                              />
+                              <div className="flex flex-col">
+                                <span className="text-small font-medium">{employee.name}</span>
+                                <span className="text-tiny text-default-400">{employee.position}</span>
+                              </div>
+                            </div>
+                            {isEmployeeEvaluated(employee.id) && (
+                              <Chip size="sm" color="success" variant="flat">
+                                Evaluado
+                              </Chip>
+                            )}
                           </div>
-                          <span className="text-tiny text-default-500">
-                            {relationshipType}
-                          </span>
-                        </div>
-                      </div>
-                    </AutocompleteItem>
-                  );
-                }}
+                        </AutocompleteItem>
+                      ))}
+                    </AutocompleteSection>
+                  )
+                ))}
               </Autocomplete>
-
             </div>
-
-            {Object.entries(groupedQuestions).map(([category, categoryQuestions]) => (
-              <div key={category} className="space-y-4">
-                <Divider />
-                <h3 className="text-base font-semibold">{category}</h3>
-                {categoryQuestions.map((question) => (
-                  <div key={question.id} className=" w-full">
-                    <Slider
-                      aria-label={question.question}
-                      label={question.question}
-                      color="foreground"
-                      step={1}
-                      maxValue={5}
-                      minValue={1}
-                      marks={[
-                        { value: 1, label: "1" },
-                        { value: 2, label: "2" },
-                        { value: 3, label: "3" },
-                        { value: 4, label: "4" },
-                        { value: 5, label: "5" },
-                      ]}
-                      defaultValue={1}
-                      value={formData[question.id] as number}
-                      onChange={(value) => handleSliderChange(question.id, value as number)}
-                      className="w-full mb-10"
-                      hideValue
-                    />
+            {!allEvaluated && (
+              <>
+                {Object.entries(groupedQuestions).map(([category, categoryQuestions]) => (
+                  <div key={category} className="space-y-4">
+                    <Divider />
+                    <h3 className="text-base font-semibold">{category}</h3>
+                    {categoryQuestions.map((question) => (
+                      <div key={question.id} className=" w-full">
+                        <Slider
+                          aria-label={question.question}
+                          label={question.question}
+                          color="foreground"
+                          step={1}
+                          maxValue={5}
+                          minValue={1}
+                          marks={[
+                            { value: 1, label: "1" },
+                            { value: 2, label: "2" },
+                            { value: 3, label: "3" },
+                            { value: 4, label: "4" },
+                            { value: 5, label: "5" },
+                          ]}
+                          defaultValue={1}
+                          value={formData[question.id] as number}
+                          onChange={(value) => handleSliderChange(question.id, value as number)}
+                          className="w-full mb-10"
+                          hideValue
+                        />
+                      </div>
+                    ))}
                   </div>
                 ))}
-              </div>
-            ))}
 
-            <div className="w-full flex flex-col gap-2">
-              <Textarea
-                variant="underlined"
-                label="Comentarios adicionales (opcional)"
-                labelPlacement="outside"
-                placeholder="Escribe tus comentarios aquí..."
-                value={comments}
-                onValueChange={setComments}
-              />
-            </div>
+                <div className="w-full flex flex-col gap-2">
+                  <Divider className="my-2" />
 
-            <Button type="submit" color="primary" className="w-full">
-              Enviar Evaluación
-            </Button>
+                  <Textarea
+                    variant="underlined"
+                    label="Comentarios adicionales (opcional)"
+                    labelPlacement="outside"
+                    placeholder="Escribe tus comentarios aquí..."
+                    value={comments}
+                    onValueChange={setComments}
+                  />
+                </div>
+
+                <Button type="submit" color="primary" className="w-full" isDisabled={allEvaluated}>
+                  Enviar Evaluación
+                </Button>
+              </>
+            )}
+            {allEvaluated && (
+              <Alert>
+                <AlertTitle>Evaluaciones completadas</AlertTitle>
+                <AlertDescription>
+                  Has completado todas las evaluaciones, incluyendo tu autoevaluación.
+                </AlertDescription>
+              </Alert>
+            )}
           </form>
         </CardBody>
       </Card>

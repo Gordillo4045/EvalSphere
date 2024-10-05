@@ -1,11 +1,9 @@
-import { TrendingUp } from "lucide-react"
 import { CartesianGrid, Line, LineChart, XAxis } from "recharts"
 
 import {
     Card,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
@@ -36,13 +34,13 @@ const chartConfig = {
 
 export function LineCharts() {
     return (
-        <Card>
+        <Card className="w-full h-full flex flex-col">
             <CardHeader>
                 <CardTitle>Line Chart</CardTitle>
                 <CardDescription>January - June 2024</CardDescription>
             </CardHeader>
-            <CardContent>
-                <ChartContainer config={chartConfig}>
+            <CardContent className="flex-grow flex items-center justify-center p-1">
+                <ChartContainer config={chartConfig} className="w-full h-full">
                     <LineChart
                         accessibilityLayer
                         data={chartData}
@@ -73,14 +71,7 @@ export function LineCharts() {
                     </LineChart>
                 </ChartContainer>
             </CardContent>
-            <CardFooter className="flex-col items-start gap-2 text-sm">
-                <div className="flex gap-2 font-medium leading-none">
-                    Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-                </div>
-                <div className="leading-none text-muted-foreground">
-                    Showing total visitors for the last 6 months
-                </div>
-            </CardFooter>
+
         </Card>
     )
 }

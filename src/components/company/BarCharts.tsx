@@ -1,11 +1,9 @@
-import { TrendingUp } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
 
 import {
     Card,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
@@ -40,13 +38,13 @@ const chartConfig = {
 
 export function BarCharts() {
     return (
-        <Card >
+        <Card className="w-full h-full flex flex-col">
             <CardHeader>
                 <CardTitle className="text-primary dark:text-primary-dark">Bar Chart - Multiple</CardTitle>
                 <CardDescription className="text-muted-foreground dark:text-muted-foreground-dark">January - June 2024</CardDescription>
             </CardHeader>
-            <CardContent>
-                <ChartContainer config={chartConfig}>
+            <CardContent className="flex-grow flex items-center justify-center p-1">
+                <ChartContainer config={chartConfig} className="w-full h-[200px]">
                     <BarChart accessibilityLayer data={chartData}>
                         <CartesianGrid vertical={false} />
                         <XAxis
@@ -65,14 +63,7 @@ export function BarCharts() {
                     </BarChart>
                 </ChartContainer>
             </CardContent>
-            <CardFooter className="flex-col items-start gap-2 text-sm">
-                <div className="flex gap-2 font-medium leading-none text-primary dark:text-primary-dark">
-                    Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-                </div>
-                <div className="leading-none text-muted-foreground dark:text-muted-foreground-dark">
-                    Showing total visitors for the last 6 months
-                </div>
-            </CardFooter>
+
         </Card>
     )
 }

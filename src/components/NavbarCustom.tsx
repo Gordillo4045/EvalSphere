@@ -11,10 +11,12 @@ import { MdOutlineLogin, MdOutlineLogout } from "react-icons/md";
 import { FaUsersGear } from "react-icons/fa6";
 import EmployeeSignUpForm from "@/components/company/EmployeeSignUpForm";
 import { FaUserPlus } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 
 export default function NavbarCustom() {
     const { setTheme, theme } = useTheme();
+    const navigate = useNavigate();
     const [isLoginOpen, setIsLoginOpen] = useState(false);
     const { user, isAdmin, isCompany, loading } = useAuth();
     const [isEmployeeSignUpOpen, setIsEmployeeSignUpOpen] = useState(false);
@@ -27,6 +29,7 @@ export default function NavbarCustom() {
     const handleLogout = async () => {
         try {
             await signOut(auth);
+            navigate("/");
             toast.success("Sesión cerrada exitosamente");
         } catch (error) {
             toast.error("Error al cerrar sesión");

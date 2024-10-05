@@ -11,14 +11,11 @@ import Controlpanel from './pages/Controlpanel';
 import CompanyControlPanel from './pages/CompanyControlPanel';
 import Formulario from './pages/Formulario';
 import Home from "./pages/Home";
-import { useAuth } from "./hooks/useAuth";
-
-
+import ProtectedUserRoute from "./components/ProtectedUserRoute";
 
 function AppContent() {
   const location = useLocation();
   const isCompanyControlPanel = location.pathname === "/company/controlpanel";
-  const { user } = useAuth();
 
   return (
     <div className={`text-foreground bg-background flex flex-col min-h-dvh`}>
@@ -36,9 +33,11 @@ function AppContent() {
               <CompanyControlPanel />
             </ProtectedCompanyRoute>
           } />
-          {user && (
-            <Route path="/employee/formulario" element={<Formulario />} />
-          )}
+          <Route path="/employee/formulario" element={
+            <ProtectedUserRoute>
+              <Formulario />
+            </ProtectedUserRoute>
+          } />
         </Routes>
       </div>
       <FooterCustom />

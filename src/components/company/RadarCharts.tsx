@@ -34,17 +34,17 @@ const chartConfig = {
 
 export function RadarCharts() {
     return (
-        <Card>
+        <Card className="w-full h-full flex flex-col">
             <CardHeader className="items-center pb-4">
                 <CardTitle>Radar Chart</CardTitle>
                 <CardDescription>
                     Showing total visitors for the last 6 months
                 </CardDescription>
             </CardHeader>
-            <CardContent className="pb-0">
+            <CardContent className="flex-grow flex items-center justify-center p-1">
                 <ChartContainer
                     config={chartConfig}
-                    className="mx-auto aspect-square max-h-[250px]"
+                    className="w-full h-[200px]"
                 >
                     <RadarChart data={chartData}>
                         <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
@@ -58,7 +58,6 @@ export function RadarCharts() {
                     </RadarChart>
                 </ChartContainer>
             </CardContent>
-
         </Card>
     )
 }
