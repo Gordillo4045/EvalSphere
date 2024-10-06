@@ -372,7 +372,7 @@ export default function PositionTable({ companyId }: PositionTableProps) {
                                 onChange={(e) => setNewPosition({ ...newPosition, level: parseInt(e.target.value, 10) })}
                                 min={1}
                                 max={10}
-                                description="Nivel de la posición en la jerarquía de la empresa (1-10)"
+                                description="Nivel de la posición en la jerarquía (1 más bajo - 10 más alto)"
                             />
                             <Input
                                 label="Descripción (opcional)"

@@ -80,7 +80,6 @@ export default function LoginForm({ isOpen, onClose }: LoginFormProps) {
                             value={formState.email}
                             onChange={(e) => handleInputChange('email', e.target.value)}
                             isInvalid={isInvalid}
-                            color={isInvalid ? "danger" : "success"}
                             errorMessage={isInvalid ? "Por favor, ingrese un correo electrónico válido" : ""}
                         />
                         <Input

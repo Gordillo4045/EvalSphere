@@ -53,7 +53,7 @@ export default function EmployeeTable({ companyId, companyName }: EmployeeTableP
         direction: "ascending",
     });
     const [page, setPage] = useState(1);
-    const rowsPerPage = 10;
+    const rowsPerPage = 8;
     const [isLoading, setIsLoading] = useState(true);
 
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -304,7 +304,7 @@ export default function EmployeeTable({ companyId, companyName }: EmployeeTableP
                     bottomContent={bottomContent}
                     bottomContentPlacement="outside"
                     classNames={{
-                        wrapper: "max-h-[582px]",
+                        wrapper: "max-h-[582px] min-h-[calc(100vh-400px)]",
                     }}
                     sortDescriptor={sortDescriptor}
                     topContent={topContent}
