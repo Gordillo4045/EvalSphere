@@ -69,7 +69,7 @@ export default function NavbarCustom() {
                         <>
                             {isEmployee && (
                                 <div className="hidden md:flex items-center justify-center mx-48">
-                                    <Link href="/employee/formulario" color="foreground">Formulario</Link>
+                                    <Link href="/employee/formulario" color="foreground" >Formulario</Link>
                                 </div>
                             )}
                             <Dropdown placement="bottom-end" >
@@ -152,22 +152,34 @@ export default function NavbarCustom() {
                     </NavbarContent>
                 )}
                 <NavbarMenu>
-                    <NavbarMenuItem>
-                        <Link href="/">
-                            Inicio
-                        </Link>
-                    </NavbarMenuItem>
-                    <NavbarMenuItem>
-                        <Button
-                            as={Link}
-                            href="#"
-                            variant="light"
-                            onPress={() => setIsLoginOpen(true)}
-                            startContent={<MdOutlineLogin />}
-                        >
-                            Iniciar Sesión
-                        </Button>
-                    </NavbarMenuItem>
+                    {!user ? (
+                        <NavbarMenuItem>
+                            <Button
+                                as={Link}
+                                href="#"
+                                variant="light"
+                                onPress={() => setIsLoginOpen(true)}
+                                startContent={<MdOutlineLogin size={15} />}
+                                className="p-0 w-full flex justify-start"
+                            >
+                                Iniciar Sesión
+                            </Button>
+                            <Button
+                                as={Link}
+                                href="#"
+                                variant="light"
+                                onPress={() => setIsEmployeeSignUpOpen(true)}
+                                startContent={<FaUserPlus size={15} />}
+                                className="p-0 w-full flex justify-start"
+                            >
+                                Registrarse como Empleado
+                            </Button>
+                        </NavbarMenuItem>
+                    ) : (
+                        <NavbarMenuItem>
+                            <Link href="/employee/formulario" color="foreground">Formulario</Link>
+                        </NavbarMenuItem>
+                    )}
                 </NavbarMenu>
 
                 <LoginForm isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
