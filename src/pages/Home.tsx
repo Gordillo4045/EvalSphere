@@ -1,80 +1,63 @@
-import { Card, CardHeader, CardFooter, Image, Button } from "@nextui-org/react";
+import { BentoHome } from "@/components/BentoHome";
+import { MarqueeReview } from "@/components/MarqueeReview";
+import { useTheme } from "@/components/ThemeProvider";
+import BlurIn from "@/components/ui/blur-in";
+import { ContainerScroll } from "@/components/ui/container-scroll-animation";
+import { MagicCard } from "@/components/ui/magic-card";
+import { Image } from "@nextui-org/react";
 
 export default function Home() {
+    const { theme } = useTheme()
     return (
-        <div className="flex items-center justify-center">
-            <div className="max-w-[900px] gap-2 grid grid-cols-12 grid-rows-2 px-8">
+        <div className="max-w-5xl mx-auto p-2 md:p-0">
 
-                <Card className="col-span-12 sm:col-span-4 h-[300px]">
-                    <CardHeader className="absolute z-10 top-1 flex-col !items-start">
-                        <p className="text-tiny text-white/60 uppercase font-bold">What to watch</p>
-                        <h4 className="text-white font-medium text-large">Stream the Acme event</h4>
-                    </CardHeader>
-                    <Image
-                        removeWrapper
-                        alt="Card background"
-                        className="z-0 w-full h-full object-cover"
-                        src="https://nextui.org/images/card-example-4.jpeg"
-                    />
-                </Card>
-                <Card className="col-span-12 sm:col-span-4 h-[300px]">
-                    <CardHeader className="absolute z-10 top-1 flex-col !items-start">
-                        <p className="text-tiny text-white/60 uppercase font-bold">Plant a tree</p>
-                        <h4 className="text-white font-medium text-large">Contribute to the planet</h4>
-                    </CardHeader>
-                    <Image
-                        removeWrapper
-                        alt="Card background"
-                        className="z-0 w-full h-full object-cover"
-                        src="https://nextui.org/images/card-example-3.jpeg"
-                    />
-                </Card>
-                <Card className="col-span-12 sm:col-span-4 h-[300px]">
-                    <CardHeader className="absolute z-10 top-1 flex-col !items-start">
-                        <p className="text-tiny text-white/60 uppercase font-bold">Supercharged</p>
-                        <h4 className="text-white font-medium text-large">Creates beauty like a beast</h4>
-                    </CardHeader>
-                    <Image
-                        removeWrapper
-                        alt="Card background"
-                        className="z-0 w-full h-full object-cover"
-                        src="https://nextui.org/images/card-example-2.jpeg"
-                    />
-                </Card>
-                <Card isFooterBlurred className="w-full h-[300px] col-span-12 sm:col-span-5">
-                    <CardHeader className="absolute z-10 top-1 flex-col items-start">
-                        <p className="text-tiny text-white/60 uppercase font-bold">New</p>
-                        <h4 className="text-black font-medium text-2xl">Acme camera</h4>
-                    </CardHeader>
-                    <Image
-                        removeWrapper
-                        alt="Card example background"
-                        className="z-0 w-full h-full scale-125 -translate-y-6 object-cover"
-                        src="https://nextui.org/images/card-example-6.jpeg"
-                    />
-                    <CardFooter className="absolute bg-white/30 bottom-0 border-t-1 border-zinc-100/50 z-10 justify-between">
-                        <div>
-                            <p className="text-black text-tiny">Available soon.</p>
-                            <p className="text-black text-tiny">Get notified.</p>
-                        </div>
-                        <Button className="text-tiny" color="primary" radius="full" size="sm">
-                            Notify Me
-                        </Button>
-                    </CardFooter>
-                </Card>
-                <Card isFooterBlurred className="w-full h-[300px] col-span-12 sm:col-span-7">
-                    <CardHeader className="absolute z-10 top-1 flex-col items-start">
-                        <p className="text-tiny text-white/60 uppercase font-bold">Your day your</p>
-                        <h4 className="text-white/90 font-medium text-xl">Your checklist for better sleep</h4>
-                    </CardHeader>
-                    <Image
-                        removeWrapper
-                        alt="Relaxing app background"
-                        className="z-0 w-full h-full object-cover"
-                        src="https://nextui.org/images/card-example-5.jpeg"
-                    />
+            <div className="flex flex-col overflow-hidden">
+                <ContainerScroll
+                    titleComponent={
+                        <>
+                            <BlurIn
+                                word="texto"
+                                className="text-4xl font-semibold text-black dark:text-white"
+                                duration={1.5}
+                                variant={{
+                                    hidden: { filter: "blur(15px)", opacity: 0 },
+                                    visible: { filter: "blur(0px)", opacity: 1 }
+                                }} />
+                            <br />
+                            <BlurIn
+                                word="Frace chila"
+                                className="text-4xl md:text-[6rem] font-bold mt-1 leading-none text-black dark:text-white"
+                                duration={1.5}
+                                variant={{
+                                    hidden: { filter: "blur(15px)", opacity: 0 },
+                                    visible: { filter: "blur(0px)", opacity: 1 }
+                                }} />
+                        </>
+                    }
+                >
 
-                </Card>
+                    <div className="w-full h-full overflow-hidden">
+                        <Image
+                            src={`https://nextui.org/images/card-example-5.jpeg`}
+                            alt="hero"
+                            width={1500}
+                            className="w-full h-full object-cover"
+                            isZoomed
+                        />
+                    </div>
+                </ContainerScroll>
+            </div>
+            <div className="-translate-y-[20%] md:-translate-y-40">
+                <BentoHome />
+                <MarqueeReview />
+                <div className=" flex h-[500px] w-full flex-col gap-4 lg:h-[250px] lg:flex-row">
+                    <MagicCard
+                        gradientColor={theme === "dark" ? "#262626" : "#D9D9D955"}
+                        className="cursor-pointer w-full flex-col items-center justify-center shadow-2xl whitespace-nowrap text-4xl"
+                    >
+                        as
+                    </MagicCard>
+                </div>
             </div>
         </div>
     )
