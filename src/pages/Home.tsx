@@ -11,7 +11,7 @@ export default function Home() {
     return (
         <div className="max-w-5xl mx-auto p-2 md:p-0">
 
-            <div className="flex flex-col overflow-hidden">
+            <div className="flex flex-col overflow-hidden -translate-y-32">
                 <ContainerScroll
                     titleComponent={
                         <>
@@ -43,11 +43,12 @@ export default function Home() {
                             width={1500}
                             className="w-full h-full object-cover"
                             isZoomed
+                            isBlurred
                         />
                     </div>
                 </ContainerScroll>
             </div>
-            <div className="-translate-y-[20%] md:-translate-y-40">
+            <div className="flex flex-col gap-2 -translate-y-[25%] md:-translate-y-[20%]">
                 <BentoHome />
                 <MarqueeReview />
                 <div className=" flex h-[500px] w-full flex-col gap-4 lg:h-[250px] lg:flex-row">

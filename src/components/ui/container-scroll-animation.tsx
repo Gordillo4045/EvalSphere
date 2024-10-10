@@ -36,7 +36,7 @@ export const ContainerScroll = ({
 
     return (
         <div
-            className="h-[120vh] md:h-[80rem] flex items-center justify-center relative p-2 md:p-20 -translate-y-40 md:translate-y-0"
+            className="w-full h-[120vh] md:h-[80rem] flex items-center justify-center relative p-2 md:p-20 -translate-y-40 md:translate-y-0"
             ref={containerRef}
         >
             <div
@@ -60,7 +60,7 @@ export const Header = ({ translate, titleComponent }: any) => {
             style={{
                 translateY: translate,
             }}
-            className="div max-w-5xl mx-auto text-center"
+            className="div w-full mx-auto text-center"
         >
             {titleComponent}
         </motion.div>
@@ -82,10 +82,8 @@ export const Card = ({
             style={{
                 rotateX: rotate,
                 scale,
-                boxShadow:
-                    "0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #0000002a",
             }}
-            className="max-w-5xl -mt-12 mx-auto h-fit md:h-fit w-full overflow-hidden rounded-[30px] relative"
+            className="-mt-12 mx-auto h-fit md:h-fit w-full overflow-hidden rounded-[30px] relative shadow-lg"
         >
             <div className="h-fit w-full bg-gray-100 dark:bg-zinc-900">
                 {children}
