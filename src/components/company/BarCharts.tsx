@@ -38,13 +38,13 @@ const chartConfig = {
 
 export function BarCharts() {
     return (
-        <Card className="w-full h-full flex flex-col">
+        <Card className="w-full  h-[380px] lg:h-full  flex flex-col">
             <CardHeader>
                 <CardTitle className="text-primary dark:text-primary-dark">Bar Chart - Multiple</CardTitle>
                 <CardDescription className="text-muted-foreground dark:text-muted-foreground-dark">January - June 2024</CardDescription>
             </CardHeader>
             <CardContent className="flex-grow flex items-center justify-center p-1">
-                <ChartContainer config={chartConfig} className="w-full h-[200px]">
+                <ChartContainer config={chartConfig} className="w-full h-[150px] lg:h-full">
                     <BarChart accessibilityLayer data={chartData}>
                         <CartesianGrid vertical={false} />
                         <XAxis

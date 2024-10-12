@@ -214,11 +214,9 @@ function CompanyControlPanel() {
                                 </CardHeader>
                                 <CardBody className="overflow-auto h-full flex flex-col md:flex-row gap-2">
                                     <Suspense fallback={<div>Cargando...</div>}>
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-1 h-full">
-                                            <RadarCharts />
-                                            <BarCharts />
-                                            <LineCharts />
-                                        </div>
+                                        <RadarCharts />
+                                        <BarCharts />
+                                        <LineCharts />
                                     </Suspense>
                                 </CardBody>
                             </Card>
