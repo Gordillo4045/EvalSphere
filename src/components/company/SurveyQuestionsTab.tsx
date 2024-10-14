@@ -89,7 +89,6 @@ export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProp
             });
             setQuestions(questionsData);
 
-            // Mostrar el modal si no hay preguntas
             if (questionsData.length === 0) {
                 setShowBaseQuestionsModal(true);
             }
@@ -171,7 +170,7 @@ export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProp
 
     return (
         <div>
-            <div className="flex gap-4 mb-4">
+            <div className="flex flex-col sm:flex-row gap-4 mb-4">
                 <Input
                     autoFocus
                     placeholder="Nueva pregunta"
@@ -179,20 +178,22 @@ export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProp
                     value={newQuestion.question}
                     onChange={(e) => setNewQuestion({ ...newQuestion, question: e.target.value })}
                 />
-                <Select
-                    placeholder="Categoría"
-                    aria-label="Categoría"
-                    selectedKeys={newQuestion.category ? [newQuestion.category] : []}
-                    onChange={(e) => setNewQuestion({ ...newQuestion, category: e.target.value })}
-                    className='w-60'
-                >
-                    {CATEGORIES.map((category) => (
-                        <SelectItem key={category} value={category}>
-                            {category}
-                        </SelectItem>
-                    ))}
-                </Select>
-                <Button color="primary" className='w-36' onPress={handleAddQuestion} endContent={<FaPlus />} >Agregar </Button>
+                <div className="flex gap-4">
+                    <Select
+                        placeholder="Categoría"
+                        aria-label="Categoría"
+                        selectedKeys={newQuestion.category ? [newQuestion.category] : []}
+                        onChange={(e) => setNewQuestion({ ...newQuestion, category: e.target.value })}
+                        className='w-60 sm:w-44'
+                    >
+                        {CATEGORIES.map((category) => (
+                            <SelectItem key={category} value={category}>
+                                {category}
+                            </SelectItem>
+                        ))}
+                    </Select>
+                    <Button color="primary" className='w-36' onPress={handleAddQuestion} endContent={<FaPlus />} >Agregar </Button>
+                </div>
             </div>
 
             <Table aria-label="Tabla de Preguntas de Encuesta" >
@@ -250,7 +251,7 @@ export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProp
                 </TableBody>
             </Table>
 
-            <Modal isOpen={isOpen} onClose={onClose}>
+            <Modal isOpen={isOpen} onClose={onClose} scrollBehavior='outside'>
                 <ModalContent>
                     <ModalHeader>Editar Pregunta</ModalHeader>
                     <ModalBody>

@@ -163,7 +163,7 @@ export default function EmployeeSignUpForm({ isOpen, onClose }: EmployeeSignUpFo
     }, [newEmployee.password, newEmployee.confirmPassword]);
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose}>
+        <Modal isOpen={isOpen} onClose={onClose} scrollBehavior='outside'>
             <ModalContent>
                 <ModalHeader>Registro de Empleado</ModalHeader>
                 <ModalBody>

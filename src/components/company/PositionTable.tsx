@@ -340,7 +340,7 @@ export default function PositionTable({ companyId }: PositionTableProps) {
                 </TableBody>
             </Table>
 
-            <Modal isOpen={isOpen} onClose={onClose}>
+            <Modal isOpen={isOpen} onClose={onClose} scrollBehavior='outside'>
                 <ModalContent>
                     <ModalHeader>{modalMode === 'add' ? 'Agregar Posición' : 'Editar Posición'}</ModalHeader>
                     <ModalBody>
