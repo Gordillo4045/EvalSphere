@@ -10,7 +10,6 @@ import {
     Button,
     Pagination,
     SortDescriptor,
-    Tooltip,
     User,
     Chip,
     Dropdown,
@@ -18,12 +17,17 @@ import {
     DropdownMenu,
     DropdownItem,
     Selection,
+    ModalBody,
+    Modal,
+    useDisclosure,
+    ModalContent,
 } from "@nextui-org/react";
 import { BiSearch } from "react-icons/bi";
 import { FiChevronDown } from "react-icons/fi";
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from "@/config/config";
 import { Employee, Department, Position } from "@/types/applicaciontypes";
+import EmployeeEvaluationChart from './EmployeeEvaluationChart';
 
 const INITIAL_VISIBLE_COLUMNS = ["name", "average", "department", "position", "status", "actions"];
 
@@ -58,6 +62,8 @@ export default function ResultTable({ data, companyId }: { data: Record<string, 
     const [visibleColumns, setVisibleColumns] = useState<Selection>(new Set(INITIAL_VISIBLE_COLUMNS));
     const [statusFilter, setStatusFilter] = useState<Selection>("all");
     const rowsPerPage = 3;
+    const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
     useEffect(() => {
         const unsubscribeEmployees = onSnapshot(
@@ -184,21 +190,22 @@ export default function ResultTable({ data, companyId }: { data: Record<string, 
                 );
             case "actions":
                 return (
-                    <Tooltip content="Ver evaluación">
-                        <Button
-                            size="sm"
-                            variant="flat"
-                            color="primary"
-                            onPress={() => console.log('Ver evaluación de', item.name)}
-                        >
-                            Ver evaluación
-                        </Button>
-                    </Tooltip>
+                    <Button
+                        size="sm"
+                        variant="shadow"
+                        color="primary"
+                        onPress={() => {
+                            setSelectedEmployee(item);
+                            onOpen()
+                        }}
+                    >
+                        Ver evaluación
+                    </Button>
                 );
             default:
                 return null;
         }
-    }, [departments, positions]);
+    }, [departments, positions, setSelectedEmployee]);
 
     const onSearchChange = useCallback((value?: string) => {
         if (value) {
@@ -297,39 +304,70 @@ export default function ResultTable({ data, companyId }: { data: Record<string, 
         );
     }, [filteredItems.length, page, rowsPerPage]);
 
+    const generateChartData = (employeeId: string) => {
+        const categories = ["Organización",
+            "Liderazgo",
+            "Comunicación",
+            "Responsabilidad",
+            "Aprendizaje",
+            "Adaptación"];
+        return categories.map(category => ({
+            category,
+            Jefe: Math.floor(Math.random() * 5) + 1,
+            Companeros: Math.floor(Math.random() * 5) + 1,
+            Subordinados: Math.floor(Math.random() * 5) + 1,
+            AutoEvaluacion: Math.floor(Math.random() * 5) + 1,
+        }));
+    };
+
     return (
-        <Table
-            aria-label="Tabla de Resultados de Evaluación"
-            isHeaderSticky
-            isCompact
-            bottomContent={bottomContent}
-            bottomContentPlacement="outside"
-            classNames={{
-                wrapper: "min-h-[237px]",
-            }}
-            sortDescriptor={sortDescriptor}
-            topContent={topContent}
-            topContentPlacement="outside"
-            onSortChange={setSortDescriptor}
-        >
-            <TableHeader columns={headerColumns}>
-                {(column) => (
-                    <TableColumn
-                        key={column.uid}
-                        align={column.uid === "actions" ? "center" : "start"}
-                        allowsSorting={column.uid !== "actions"}
-                    >
-                        {column.name}
-                    </TableColumn>
-                )}
-            </TableHeader>
-            <TableBody items={paginatedItems} emptyContent="No hay datos para mostrar">
-                {(item) => (
-                    <TableRow key={item.id}>
-                        {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
-                    </TableRow>
-                )}
-            </TableBody>
-        </Table>
+        <>
+            <Table
+                aria-label="Tabla de Resultados de Evaluación"
+                isHeaderSticky
+                isCompact
+                bottomContent={bottomContent}
+                bottomContentPlacement="outside"
+                classNames={{
+                    wrapper: "min-h-[237px]",
+                }}
+                sortDescriptor={sortDescriptor}
+                topContent={topContent}
+                topContentPlacement="outside"
+                onSortChange={setSortDescriptor}
+            >
+                <TableHeader columns={headerColumns}>
+                    {(column) => (
+                        <TableColumn
+                            key={column.uid}
+                            align={column.uid === "actions" ? "center" : "start"}
+                            allowsSorting={column.uid !== "actions"}
+                        >
+                            {column.name}
+                        </TableColumn>
+                    )}
+                </TableHeader>
+                <TableBody items={paginatedItems} emptyContent="No hay datos para mostrar">
+                    {(item) => (
+                        <TableRow key={item.id}>
+                            {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
+                        </TableRow>
+                    )}
+                </TableBody>
+            </Table>
+
+            <Modal isOpen={isOpen} onClose={onOpenChange} size="5xl" scrollBehavior="outside">
+                <ModalContent>
+                    <ModalBody>
+                        {selectedEmployee && (
+                            <EmployeeEvaluationChart
+                                data={generateChartData(selectedEmployee.id)}
+                                employeeName={selectedEmployee.name}
+                            />
+                        )}
+                    </ModalBody>
+                </ModalContent>
+            </Modal>
+        </>
     );
 }

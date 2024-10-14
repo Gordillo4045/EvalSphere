@@ -262,7 +262,7 @@ export default function UserForm({ isOpen, onClose, editItem, onUpdate }: UserFo
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} placement="top-center" scrollBehavior='inside'>
+        <Modal isOpen={isOpen} onClose={onClose} placement="top-center" scrollBehavior='outside'>
             <ModalContent>
                 <ModalHeader>
                     <h2 className="text-2xl font-bold">

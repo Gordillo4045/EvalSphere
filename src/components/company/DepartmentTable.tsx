@@ -311,7 +311,7 @@ export default function DepartmentTable({ companyId }: DepartmentTableProps) {
                 </TableBody>
             </Table>
 
-            <Modal isOpen={isOpen} onClose={onClose}>
+            <Modal isOpen={isOpen} onClose={onClose} scrollBehavior='outside'>
                 <ModalContent>
                     <ModalHeader>{modalMode === 'add' ? 'Agregar Departamento' : 'Editar Departamento'}</ModalHeader>
                     <ModalBody>

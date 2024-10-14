@@ -173,7 +173,7 @@ export default function EmployeeModal({ isOpen, onClose, onUpdate, mode, company
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose}>
+        <Modal isOpen={isOpen} onClose={onClose} scrollBehavior='outside'>
             <ModalContent>
                 <ModalHeader>{mode === 'add' ? 'Agregar Empleado' : 'Editar Empleado'}</ModalHeader>
                 <ModalBody>
