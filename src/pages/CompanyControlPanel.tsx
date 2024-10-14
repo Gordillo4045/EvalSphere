@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button, Card, CardBody, CardHeader, Select, SelectItem, Spinner, Input, ButtonGroup, Snippet } from "@nextui-org/react";
 import { collection, doc, getDoc, onSnapshot, query, updateDoc } from 'firebase/firestore';
 import { db } from '@/config/config';
@@ -16,6 +16,7 @@ import { RadarCharts } from '@/components/company/RadarCharts';
 import { BarCharts } from '@/components/company/BarCharts';
 import { LineCharts } from '@/components/company/LineCharts';
 import { IoMdArrowBack } from "react-icons/io";
+import { getFunctions, httpsCallable } from 'firebase/functions';
 
 const DepartmentTable = React.lazy(() => import("@/components/company/DepartmentTable"));
 const PositionTable = React.lazy(() => import("@/components/company/PositionTable"));
@@ -34,6 +35,9 @@ function CompanyControlPanel() {
     const [invitationCode, setInvitationCode] = useState<string>('');
     const [isEditingCode, setIsEditingCode] = useState<boolean>(false);
     const [newInvitationCode, setNewInvitationCode] = useState<string>('');
+    const [evaluationResults, setEvaluationResults] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [filteredResults, setFilteredResults] = useState(null);
 
     useEffect(() => {
         const fetchCompanyData = async () => {
@@ -53,6 +57,8 @@ function CompanyControlPanel() {
                 }
             }
         };
+
+
 
         if (!loading) {
             if (!user || !isCompany) {
@@ -80,6 +86,75 @@ function CompanyControlPanel() {
 
         return () => unsubscribe();
     }, [company?.id, selectedDepartment]);
+
+    const fetchEvaluationResults = useCallback(async () => {
+        if (!company?.id) return;
+
+        setIsLoading(true);
+        try {
+            const functions = getFunctions();
+            const calculateAverages = httpsCallable(functions, 'calculateEvaluationAverages');
+            const result = await calculateAverages({ companyId: company.id });
+            const newResults = result.data;
+            setEvaluationResults(newResults);
+        } catch (error) {
+            console.error('Error al obtener los resultados de evaluación:', error);
+            toast.error('Error al cargar los resultados de evaluación');
+        } finally {
+            setIsLoading(false);
+        }
+    }, [company?.id]);
+
+    useEffect(() => {
+        if (company?.id) {
+            fetchEvaluationResults();
+        }
+    }, [company?.id, fetchEvaluationResults]);
+
+    useEffect(() => {
+        if (evaluationResults && selectedDepartment) {
+            const departmentEntries = Object.entries(evaluationResults.departmentCategoryAverages || {});
+            const filteredDepartmentResults = departmentEntries.find(
+                ([key]) => key === selectedDepartment.id
+            );
+
+            const employeeEntries = Object.entries(evaluationResults.employeeCategoryAverages || {});
+            const filteredEmployeeResults = employeeEntries.filter(
+                async ([key]) => {
+                    const employeeId = key;
+                    const employeeRef = doc(db, `companies/${company?.id}/employees/${employeeId}`);
+                    const employeeDoc = await getDoc(employeeRef);
+                    const employeeData = employeeDoc.data();
+                    return employeeData?.departmentId === selectedDepartment.id;
+                }
+            );
+            setFilteredResults({
+                departmentCategoryAverages: filteredDepartmentResults ? {
+                    [filteredDepartmentResults[0]]: {
+                        Adaptación: (filteredDepartmentResults[1] as any).Adaptación,
+                        Aprendizaje: (filteredDepartmentResults[1] as any).Aprendizaje,
+                        Comunicación: (filteredDepartmentResults[1] as any).Comunicación,
+                        Organización: (filteredDepartmentResults[1] as any).Organización,
+                        Responsabilidad: (filteredDepartmentResults[1] as any).Responsabilidad,
+                        Liderazgo: (filteredDepartmentResults[1] as any).Liderazgo
+                    }
+                } : {},
+                employeeCategoryAverages: filteredEmployeeResults.reduce((acc, [key, value]) => {
+                    acc[key] = {
+                        Adaptación: (value as any).Adaptación,
+                        Aprendizaje: (value as any).Aprendizaje,
+                        Comunicación: (value as any).Comunicación,
+                        Organización: (value as any).Organización,
+                        Responsabilidad: (value as any).Responsabilidad,
+                        Liderazgo: (value as any).Liderazgo
+
+                    };
+                    return acc;
+                }, {} as Record<string, any>)
+            });
+        }
+    }, [evaluationResults, selectedDepartment]);
+
 
     const handleChangeInvitationCode = async () => {
         if (!newInvitationCode) {
@@ -111,7 +186,6 @@ function CompanyControlPanel() {
             <Spinner color="primary" label="Cargando datos..." />
         </div>;
     }
-
     return (
         <div className="flex min-h-dvh">
             <Sidebar setActiveTab={setActiveTab} />
@@ -208,18 +282,30 @@ function CompanyControlPanel() {
                                 </CardBody>
                             </Card>
 
-                            <Card className="w-full col-span-12 row-span-6 md:col-span-8 md:row-span-3" >
-                                <CardHeader>
-                                    <h2 className="text-lg font-semibold">Informe de {selectedDepartment?.name || 'Departamento'}</h2>
-                                </CardHeader>
-                                <CardBody className="overflow-auto h-full flex flex-col md:flex-row gap-2">
-                                    <Suspense fallback={<div>Cargando...</div>}>
-                                        <RadarCharts />
-                                        <BarCharts />
-                                        <LineCharts />
-                                    </Suspense>
-                                </CardBody>
-                            </Card>
+                            {isLoading ? (
+                                <Card className="w-full col-span-12 row-span-6 md:col-span-8 md:row-span-3" >
+                                    <CardHeader>
+                                        <h2 className="text-lg font-semibold">Informe de {selectedDepartment?.name || 'Departamento'}</h2>
+                                    </CardHeader>
+                                    <CardBody className="overflow-auto h-full flex flex-col md:flex-row gap-2 justify-center items-center">
+                                        <Spinner label="Cargando resultados de evaluación..." />
+                                    </CardBody>
+                                </Card>
+
+                            ) : (
+                                <Card className="w-full col-span-12 row-span-6 md:col-span-8 md:row-span-3" >
+                                    <CardHeader>
+                                        <h2 className="text-lg font-semibold">Informe de {selectedDepartment?.name || 'Departamento'}</h2>
+                                    </CardHeader>
+                                    <CardBody className="overflow-auto h-full flex flex-col md:flex-row gap-2">
+                                        <Suspense fallback={<div>Cargando...</div>}>
+                                            <RadarCharts data={filteredResults?.departmentCategoryAverages} />
+                                            <BarCharts data={filteredResults?.departmentCategoryAverages} />
+                                            <LineCharts data={filteredResults?.employeeCategoryAverages} companyId={company.id} />
+                                        </Suspense>
+                                    </CardBody>
+                                </Card>
+                            )}
 
                             <Card className="w-full col-span-12 row-span-6 order-4 md:order-none md:col-span-4 md:row-span-4">
                                 <CardHeader>
@@ -312,7 +398,7 @@ function CompanyControlPanel() {
                                 </CardHeader>
                                 <CardBody className="overflow-auto h-full">
                                     <Suspense fallback={<div>Cargando...</div>}>
-                                        <ResultTable />
+                                        <ResultTable data={evaluationResults?.employeeCategoryAverages} companyId={company.id} />
                                     </Suspense>
                                 </CardBody>
                             </Card>

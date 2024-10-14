@@ -339,7 +339,7 @@ const FormularioPrueba = () => {
               <>
                 {Object.entries(groupedQuestions).map(([category, categoryQuestions]) => (
                   <div key={category} className="space-y-4">
-                    <Divider />
+                    <Divider className="my-2" />
                     <h3 className="text-base font-semibold">{category}</h3>
                     {categoryQuestions.map((question) => (
                       <div key={question.id} className=" w-full">
@@ -351,17 +351,20 @@ const FormularioPrueba = () => {
                           maxValue={5}
                           minValue={1}
                           marks={[
-                            { value: 1, label: "1" },
-                            { value: 2, label: "2" },
-                            { value: 3, label: "3" },
-                            { value: 4, label: "4" },
-                            { value: 5, label: "5" },
+                            { value: 1, label: "Muy bajo" },
+                            { value: 2, label: "Bajo" },
+                            { value: 3, label: "Regular" },
+                            { value: 4, label: "Alto" },
+                            { value: 5, label: "Muy alto" },
                           ]}
                           defaultValue={1}
                           value={formData[question.id] as number}
                           onChange={(value) => handleSliderChange(question.id, value as number)}
                           className="w-full mb-10"
                           hideValue
+                          classNames={{
+                            mark: "text-muted-foreground dark:text-muted-foreground-dark text-xs whitespace-normal md:whitespace-nowrap md:text-sm",
+                          }}
                         />
                       </div>
                     ))}
@@ -369,7 +372,7 @@ const FormularioPrueba = () => {
                 ))}
 
                 <div className="w-full flex flex-col gap-2">
-                  <Divider className="my-2" />
+                  <Divider className="my-" />
 
                   <Textarea
                     variant="underlined"
