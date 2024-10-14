@@ -304,8 +304,9 @@ export default function ResultTable({ data, companyId }: { data: Record<string, 
         );
     }, [filteredItems.length, page, rowsPerPage]);
 
-    const generateChartData = (employeeId: string) => {
-        const categories = ["Organización",
+    const generateChartData = () => {
+        const categories = [
+            "Organización",
             "Liderazgo",
             "Comunicación",
             "Responsabilidad",
@@ -361,7 +362,7 @@ export default function ResultTable({ data, companyId }: { data: Record<string, 
                     <ModalBody>
                         {selectedEmployee && (
                             <EmployeeEvaluationChart
-                                data={generateChartData(selectedEmployee.id)}
+                                data={generateChartData()}
                                 employeeName={selectedEmployee.name}
                             />
                         )}
