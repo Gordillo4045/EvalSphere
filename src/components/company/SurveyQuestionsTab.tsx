@@ -25,6 +25,7 @@ import { AiOutlineEdit } from "react-icons/ai";
 import { BiSolidTrashAlt } from "react-icons/bi";
 import { FaPlus } from 'react-icons/fa6';
 import DeleteConfirmationModal from '../DeleteConfirmationModal';
+import { FaClipboardList } from 'react-icons/fa';
 
 interface SurveyQuestion {
     id: string;
@@ -45,6 +46,29 @@ const CATEGORIES = [
     "Adaptación"
 ];
 
+const BASE_QUESTIONS = [
+    { category: "Organización", question: "¿Trabaja de forma ordenada?" },
+    { category: "Organización", question: "¿Cumple con los plazos de entrega?" },
+    { category: "Organización", question: "¿Es capaz de priorizar tareas y manejar su tiempo de manera efectiva?" },
+    { category: "Creatividad", question: "¿Propone ideas creativas y de valor?" },
+    { category: "Creatividad", question: "¿Busca soluciones innovadoras para los problemas que enfrenta?" },
+    { category: "Liderazgo", question: "¿Muestra iniciativa y participa activamente en las reuniones?" },
+    { category: "Liderazgo", question: "¿Muestra seguridad en su trabajo?" },
+    { category: "Liderazgo", question: "¿Es capaz de tomar decisiones efectivas en momentos críticos?" },
+    { category: "Comunicación", question: "¿Se comunica de forma clara y eficaz?" },
+    { category: "Comunicación", question: "¿Sabe escuchar?" },
+    { category: "Comunicación", question: "¿Muestra una actitud receptiva frente a las opiniones de los demás?" },
+    { category: "Responsabilidad", question: "¿Cumple con los plazos de entrega?" },
+    { category: "Responsabilidad", question: "¿Su trabajo contribuye a que la empresa alcance sus objetivos?" },
+    { category: "Responsabilidad", question: "¿Asume la responsabilidad por sus errores y trabaja para corregirlos?" },
+    { category: "Aprendizaje", question: "¿Acepta las críticas y aplica los consejos de los demás en su manera de trabajar?" },
+    { category: "Aprendizaje", question: "¿Muestra disposición para aprender y mejorar continuamente?" },
+    { category: "Aprendizaje", question: "¿Busca activamente oportunidades para desarrollar nuevas habilidades?" },
+    { category: "Adaptación", question: "¿Sabe actuar de manera adecuada ante situaciones de estrés o conflictivas?" },
+    { category: "Adaptación", question: "¿Se adapta fácilmente a cambios en su entorno laboral?" },
+    { category: "Adaptación", question: "¿Muestra flexibilidad ante nuevas responsabilidades y desafíos?" },
+];
+
 export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProps) {
     const [questions, setQuestions] = useState<SurveyQuestion[]>([]);
     const [newQuestion, setNewQuestion] = useState({ question: '', category: '' });
@@ -52,6 +76,7 @@ export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProp
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [questionToDelete, setQuestionToDelete] = useState<SurveyQuestion | null>(null);
+    const [showBaseQuestionsModal, setShowBaseQuestionsModal] = useState(false);
 
     useEffect(() => {
         const questionsRef = collection(db, `companies/${companyId}/surveyQuestions`);
@@ -63,6 +88,11 @@ export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProp
                 questionsData.push({ id: doc.id, ...doc.data() } as SurveyQuestion);
             });
             setQuestions(questionsData);
+
+            // Mostrar el modal si no hay preguntas
+            if (questionsData.length === 0) {
+                setShowBaseQuestionsModal(true);
+            }
         });
 
         return () => unsubscribe();
@@ -122,6 +152,20 @@ export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProp
                 console.error("Error al eliminar pregunta:", error);
                 toast.error("Error al eliminar pregunta.");
             }
+        }
+    };
+
+    const handleAddBaseQuestions = async () => {
+        try {
+            const questionsRef = collection(db, `companies/${companyId}/surveyQuestions`);
+            for (const question of BASE_QUESTIONS) {
+                await addDoc(questionsRef, question);
+            }
+            setShowBaseQuestionsModal(false);
+            toast.success("Preguntas base añadidas exitosamente.");
+        } catch (error) {
+            console.error("Error al añadir preguntas base:", error);
+            toast.error("Error al añadir preguntas base.");
         }
     };
 
@@ -245,6 +289,23 @@ export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProp
                 title="Eliminar Pregunta"
                 content={`¿Estás seguro de que deseas eliminar la pregunta "${questionToDelete?.question}"?`}
             />
+
+            <Modal isOpen={showBaseQuestionsModal} onClose={() => setShowBaseQuestionsModal(false)}>
+                <ModalContent>
+                    <ModalHeader>Añadir Preguntas Base</ModalHeader>
+                    <ModalBody>
+                        <p>No hay preguntas en la encuesta. ¿Deseas añadir las preguntas base?</p>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button color="danger" variant="light" onPress={() => setShowBaseQuestionsModal(false)}>
+                            Cancelar
+                        </Button>
+                        <Button color="primary" onPress={handleAddBaseQuestions} endContent={<FaClipboardList />}>
+                            Añadir Preguntas Base
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
         </div>
     );
 }

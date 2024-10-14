@@ -474,3 +474,103 @@ export const updateEmployee = functions.https.onCall(async (data, context) => {
         );
     }
 });
+
+export const calculateEvaluationAverages = functions.https.onCall(async (data: { companyId: string }, context: functions.https.CallableContext) => {
+    if (!context.auth) {
+        throw new functions.https.HttpsError('unauthenticated', 'El usuario debe estar autenticado para realizar esta acción.');
+    }
+
+    const { companyId } = data;
+    if (!companyId) {
+        throw new functions.https.HttpsError('invalid-argument', 'Se requiere el ID de la compañía.');
+    }
+
+    try {
+        // Obtener todas las preguntas y sus categorías
+        const questionsSnapshot = await admin.firestore().collection(`companies/${companyId}/surveyQuestions`).get();
+        const questionCategories: { [key: string]: string } = {};
+        questionsSnapshot.forEach(doc => {
+            questionCategories[doc.id] = doc.data().category;
+        });
+
+        // Obtener todos los empleados y sus departamentos
+        const employeesSnapshot = await admin.firestore().collection(`companies/${companyId}/employees`).get();
+        const employeeDepartments: { [key: string]: string } = {};
+        employeesSnapshot.forEach(doc => {
+            employeeDepartments[doc.id] = doc.data().departmentId;
+        });
+
+        // Obtener todas las evaluaciones
+        const evaluationsSnapshot = await admin.firestore().collection(`companies/${companyId}/evaluations`).get();
+
+        const employeeCategoryTotals: { [key: string]: { [key: string]: number } } = {};
+        const employeeCategoryCounts: { [key: string]: { [key: string]: number } } = {};
+        const departmentCategoryTotals: { [key: string]: { [key: string]: number } } = {};
+        const departmentCategoryCounts: { [key: string]: { [key: string]: number } } = {};
+
+        evaluationsSnapshot.forEach(evalDoc => {
+            const evaluationData = evalDoc.data();
+            const evaluatedEmployeeId = evaluationData.evaluatedId;
+            const departmentId = employeeDepartments[evaluatedEmployeeId];
+
+            if (!departmentId) {
+                console.warn(`Empleado ${evaluatedEmployeeId} no tiene departamento asignado.`);
+                return;
+            }
+
+            Object.entries(evaluationData).forEach(([questionId, score]) => {
+                if (typeof score !== 'number' || !questionCategories[questionId]) return;
+
+                const category = questionCategories[questionId];
+
+                // Acumular para empleados
+                if (!employeeCategoryTotals[evaluatedEmployeeId]) {
+                    employeeCategoryTotals[evaluatedEmployeeId] = {};
+                    employeeCategoryCounts[evaluatedEmployeeId] = {};
+                }
+                if (!employeeCategoryTotals[evaluatedEmployeeId][category]) {
+                    employeeCategoryTotals[evaluatedEmployeeId][category] = 0;
+                    employeeCategoryCounts[evaluatedEmployeeId][category] = 0;
+                }
+                employeeCategoryTotals[evaluatedEmployeeId][category] += score;
+                employeeCategoryCounts[evaluatedEmployeeId][category]++;
+
+                // Acumular para departamentos
+                if (!departmentCategoryTotals[departmentId]) {
+                    departmentCategoryTotals[departmentId] = {};
+                    departmentCategoryCounts[departmentId] = {};
+                }
+                if (!departmentCategoryTotals[departmentId][category]) {
+                    departmentCategoryTotals[departmentId][category] = 0;
+                    departmentCategoryCounts[departmentId][category] = 0;
+                }
+                departmentCategoryTotals[departmentId][category] += score;
+                departmentCategoryCounts[departmentId][category]++;
+            });
+        });
+
+        // Calcular promedios finales
+        const employeeCategoryAverages: { [key: string]: { [key: string]: number } } = {};
+        Object.entries(employeeCategoryTotals).forEach(([employeeId, categories]) => {
+            employeeCategoryAverages[employeeId] = {};
+            Object.entries(categories).forEach(([category, total]) => {
+                const count = employeeCategoryCounts[employeeId][category];
+                employeeCategoryAverages[employeeId][category] = total / count;
+            });
+        });
+
+        const departmentCategoryAverages: { [key: string]: { [key: string]: number } } = {};
+        Object.entries(departmentCategoryTotals).forEach(([departmentId, categories]) => {
+            departmentCategoryAverages[departmentId] = {};
+            Object.entries(categories).forEach(([category, total]) => {
+                const count = departmentCategoryCounts[departmentId][category];
+                departmentCategoryAverages[departmentId][category] = total / count;
+            });
+        });
+
+        return { employeeCategoryAverages, departmentCategoryAverages };
+    } catch (error) {
+        console.error("Error al calcular promedios:", error);
+        throw new functions.https.HttpsError('internal', 'Error al calcular los promedios de evaluación');
+    }
+});

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import {
     Table,
     TableHeader,
@@ -7,357 +7,200 @@ import {
     TableRow,
     TableCell,
     Input,
+    Button,
+    Pagination,
+    SortDescriptor,
+    Tooltip,
+    User,
+    Chip,
     Dropdown,
     DropdownTrigger,
     DropdownMenu,
     DropdownItem,
-    Button,
-    Chip,
-    User,
-    Pagination,
     Selection,
-    ChipProps,
-    SortDescriptor
 } from "@nextui-org/react";
 import { BiSearch } from "react-icons/bi";
 import { FiChevronDown } from "react-icons/fi";
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from "@/config/config";
+import { Employee, Department, Position } from "@/types/applicaciontypes";
+
+const INITIAL_VISIBLE_COLUMNS = ["name", "average", "department", "position", "status", "actions"];
+
+const COLUMN_NAMES = {
+    name: "Nombre",
+    average: "Promedio",
+    department: "Departamento",
+    position: "Posición",
+    status: "Estado",
+    actions: "Acciones"
+};
+
+const statusOptions = [
+    { name: "Completado", uid: "Completado" },
+    { name: "Pendiente", uid: "Pendiente" },
+];
 
 export function capitalize(str: string) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
-const statusColorMap: Record<string, ChipProps["color"]> = {
-    active: "success",
-    paused: "danger",
-    vacation: "warning",
-};
 
-const INITIAL_VISIBLE_COLUMNS = ["name", "role", "status", "actions"];
-
-const columns = [
-    { name: "ID", uid: "id", sortable: true },
-    { name: "NAME", uid: "name", sortable: true },
-    { name: "AGE", uid: "age", sortable: true },
-    { name: "ROLE", uid: "role", sortable: true },
-    { name: "TEAM", uid: "team" },
-    { name: "EMAIL", uid: "email" },
-    { name: "STATUS", uid: "status", sortable: true },
-    { name: "ACTIONS", uid: "actions" },
-];
-
-const statusOptions = [
-    { name: "Active", uid: "active" },
-    { name: "Paused", uid: "paused" },
-    { name: "Vacation", uid: "vacation" },
-];
-
-const users = [
-    {
-        id: 1,
-        name: "Tony Reichert",
-        role: "CEO",
-        team: "Management",
-        status: "active",
-        age: "29",
-        avatar: "https://i.pravatar.cc/150?u=a042581f4e29026024d",
-        email: "tony.reichert@example.com",
-    },
-    {
-        id: 2,
-        name: "Zoey Lang",
-        role: "Tech Lead",
-        team: "Development",
-        status: "paused",
-        age: "25",
-        avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704d",
-        email: "zoey.lang@example.com",
-    },
-    {
-        id: 3,
-        name: "Jane Fisher",
-        role: "Sr. Dev",
-        team: "Development",
-        status: "active",
-        age: "22",
-        avatar: "https://i.pravatar.cc/150?u=a04258114e29026702d",
-        email: "jane.fisher@example.com",
-    },
-    {
-        id: 4,
-        name: "William Howard",
-        role: "C.M.",
-        team: "Marketing",
-        status: "vacation",
-        age: "28",
-        avatar: "https://i.pravatar.cc/150?u=a048581f4e29026701d",
-        email: "william.howard@example.com",
-    },
-    {
-        id: 5,
-        name: "Kristen Copper",
-        role: "S. Manager",
-        team: "Sales",
-        status: "active",
-        age: "24",
-        avatar: "https://i.pravatar.cc/150?u=a092581d4ef9026700d",
-        email: "kristen.cooper@example.com",
-    },
-    {
-        id: 6,
-        name: "Brian Kim",
-        role: "P. Manager",
-        team: "Management",
-        age: "29",
-        avatar: "https://i.pravatar.cc/150?u=a042581f4e29026024d",
-        email: "brian.kim@example.com",
-        status: "Active",
-    },
-    {
-        id: 7,
-        name: "Michael Hunt",
-        role: "Designer",
-        team: "Design",
-        status: "paused",
-        age: "27",
-        avatar: "https://i.pravatar.cc/150?u=a042581f4e29027007d",
-        email: "michael.hunt@example.com",
-    },
-    {
-        id: 8,
-        name: "Samantha Brooks",
-        role: "HR Manager",
-        team: "HR",
-        status: "active",
-        age: "31",
-        avatar: "https://i.pravatar.cc/150?u=a042581f4e27027008d",
-        email: "samantha.brooks@example.com",
-    },
-    {
-        id: 9,
-        name: "Frank Harrison",
-        role: "F. Manager",
-        team: "Finance",
-        status: "vacation",
-        age: "33",
-        avatar: "https://i.pravatar.cc/150?img=4",
-        email: "frank.harrison@example.com",
-    },
-    {
-        id: 10,
-        name: "Emma Adams",
-        role: "Ops Manager",
-        team: "Operations",
-        status: "active",
-        age: "35",
-        avatar: "https://i.pravatar.cc/150?img=5",
-        email: "emma.adams@example.com",
-    },
-    {
-        id: 11,
-        name: "Brandon Stevens",
-        role: "Jr. Dev",
-        team: "Development",
-        status: "active",
-        age: "22",
-        avatar: "https://i.pravatar.cc/150?img=8",
-        email: "brandon.stevens@example.com",
-    },
-    {
-        id: 12,
-        name: "Megan Richards",
-        role: "P. Manager",
-        team: "Product",
-        status: "paused",
-        age: "28",
-        avatar: "https://i.pravatar.cc/150?img=10",
-        email: "megan.richards@example.com",
-    },
-    {
-        id: 13,
-        name: "Oliver Scott",
-        role: "S. Manager",
-        team: "Security",
-        status: "active",
-        age: "37",
-        avatar: "https://i.pravatar.cc/150?img=12",
-        email: "oliver.scott@example.com",
-    },
-    {
-        id: 14,
-        name: "Grace Allen",
-        role: "M. Specialist",
-        team: "Marketing",
-        status: "active",
-        age: "30",
-        avatar: "https://i.pravatar.cc/150?img=16",
-        email: "grace.allen@example.com",
-    },
-    {
-        id: 15,
-        name: "Noah Carter",
-        role: "IT Specialist",
-        team: "I. Technology",
-        status: "paused",
-        age: "31",
-        avatar: "https://i.pravatar.cc/150?img=15",
-        email: "noah.carter@example.com",
-    },
-    {
-        id: 16,
-        name: "Ava Perez",
-        role: "Manager",
-        team: "Sales",
-        status: "active",
-        age: "29",
-        avatar: "https://i.pravatar.cc/150?img=20",
-        email: "ava.perez@example.com",
-    },
-    {
-        id: 17,
-        name: "Liam Johnson",
-        role: "Data Analyst",
-        team: "Analysis",
-        status: "active",
-        age: "28",
-        avatar: "https://i.pravatar.cc/150?img=33",
-        email: "liam.johnson@example.com",
-    },
-    {
-        id: 18,
-        name: "Sophia Taylor",
-        role: "QA Analyst",
-        team: "Testing",
-        status: "active",
-        age: "27",
-        avatar: "https://i.pravatar.cc/150?img=29",
-        email: "sophia.taylor@example.com",
-    },
-    {
-        id: 19,
-        name: "Lucas Harris",
-        role: "Administrator",
-        team: "Information Technology",
-        status: "paused",
-        age: "32",
-        avatar: "https://i.pravatar.cc/150?img=50",
-        email: "lucas.harris@example.com",
-    },
-    {
-        id: 20,
-        name: "Mia Robinson",
-        role: "Coordinator",
-        team: "Operations",
-        status: "active",
-        age: "26",
-        avatar: "https://i.pravatar.cc/150?img=45",
-        email: "mia.robinson@example.com",
-    },
-];
-
-
-type User = typeof users[0];
-
-export default function ResultTable() {
-    const [filterValue, setFilterValue] = React.useState("");
-    const [visibleColumns, setVisibleColumns] = React.useState<Selection>(new Set(INITIAL_VISIBLE_COLUMNS));
-    const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
-    const [rowsPerPage, setRowsPerPage] = React.useState(3);
-    const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
-        column: "age",
+export default function ResultTable({ data, companyId }: { data: Record<string, Record<string, number>>, companyId: string }) {
+    const [employees, setEmployees] = useState<Employee[]>([]);
+    const [departments, setDepartments] = useState<Department[]>([]);
+    const [positions, setPositions] = useState<Position[]>([]);
+    const [filterValue, setFilterValue] = useState("");
+    const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
+        column: "name",
         direction: "ascending",
     });
+    const [page, setPage] = useState(1);
+    const [visibleColumns, setVisibleColumns] = useState<Selection>(new Set(INITIAL_VISIBLE_COLUMNS));
+    const [statusFilter, setStatusFilter] = useState<Selection>("all");
+    const rowsPerPage = 3;
 
-    const [page, setPage] = React.useState(1);
+    useEffect(() => {
+        const unsubscribeEmployees = onSnapshot(
+            collection(db, `companies/${companyId}/employees`),
+            (snapshot) => {
+                const employeesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Employee));
+                setEmployees(employeesData);
+            },
+            (error) => console.error("Error al obtener empleados:", error)
+        );
 
-    const hasSearchFilter = Boolean(filterValue);
+        const unsubscribeDepartments = onSnapshot(
+            collection(db, `companies/${companyId}/departments`),
+            (snapshot) => {
+                const departmentsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Department));
+                setDepartments(departmentsData);
 
-    const headerColumns = React.useMemo(() => {
-        if (visibleColumns === "all") return columns;
+                departmentsData.forEach(department => {
+                    const unsubscribePositions = onSnapshot(
+                        collection(db, `companies/${companyId}/departments/${department.id}/positions`),
+                        (positionsSnapshot) => {
+                            const positionsData = positionsSnapshot.docs.map(doc => ({
+                                id: doc.id,
+                                ...doc.data(),
+                                departmentId: department.id
+                            } as Position));
+                            setPositions(prevPositions => {
+                                const filteredPositions = prevPositions.filter(p => p.departmentId !== department.id);
+                                return [...filteredPositions, ...positionsData];
+                            });
+                        },
+                        (error) => console.error(`Error al obtener posiciones para el departamento ${department.id}:`, error)
+                    );
 
-        return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
+                    return () => unsubscribePositions();
+                });
+            },
+            (error) => console.error("Error al obtener departamentos:", error)
+        );
+
+        return () => {
+            unsubscribeEmployees();
+            unsubscribeDepartments();
+        };
+    }, [companyId]);
+
+    const items = useMemo(() => {
+        if (!data || !employees.length) return [];
+        return employees.map(employee => {
+            const employeeData = data[employee.id] || {};
+            const average = Object.values(employeeData).reduce((sum, value) => sum + value, 0) / Object.values(employeeData).length;
+            return {
+                ...employee,
+                average: average ? average.toFixed(2) : 'N/A',
+                status: Object.keys(employeeData).length > 0 ? 'Completado' : 'Pendiente'
+            };
+        });
+    }, [data, employees]);
+
+    const headerColumns = useMemo(() => {
+        if (visibleColumns === "all") return INITIAL_VISIBLE_COLUMNS.map(col => ({ uid: col, name: COLUMN_NAMES[col as keyof typeof COLUMN_NAMES] }));
+        return INITIAL_VISIBLE_COLUMNS.filter((column) => Array.from(visibleColumns).includes(column)).map(col => ({ uid: col, name: COLUMN_NAMES[col as keyof typeof COLUMN_NAMES] }));
     }, [visibleColumns]);
 
-    const filteredItems = React.useMemo(() => {
-        let filteredUsers = [...users];
-
-        if (hasSearchFilter) {
-            filteredUsers = filteredUsers.filter((user) =>
-                user.name.toLowerCase().includes(filterValue.toLowerCase()),
+    const filteredItems = useMemo(() => {
+        let filtered = items;
+        if (filterValue) {
+            filtered = filtered.filter((item) =>
+                item.name?.toLowerCase().includes(filterValue.toLowerCase()) ||
+                item.email?.toLowerCase().includes(filterValue.toLowerCase()) ||
+                departments.find(d => d.id === item.departmentId)?.name?.toLowerCase().includes(filterValue.toLowerCase())
             );
         }
         if (statusFilter !== "all" && Array.from(statusFilter).length !== statusOptions.length) {
-            filteredUsers = filteredUsers.filter((user) =>
-                Array.from(statusFilter).includes(user.status),
+            filtered = filtered.filter((item) =>
+                Array.from(statusFilter).includes(item.status),
             );
         }
-
-        return filteredUsers;
-    }, [users, filterValue, statusFilter]);
+        return filtered;
+    }, [items, filterValue, departments, statusFilter]);
 
     const pages = Math.ceil(filteredItems.length / rowsPerPage);
 
-    const items = React.useMemo(() => {
-        const start = (page - 1) * rowsPerPage;
-        const end = start + rowsPerPage;
-
-        return filteredItems.slice(start, end);
-    }, [page, filteredItems, rowsPerPage]);
-
-    const sortedItems = React.useMemo(() => {
-        return [...items].sort((a: User, b: User) => {
-            const first = a[sortDescriptor.column as keyof User] as number;
-            const second = b[sortDescriptor.column as keyof User] as number;
+    const sortedItems = useMemo(() => {
+        return [...filteredItems].sort((a, b) => {
+            const first = a[sortDescriptor.column as keyof typeof a];
+            const second = b[sortDescriptor.column as keyof typeof b];
             const cmp = first < second ? -1 : first > second ? 1 : 0;
 
             return sortDescriptor.direction === "descending" ? -cmp : cmp;
         });
-    }, [sortDescriptor, items]);
+    }, [filteredItems, sortDescriptor]);
 
-    const renderCell = React.useCallback((user: User, columnKey: React.Key) => {
-        const cellValue = user[columnKey as keyof User];
+    const paginatedItems = useMemo(() => {
+        const start = (page - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
 
+        return sortedItems.slice(start, end);
+    }, [sortedItems, page, rowsPerPage]);
+
+    const renderCell = useCallback((item: any, columnKey: React.Key) => {
         switch (columnKey) {
             case "name":
                 return (
                     <User
-                        avatarProps={{ radius: "lg", src: user.avatar }}
-                        description={user.email}
-                        name={cellValue}
+                        avatarProps={{ src: item.avatar }}
+                        description={item.email}
+                        name={item.name}
                     >
-                        {user.email}
+                        {item.name}
                     </User>
                 );
-            case "role":
-                return (
-                    <div className="flex flex-col">
-                        <p className="text-bold text-small capitalize">{cellValue}</p>
-                        <p className="text-bold text-tiny capitalize text-default-400">{user.team}</p>
-                    </div>
-                );
+            case "average":
+                return <span>{item.average}</span>;
+            case "department":
+                return <span>{departments.find(d => d.id === item.departmentId)?.name || 'N/A'}</span>;
+            case "position":
+                return <span>{positions.find(p => p.id === item.positionId)?.title || 'N/A'}</span>;
             case "status":
                 return (
-                    <Chip className="capitalize" color={statusColorMap[user.status]} size="sm" variant="flat">
-                        {cellValue}
+                    <Chip color={item.status === 'Completado' ? 'success' : 'warning'} variant="flat">
+                        {item.status}
                     </Chip>
                 );
             case "actions":
                 return (
-                    <div className="flex justify-center">
-                        <Button color="primary" size="sm" variant="flat">
+                    <Tooltip content="Ver evaluación">
+                        <Button
+                            size="sm"
+                            variant="flat"
+                            color="primary"
+                            onPress={() => console.log('Ver evaluación de', item.name)}
+                        >
                             Ver evaluación
                         </Button>
-                    </div>
+                    </Tooltip>
                 );
             default:
-                return cellValue;
+                return null;
         }
-    }, []);
+    }, [departments, positions]);
 
-    const onRowsPerPageChange = React.useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-        setRowsPerPage(Number(e.target.value));
-        setPage(1);
-    }, []);
-
-    const onSearchChange = React.useCallback((value?: string) => {
+    const onSearchChange = useCallback((value?: string) => {
         if (value) {
             setFilterValue(value);
             setPage(1);
@@ -366,27 +209,27 @@ export default function ResultTable() {
         }
     }, []);
 
-    const onClear = React.useCallback(() => {
+    const onClear = useCallback(() => {
         setFilterValue("")
         setPage(1)
     }, [])
 
-    const topContent = React.useMemo(() => {
+    const topContent = useMemo(() => {
         return (
-            <div className="flex flex-col gap-4 ">
-                <div className="flex justify-between gap-3 ">
+            <div className="flex flex-col gap-4">
+                <div className="flex justify-between gap-3 items-end">
                     <Input
                         isClearable
-                        className="w-full min-w-[205px] sm:max-w-[44%]"
-                        placeholder="Buscar por nombre..."
+                        className="w-full sm:max-w-[44%]"
+                        placeholder="Buscar por nombre, email o departamento"
                         startContent={<BiSearch />}
                         value={filterValue}
                         onClear={() => onClear()}
                         onValueChange={onSearchChange}
                     />
-                    <div className="flex gap-3 ">
+                    <div className="flex gap-3">
                         <Dropdown>
-                            <DropdownTrigger className="flex">
+                            <DropdownTrigger className="hidden sm:flex">
                                 <Button endContent={<FiChevronDown className="text-small" />} variant="flat">
                                     Estado
                                 </Button>
@@ -407,7 +250,7 @@ export default function ResultTable() {
                             </DropdownMenu>
                         </Dropdown>
                         <Dropdown>
-                            <DropdownTrigger className="flex">
+                            <DropdownTrigger className="hidden sm:flex">
                                 <Button endContent={<FiChevronDown className="text-small" />} variant="flat">
                                     Columnas
                                 </Button>
@@ -420,60 +263,53 @@ export default function ResultTable() {
                                 selectionMode="multiple"
                                 onSelectionChange={setVisibleColumns}
                             >
-                                {columns.map((column) => (
-                                    <DropdownItem key={column.uid} className="capitalize">
-                                        {capitalize(column.name)}
+                                {INITIAL_VISIBLE_COLUMNS.map((column) => (
+                                    <DropdownItem key={column} className="capitalize">
+                                        {capitalize(COLUMN_NAMES[column as keyof typeof COLUMN_NAMES])}
                                     </DropdownItem>
                                 ))}
                             </DropdownMenu>
                         </Dropdown>
                     </div>
                 </div>
-
             </div>
         );
-    }, [
-        filterValue,
-        statusFilter,
-        visibleColumns,
-        onSearchChange,
-        onRowsPerPageChange,
-        users.length,
-        hasSearchFilter,
-    ]);
+    }, [filterValue, statusFilter, visibleColumns, onSearchChange]);
 
-    const bottomContent = React.useMemo(() => {
+    const bottomContent = useMemo(() => {
         return (
-            <div className="py-2 px-2 flex justify-between items-center ">
+            <div className="py-2 px-2 flex justify-between items-center">
                 <Pagination
                     isCompact
                     color="primary"
                     page={page}
-                    total={pages}
+                    total={employees.length > 0 ? pages : 1}
                     onChange={setPage}
                     size="sm"
                     classNames={{
                         cursor: "bg-foreground text-background",
                     }}
                 />
-                <span className="text-default-400 text-xs sm:text-small text-end">Total {users.length} usuarios</span>
+                <span className="text-default-400 text-xs sm:text-small text-end">
+                    {`${filteredItems.length} empleados`}
+                </span>
             </div>
         );
-    }, [page, pages]);
+    }, [filteredItems.length, page, rowsPerPage]);
 
     return (
         <Table
-            aria-label="Tabla de resultados con celdas personalizadas, paginación y ordenamiento"
+            aria-label="Tabla de Resultados de Evaluación"
             isHeaderSticky
             isCompact
             bottomContent={bottomContent}
             bottomContentPlacement="outside"
             classNames={{
-                wrapper: "max-h-[282px]",
+                wrapper: "min-h-[237px]",
             }}
             sortDescriptor={sortDescriptor}
             topContent={topContent}
-            topContentPlacement="inside"
+            topContentPlacement="outside"
             onSortChange={setSortDescriptor}
         >
             <TableHeader columns={headerColumns}>
@@ -481,13 +317,13 @@ export default function ResultTable() {
                     <TableColumn
                         key={column.uid}
                         align={column.uid === "actions" ? "center" : "start"}
-                        allowsSorting={column.sortable}
+                        allowsSorting={column.uid !== "actions"}
                     >
                         {column.name}
                     </TableColumn>
                 )}
             </TableHeader>
-            <TableBody emptyContent={"No se encontraron usuarios"} items={sortedItems}>
+            <TableBody items={paginatedItems} emptyContent="No hay datos para mostrar">
                 {(item) => (
                     <TableRow key={item.id}>
                         {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
