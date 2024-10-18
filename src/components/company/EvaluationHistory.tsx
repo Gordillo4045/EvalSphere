@@ -39,7 +39,6 @@ export default function EvaluationHistory({
 }: EvaluationHistoryProps) {
     const [processedEvaluationData, setProcessedEvaluationData] = useState<ProcessedEmployeeEvaluation[]>([]);
     const [totalEvaluations, setTotalEvaluations] = useState<number>(0);
-    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const processData = async () => {
@@ -73,10 +72,8 @@ export default function EvaluationHistory({
                     })
                 );
                 setProcessedEvaluationData(processedData);
-                setError(null);
             } catch (err) {
                 console.error("Error al procesar los datos de evaluación:", err);
-                setError("Hubo un problema al cargar los datos de evaluación. Por favor, intente de nuevo más tarde.");
             }
         };
 
@@ -91,18 +88,10 @@ export default function EvaluationHistory({
         );
     }
 
-    if (error) {
-        return (
-            <div className="text-center text-red-500 p-4" aria-live="assertive">
-                {error}
-            </div>
-        );
-    }
-
     if (processedEvaluationData.length === 0) {
         return (
-            <div className="flex justify-center items-center h-96 text-center p-4 text-muted-foreground dark:text-muted-foreground-dark" aria-live="polite">
-                No hay datos de evaluación disponibles en este momento.
+            <div className="flex justify-center items-center h-[calc(100vh-12rem)] text-center p-4 text-muted-foreground dark:text-muted-foreground-dark select-none" aria-live="polite">
+                No hay datos de evaluación disponibles.
             </div>
         );
     }
