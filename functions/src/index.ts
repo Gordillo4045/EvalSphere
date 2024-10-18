@@ -391,12 +391,12 @@ export const createEmployee = functions.https.onCall(async (data, context) => {
 });
 
 export const deleteEmployee = functions.https.onCall(async (data, context) => {
-    const { id } = data;
+    const { id, companyId } = data;
 
     try {
         await admin.auth().deleteUser(id);
         await admin.firestore().collection("employees").doc(id).delete();
-        await admin.firestore().collection("companies").doc(data.companyId).collection("employees").doc(id).delete();
+        await admin.firestore().collection("companies").doc(companyId).collection("employees").doc(id).delete();
         await admin.firestore().collection("users").doc(id).delete();
 
         return { success: true };

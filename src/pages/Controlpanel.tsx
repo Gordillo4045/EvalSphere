@@ -25,7 +25,7 @@ export default function Controlpanel() {
     const [adminUsuarios, setAdminUsuarios] = useState<Usuario[]>([]);
     const [companyUsuarios, setCompanyUsuarios] = useState<Usuario[]>([]);
     const [selectedTab, setSelectedTab] = useState("companias");
-
+    const [isDeleting, setIsDeleting] = useState(false);
     useEffect(() => {
         obtenerUsuarios();
     }, []);
@@ -66,6 +66,7 @@ export default function Controlpanel() {
     };
 
     const confirmarEliminar = async () => {
+        setIsDeleting(true);
         if (itemToDelete) {
             try {
                 const deleteUserFunction = httpsCallable('deleteUser');
@@ -76,6 +77,8 @@ export default function Controlpanel() {
             } catch (error) {
                 console.error(error);
                 toast.error("Error al eliminar el usuario");
+            } finally {
+                setIsDeleting(false);
             }
         }
         setItemToDelete(null);
@@ -128,6 +131,7 @@ export default function Controlpanel() {
 
                 <DeleteConfirmationModal
                     isOpen={showDeleteModal}
+                    isDeleting={isDeleting}
                     onConfirm={confirmarEliminar}
                     onCancel={() => setShowDeleteModal(false)}
                     title="Eliminar Usuario"

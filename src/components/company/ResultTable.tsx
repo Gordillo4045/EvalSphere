@@ -17,17 +17,12 @@ import {
     DropdownMenu,
     DropdownItem,
     Selection,
-    ModalBody,
-    Modal,
-    useDisclosure,
-    ModalContent,
 } from "@nextui-org/react";
 import { BiSearch } from "react-icons/bi";
 import { FiChevronDown } from "react-icons/fi";
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from "@/config/config";
 import { Employee, Department, Position } from "@/types/applicaciontypes";
-import EmployeeEvaluationChart from './EmployeeEvaluationChart';
 
 const INITIAL_VISIBLE_COLUMNS = ["name", "average", "department", "position", "status", "actions"];
 
@@ -49,7 +44,14 @@ export function capitalize(str: string) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-export default function ResultTable({ data, companyId }: { data: Record<string, Record<string, number>>, companyId: string }) {
+interface ResultTableProps {
+    data: Record<string, Record<string, number>>;
+    companyId: string;
+    setActiveTab: (tab: string) => void;
+    setSelectedEmployeeId: (id: string) => void;
+}
+
+export default function ResultTable({ data, companyId, setActiveTab, setSelectedEmployeeId }: ResultTableProps) {
     const [employees, setEmployees] = useState<Employee[]>([]);
     const [departments, setDepartments] = useState<Department[]>([]);
     const [positions, setPositions] = useState<Position[]>([]);
@@ -62,8 +64,6 @@ export default function ResultTable({ data, companyId }: { data: Record<string, 
     const [visibleColumns, setVisibleColumns] = useState<Selection>(new Set(INITIAL_VISIBLE_COLUMNS));
     const [statusFilter, setStatusFilter] = useState<Selection>("all");
     const rowsPerPage = 3;
-    const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
-    const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
     useEffect(() => {
         const unsubscribeEmployees = onSnapshot(
@@ -192,11 +192,11 @@ export default function ResultTable({ data, companyId }: { data: Record<string, 
                 return (
                     <Button
                         size="sm"
-                        variant="shadow"
+                        variant="light"
                         color="primary"
                         onPress={() => {
-                            setSelectedEmployee(item);
-                            onOpen()
+                            setSelectedEmployeeId(item.id);
+                            setActiveTab('evaluationHistory');
                         }}
                     >
                         Ver evaluación
@@ -205,7 +205,7 @@ export default function ResultTable({ data, companyId }: { data: Record<string, 
             default:
                 return null;
         }
-    }, [departments, positions, setSelectedEmployee]);
+    }, [departments, positions, setSelectedEmployeeId, setActiveTab]);
 
     const onSearchChange = useCallback((value?: string) => {
         if (value) {
@@ -304,23 +304,6 @@ export default function ResultTable({ data, companyId }: { data: Record<string, 
         );
     }, [filteredItems.length, page, rowsPerPage]);
 
-    const generateChartData = () => {
-        const categories = [
-            "Organización",
-            "Liderazgo",
-            "Comunicación",
-            "Responsabilidad",
-            "Aprendizaje",
-            "Adaptación"];
-        return categories.map(category => ({
-            category,
-            Jefe: Math.floor(Math.random() * 5) + 1,
-            Companeros: Math.floor(Math.random() * 5) + 1,
-            Subordinados: Math.floor(Math.random() * 5) + 1,
-            AutoEvaluacion: Math.floor(Math.random() * 5) + 1,
-        }));
-    };
-
     return (
         <>
             <Table
@@ -357,18 +340,6 @@ export default function ResultTable({ data, companyId }: { data: Record<string, 
                 </TableBody>
             </Table>
 
-            <Modal isOpen={isOpen} onClose={onOpenChange} size="5xl" scrollBehavior="outside">
-                <ModalContent>
-                    <ModalBody>
-                        {selectedEmployee && (
-                            <EmployeeEvaluationChart
-                                data={generateChartData()}
-                                employeeName={selectedEmployee.name}
-                            />
-                        )}
-                    </ModalBody>
-                </ModalContent>
-            </Modal>
         </>
     );
 }

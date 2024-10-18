@@ -58,7 +58,7 @@ export default function PositionTable({ companyId }: PositionTableProps) {
 
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [positionToDelete, setPositionToDelete] = useState<Position | null>(null);
-
+    const [isDeleting, setIsDeleting] = useState(false);
     useEffect(() => {
         const positionsQuery = query(collectionGroup(db, 'positions'));
 
@@ -121,6 +121,7 @@ export default function PositionTable({ companyId }: PositionTableProps) {
     };
 
     const handleDeleteConfirm = async () => {
+        setIsDeleting(true);
         if (positionToDelete) {
             try {
                 const positionRef = doc(db, `companies/${companyId}/departments/${positionToDelete.department}/positions`, positionToDelete.id);
@@ -130,6 +131,8 @@ export default function PositionTable({ companyId }: PositionTableProps) {
                 toast.success("Posición eliminada correctamente");
             } catch (error) {
                 console.error("Error al eliminar posición: ", error);
+            } finally {
+                setIsDeleting(false);
             }
         }
     };
@@ -397,6 +400,7 @@ export default function PositionTable({ companyId }: PositionTableProps) {
             </Modal>
 
             <DeleteConfirmationModal
+                isDeleting={isDeleting}
                 isOpen={deleteModalOpen}
                 onCancel={() => setDeleteModalOpen(false)}
                 onConfirm={handleDeleteConfirm}

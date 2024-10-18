@@ -6,9 +6,10 @@ interface DeleteConfirmationModalProps {
     onCancel: () => void;
     title: string;
     content: string;
+    isDeleting: boolean;
 }
 
-export default function DeleteConfirmationModal({ isOpen, onConfirm, onCancel, title, content }: DeleteConfirmationModalProps) {
+export default function DeleteConfirmationModal({ isOpen, onConfirm, onCancel, title, content, isDeleting }: DeleteConfirmationModalProps) {
     return (
         <Modal isOpen={isOpen} onClose={onCancel} placement="center">
             <ModalContent>
@@ -19,10 +20,14 @@ export default function DeleteConfirmationModal({ isOpen, onConfirm, onCancel, t
                 </ModalBody>
                 <ModalFooter>
                     <ButtonGroup>
-                        <Button color="danger" onPress={onConfirm}>
-                            Eliminar
+                        <Button
+                            color="danger"
+                            onPress={onConfirm}
+                            isDisabled={isDeleting}
+                        >
+                            {isDeleting ? 'Procesando...' : 'Eliminar'}
                         </Button>
-                        <Button color="default" onPress={onCancel}>
+                        <Button color="default" onPress={onCancel} >
                             Cancelar
                         </Button>
                     </ButtonGroup>

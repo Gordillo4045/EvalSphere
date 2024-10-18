@@ -61,6 +61,7 @@ export default function EmployeeTable({ companyId, companyName }: EmployeeTableP
     const [currentEmployee, setCurrentEmployee] = useState<Employee | null>(null);
     const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
     const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const fetchData = async () => {
         setIsLoading(true);
@@ -119,26 +120,31 @@ export default function EmployeeTable({ companyId, companyName }: EmployeeTableP
     };
 
     const handleDeleteConfirmation = async () => {
+        setIsDeleting(true);
+
         if (employeeToDelete) {
             try {
                 await toast.promise(
                     async () => {
                         const deleteEmployeeFunction = httpsCallable('deleteEmployee');
-                        await deleteEmployeeFunction(employeeToDelete);
+                        await deleteEmployeeFunction({ id: employeeToDelete.id, companyId: companyId });
                         setDeleteConfirmationOpen(false);
                         await fetchData();
+                        setIsDeleting(false);
                     },
                     {
                         loading: 'Eliminando empleado...',
                         success: 'Empleado eliminado exitosamente.',
                         error: (error: Error) => {
                             console.error("Error al eliminar empleado:", error);
+                            setIsDeleting(false);
                             return "Error al eliminar el empleado.";
                         },
                     }
                 );
             } catch (error) {
                 console.error("Error inesperado:", error);
+                setIsDeleting(false);
             }
         }
     };
@@ -344,6 +350,7 @@ export default function EmployeeTable({ companyId, companyName }: EmployeeTableP
             />
 
             <DeleteConfirmationModal
+                isDeleting={isDeleting}
                 isOpen={deleteConfirmationOpen}
                 onConfirm={handleDeleteConfirmation}
                 onCancel={() => setDeleteConfirmationOpen(false)}

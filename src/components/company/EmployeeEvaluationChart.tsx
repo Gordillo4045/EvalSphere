@@ -1,4 +1,4 @@
-import { LineChart, Line, XAxis, CartesianGrid, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, CartesianGrid, Legend } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 
@@ -34,22 +34,26 @@ const EmployeeEvaluationChart: React.FC<EmployeeEvaluationChartProps> = ({ data,
                 <CardDescription>Resultados por categoría y tipo de evaluador</CardDescription>
             </CardHeader>
             <CardContent>
-                <ChartContainer config={chartConfig}>
-                    <ResponsiveContainer width="100%" height={400}>
-                        <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                            <XAxis dataKey="category" />
-                            <Legend />
-                            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-                            <Line type="monotone" dataKey="Jefe" stroke="#8884d8" activeDot={{ r: 8 }} />
-                            <Line type="monotone" dataKey="Companeros" stroke="#82ca9d" />
-                            <Line type="monotone" dataKey="Subordinados" stroke="#ffc658" />
-                            <Line type="monotone" dataKey="AutoEvaluacion" stroke="#ff7300" />
-                        </LineChart>
-                    </ResponsiveContainer>
+                <ChartContainer config={chartConfig} className=' h-[300px] w-full '>
+                    <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                        <XAxis
+                            dataKey="category"
+                            tickLine={false}
+                            axisLine={false}
+                            tickMargin={1}
+                            tickFormatter={(value) => value.slice(0, 5)}
+                        />
+                        <Legend />
+                        <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                        <Line type="monotone" dataKey="Jefe" stroke="#8884d8" activeDot={{ r: 8 }} />
+                        <Line type="monotone" dataKey="Companeros" stroke="#82ca9d" />
+                        <Line type="monotone" dataKey="Subordinados" stroke="#ffc658" />
+                        <Line type="monotone" dataKey="AutoEvaluacion" stroke="#ff7300" />
+                    </LineChart>
                 </ChartContainer>
             </CardContent>
-        </Card>
+        </Card >
     );
 };
 

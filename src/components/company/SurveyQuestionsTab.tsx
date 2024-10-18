@@ -77,6 +77,7 @@ export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProp
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [questionToDelete, setQuestionToDelete] = useState<SurveyQuestion | null>(null);
     const [showBaseQuestionsModal, setShowBaseQuestionsModal] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
         const questionsRef = collection(db, `companies/${companyId}/surveyQuestions`);
@@ -141,6 +142,7 @@ export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProp
     };
 
     const confirmDeleteQuestion = async () => {
+        setIsDeleting(true);
         if (questionToDelete) {
             try {
                 await deleteDoc(doc(db, `companies/${companyId}/surveyQuestions`, questionToDelete.id));
@@ -150,6 +152,8 @@ export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProp
             } catch (error) {
                 console.error("Error al eliminar pregunta:", error);
                 toast.error("Error al eliminar pregunta.");
+            } finally {
+                setIsDeleting(false);
             }
         }
     };
@@ -284,6 +288,7 @@ export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProp
             </Modal>
 
             <DeleteConfirmationModal
+                isDeleting={isDeleting}
                 isOpen={deleteModalOpen}
                 onCancel={() => setDeleteModalOpen(false)}
                 onConfirm={confirmDeleteQuestion}
