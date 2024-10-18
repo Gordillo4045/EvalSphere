@@ -51,7 +51,7 @@ export default function DepartmentTable({ companyId }: DepartmentTableProps) {
     const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
     const [currentDepartment, setCurrentDepartment] = useState<Department | null>(null);
     const [newDepartment, setNewDepartment] = useState<Partial<Department>>({});
-
+    const [isDeleting, setIsDeleting] = useState(false);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [departmentToDelete, setDepartmentToDelete] = useState<Department | null>(null);
 
@@ -172,6 +172,7 @@ export default function DepartmentTable({ companyId }: DepartmentTableProps) {
     };
 
     const handleDeleteConfirm = async () => {
+        setIsDeleting(true);
         if (departmentToDelete) {
             try {
                 const departmentRef = doc(db, `companies/${companyId}/departments`, departmentToDelete.id);
@@ -180,13 +181,14 @@ export default function DepartmentTable({ companyId }: DepartmentTableProps) {
                 setDepartmentToDelete(null);
             } catch (error) {
                 console.error("Error al eliminar departamento: ", error);
+            } finally {
+                setIsDeleting(false);
             }
         }
     };
 
     const onRefresh = () => {
         // La actualización en tiempo real ya está implementada con onSnapshot
-        // Aquí podrías agregar lógica adicional si es necesario
     };
 
     const handleModalSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -346,6 +348,7 @@ export default function DepartmentTable({ companyId }: DepartmentTableProps) {
             </Modal>
 
             <DeleteConfirmationModal
+                isDeleting={isDeleting}
                 isOpen={deleteModalOpen}
                 onCancel={() => setDeleteModalOpen(false)}
                 onConfirm={handleDeleteConfirm}

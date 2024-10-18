@@ -130,7 +130,7 @@ const Sidebar = ({ setActiveTab }: Props) => {
 
                     </div>
                     <button
-                        className="p-1 rounded-full flex"
+                        className="p-1 rounded-full flex mt-2 sm:mt-0"
                         onClick={() => handleOpenClose()}
                     >
                         <svg
@@ -168,7 +168,7 @@ const Sidebar = ({ setActiveTab }: Props) => {
                         </> : (<IoMdHome size={30} />)}
                     </Link>
                     <Link
-                        onPress={() => { setActiveTab('positions'); }}
+                        onPress={() => { setActiveTab('evaluationHistory'); }}
                         className="overflow-clip whitespace-nowrap tracking-wide flex gap-3 cursor-pointer"
                         color="foreground"
                         isBlock
@@ -242,7 +242,7 @@ const Sidebar = ({ setActiveTab }: Props) => {
                         </AccordionItem>
                     </Accordion>
                     <Link
-                        onPress={() => { setActiveTab('employees'); }}
+                        onPress={() => { setActiveTab('support'); }}
                         className="overflow-clip whitespace-nowrap tracking-wide flex gap-3 cursor-pointer"
                         color="foreground"
                         isBlock
