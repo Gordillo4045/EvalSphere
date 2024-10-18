@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, CardHeader, CardBody, Progress } from "@nextui-org/react";
+import { Card, CardHeader, CardBody, Progress, Spinner } from "@nextui-org/react";
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { db } from '@/config/config';
 import { Employee } from '@/types/applicaciontypes';
@@ -39,38 +39,73 @@ export default function EvaluationHistory({
 }: EvaluationHistoryProps) {
     const [processedEvaluationData, setProcessedEvaluationData] = useState<ProcessedEmployeeEvaluation[]>([]);
     const [totalEvaluations, setTotalEvaluations] = useState<number>(0);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const processData = async () => {
-            const employeesRef = collection(db, `companies/${companyId}/employees`);
-            const employeesSnap = await getDocs(employeesRef);
-            const totalEmployeesCount = employeesSnap.size;
+            try {
+                if (!evaluationData) {
+                    throw new Error("No se han recibido datos de evaluación");
+                }
 
-            const totalEvaluationsCount = totalEmployeesCount * (totalEmployeesCount - 1);
-            setTotalEvaluations(totalEvaluationsCount);
+                const employeesRef = collection(db, `companies/${companyId}/employees`);
+                const employeesSnap = await getDocs(employeesRef);
+                const totalEmployeesCount = employeesSnap.size;
 
-            const processedData = await Promise.all(
-                Object.entries(evaluationData).map(async ([id, averages]) => {
-                    const employeeRef = doc(db, `companies/${companyId}/employees/${id}`);
-                    const employeeSnap = await getDoc(employeeRef);
-                    const employeeData = employeeSnap.data() as Employee | undefined;
+                const totalEvaluationsCount = totalEmployeesCount * (totalEmployeesCount - 1);
+                setTotalEvaluations(totalEvaluationsCount);
 
-                    const globalPercentage = Object.values(averages).reduce((sum, value) => sum + value, 0) / Object.keys(averages).length;
+                const processedData = await Promise.all(
+                    Object.entries(evaluationData).map(async ([id, averages]) => {
+                        const employeeRef = doc(db, `companies/${companyId}/employees/${id}`);
+                        const employeeSnap = await getDoc(employeeRef);
+                        const employeeData = employeeSnap.data() as Employee | undefined;
 
-                    return {
-                        id,
-                        name: employeeData?.name || `Empleado ${id}`,
-                        avatar: employeeData?.avatar || '',
-                        averages,
-                        globalPercentage: globalPercentage * 20
-                    };
-                })
-            );
-            setProcessedEvaluationData(processedData);
+                        const globalPercentage = Object.values(averages).reduce((sum, value) => sum + value, 0) / Object.keys(averages).length;
+
+                        return {
+                            id,
+                            name: employeeData?.name || `Empleado ${id}`,
+                            avatar: employeeData?.avatar || '',
+                            averages,
+                            globalPercentage: globalPercentage * 20
+                        };
+                    })
+                );
+                setProcessedEvaluationData(processedData);
+                setError(null);
+            } catch (err) {
+                console.error("Error al procesar los datos de evaluación:", err);
+                setError("Hubo un problema al cargar los datos de evaluación. Por favor, intente de nuevo más tarde.");
+            }
         };
 
         processData();
     }, [evaluationData, companyId]);
+
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center h-64">
+                <Spinner label="Cargando datos de evaluación..." />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="text-center text-red-500 p-4" aria-live="assertive">
+                {error}
+            </div>
+        );
+    }
+
+    if (processedEvaluationData.length === 0) {
+        return (
+            <div className="flex justify-center items-center h-96 text-center p-4 text-muted-foreground dark:text-muted-foreground-dark" aria-live="polite">
+                No hay datos de evaluación disponibles en este momento.
+            </div>
+        );
+    }
 
     const averageEvaluation = processedEvaluationData.length > 0
         ? processedEvaluationData.reduce((sum, employee) => sum + employee.globalPercentage, 0) / processedEvaluationData.length
