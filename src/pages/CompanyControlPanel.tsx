@@ -61,8 +61,6 @@ function CompanyControlPanel() {
             }
         };
 
-
-
         if (!loading) {
             if (!user || !isCompany) {
                 navigate('/');
@@ -139,7 +137,8 @@ function CompanyControlPanel() {
                         Comunicación: (filteredDepartmentResults[1] as any).Comunicación,
                         Organización: (filteredDepartmentResults[1] as any).Organización,
                         Responsabilidad: (filteredDepartmentResults[1] as any).Responsabilidad,
-                        Liderazgo: (filteredDepartmentResults[1] as any).Liderazgo
+                        Liderazgo: (filteredDepartmentResults[1] as any).Liderazgo,
+                        Creatividad: (filteredDepartmentResults[1] as any).Creatividad
                     }
                 } : {},
                 employeeCategoryAverages: filteredEmployeeResults.reduce((acc, [key, value]) => {
@@ -149,8 +148,8 @@ function CompanyControlPanel() {
                         Comunicación: (value as any).Comunicación,
                         Organización: (value as any).Organización,
                         Responsabilidad: (value as any).Responsabilidad,
-                        Liderazgo: (value as any).Liderazgo
-
+                        Liderazgo: (value as any).Liderazgo,
+                        Creatividad: (value as any).Creatividad
                     };
                     return acc;
                 }, {} as Record<string, any>)
