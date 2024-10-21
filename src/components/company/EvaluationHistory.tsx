@@ -146,6 +146,7 @@ export default function EvaluationHistory({
                 <CardHeader>Detalles de Evaluación</CardHeader>
                 <CardBody>
                     <EvaluationHistoryTable
+                        companyId={companyId}
                         evaluationData={processedEvaluationData}
                         isLoading={isLoading}
                         selectedEmployeeId={selectedEmployeeId}

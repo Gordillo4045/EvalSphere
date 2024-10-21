@@ -39,6 +39,7 @@ interface SurveyQuestionsTabProps {
 
 const CATEGORIES = [
     "Organización",
+    "Creatividad",
     "Liderazgo",
     "Comunicación",
     "Responsabilidad",

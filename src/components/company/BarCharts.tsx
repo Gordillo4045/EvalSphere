@@ -37,7 +37,6 @@ export function BarCharts({ data }: { data: Record<string, Record<string, number
             Promedio: average,
         }));
     }, [data]);
-
     return (
         <Card className="w-full h-[380px] lg:h-full flex flex-col">
             <CardHeader>

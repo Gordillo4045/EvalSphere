@@ -7,7 +7,7 @@ interface EvaluationData {
     Jefe: number;
     Companeros: number;
     Subordinados: number;
-    AutoEvaluacion: number;
+    AutoEval: number;
 }
 
 interface EmployeeEvaluationChartProps {
@@ -49,7 +49,7 @@ const EmployeeEvaluationChart: React.FC<EmployeeEvaluationChartProps> = ({ data,
                         <Line type="monotone" dataKey="Jefe" stroke="#8884d8" activeDot={{ r: 8 }} />
                         <Line type="monotone" dataKey="Companeros" stroke="#82ca9d" />
                         <Line type="monotone" dataKey="Subordinados" stroke="#ffc658" />
-                        <Line type="monotone" dataKey="AutoEvaluacion" stroke="#ff7300" />
+                        <Line type="monotone" dataKey="AutoEval" stroke="#ff7300" />
                     </LineChart>
                 </ChartContainer>
             </CardContent>
