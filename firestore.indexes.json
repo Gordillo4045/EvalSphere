@@ -1,0 +1,36 @@
+{
+    "indexes": [
+        {
+            "collectionGroup": "evaluations",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "evaluatedId",
+                    "order": "ASCENDING"
+                }
+            ]
+        }
+    ],
+    "fieldOverrides": [
+        {
+            "collectionGroup": "evaluations",
+            "fieldPath": "evaluatedId",
+            "indexes": [
+                {
+                    "order": "ASCENDING",
+                    "queryScope": "COLLECTION"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "positions",
+            "fieldPath": "level",
+            "indexes": [
+                {
+                    "order": "ASCENDING",
+                    "queryScope": "COLLECTION"
+                }
+            ]
+        }
+    ]
+}
