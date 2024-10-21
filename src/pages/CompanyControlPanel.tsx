@@ -492,7 +492,7 @@ function CompanyControlPanel() {
                         {activeTab !== 'home' && <div className="w-[70px]"></div>}
                     </div>
                 </div>
-                <div className={`w-full ${activeTab === 'home' || activeTab === 'evaluationHistory' ? 'h-fit' : 'max-w-5xl mx-auto'} flex flex-col shadow-inner rounded-xl dark:shadow-slate-300/20 overflow-x-auto p-3`}>
+                <div className={`w-full ${activeTab === 'home' || activeTab === 'evaluationHistory' || activeTab === 'support' ? 'h-fit' : 'max-w-5xl mx-auto'} flex flex-col shadow-inner rounded-xl dark:shadow-slate-300/20 overflow-x-auto p-3`}>
                     {renderContent()}
                 </div>
             </main >
