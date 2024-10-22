@@ -1,4 +1,6 @@
 const { nextui } = require("@nextui-org/react");
+const withMT = require("@material-tailwind/react/utils/withMT");
+
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -69,7 +71,8 @@ export default {
     			rainbow: 'rainbow var(--speed, 2s) infinite linear',
     			'border-beam': 'border-beam calc(var(--duration)*1s) infinite linear',
     			marquee: 'marquee var(--duration) infinite linear',
-    			'marquee-vertical': 'marquee-vertical var(--duration) linear infinite'
+    			'marquee-vertical': 'marquee-vertical var(--duration) linear infinite',
+    			gradient: 'gradient 8s linear infinite'
     		},
     		keyframes: {
     			rainbow: {
@@ -99,6 +102,11 @@ export default {
     				},
     				to: {
     					transform: 'translateY(calc(-100% - var(--gap)))'
+    				}
+    			},
+    			gradient: {
+    				to: {
+    					backgroundPosition: 'var(--bg-size) 0'
     				}
     			}
     		}

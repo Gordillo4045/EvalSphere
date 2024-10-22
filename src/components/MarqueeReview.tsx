@@ -5,13 +5,13 @@ const reviews = [
     {
         name: "Jack",
         username: "@jack",
-        body: "I've never seen anything like this before. It's amazing. I love it.",
+        body: "Good",
         img: "https://avatar.vercel.sh/jack",
     },
     {
         name: "Jill",
         username: "@jill",
-        body: "I don't know what to say. I'm speechless. This is amazing.",
+        body: "I don't know what to say. I love Beyonce.",
         img: "https://avatar.vercel.sh/jill",
     },
     {
@@ -35,7 +35,7 @@ const reviews = [
     {
         name: "James",
         username: "@james",
-        body: "I'm at a loss for words. This is amazing. I love it.",
+        body: "Se la rifaron xd",
         img: "https://avatar.vercel.sh/james",
     },
 ];
