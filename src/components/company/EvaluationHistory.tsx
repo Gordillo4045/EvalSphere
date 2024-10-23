@@ -6,6 +6,8 @@ import { Employee } from '@/types/applicaciontypes';
 import EvaluationHistoryTable from './EvaluationHistoryTable';
 import NumberTicker from '../ui/number-ticker';
 import EmployeeEvaluationChart from './EmployeeEvaluationChart';
+import { toast } from 'sonner';
+import { generateChartData } from '@/utils/chartUtils';
 
 interface EvaluationAverage {
     [category: string]: number;
@@ -36,11 +38,11 @@ export default function EvaluationHistory({
     evaluationData,
     isLoading,
     selectedEmployeeId,
-    setSelectedEmployeeId
+    setSelectedEmployeeId,
 }: EvaluationHistoryProps) {
     const [processedEvaluationData, setProcessedEvaluationData] = useState<ProcessedEmployeeEvaluation[]>([]);
     const [totalEvaluations, setTotalEvaluations] = useState<number>(0);
-    const [selectedEmployeeChartData, setSelectedEmployeeChartData] = useState<any[]>([]);
+    const [chartData, setChartData] = useState<any[] | null>(null);
 
     useEffect(() => {
         const processData = async () => {
@@ -82,9 +84,34 @@ export default function EvaluationHistory({
         processData();
     }, [evaluationData, companyId]);
 
-    const handleSelectEmployee = (employeeId: string, chartData: any[]) => {
+    useEffect(() => {
+        const loadChartData = async () => {
+            if (selectedEmployeeId) {
+
+                try {
+                    const newChartData = await generateChartData(companyId, selectedEmployeeId);
+                    setChartData(newChartData);
+                } catch (error) {
+                    console.error("Error al obtener datos del gráfico:", error);
+                    toast.error("Error al cargar los datos del gráfico");
+                }
+            } else {
+                setChartData(null);
+            }
+        };
+
+        loadChartData();
+    }, [selectedEmployeeId, companyId]);
+
+    const handleSelectEmployee = async (employeeId: string) => {
         setSelectedEmployeeId(employeeId);
-        setSelectedEmployeeChartData(chartData);
+        try {
+            const newChartData = await generateChartData(companyId, employeeId);
+            setChartData(newChartData);
+        } catch (error) {
+            console.error("Error al obtener datos del gráfico:", error);
+            toast.error("Error al cargar los datos del gráfico");
+        }
     };
 
     if (isLoading) {
@@ -157,26 +184,44 @@ export default function EvaluationHistory({
                         evaluationData={processedEvaluationData}
                         isLoading={isLoading}
                         selectedEmployeeId={selectedEmployeeId}
-                        clearSelectedEmployee={() => setSelectedEmployeeId(null)}
+                        clearSelectedEmployee={() => {
+                            setSelectedEmployeeId(null);
+                            setChartData(null);
+                        }}
                         onSelectEmployee={handleSelectEmployee}
                     />
                 </CardBody>
             </Card>
 
-            {selectedEmployeeId && selectedEmployeeChartData.length > 0 && (
-                <Card>
-                    <CardHeader>
-                        <div className='flex flex-col gap-y-2'>
-                            <p >Gráfico de Evaluación del {processedEvaluationData.find(e => e.id === selectedEmployeeId)?.name || ''}</p>
-                            <p className='text-sm text-gray-500'>Resultados por categoría y tipo de evaluador</p>
-                        </div>
-                    </CardHeader>
-                    <CardBody>
-                        <EmployeeEvaluationChart
-                            data={selectedEmployeeChartData}
-                        />
-                    </CardBody>
-                </Card>
+            {selectedEmployeeId && chartData && (
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                    <Card>
+                        <CardHeader>
+                            <div className='flex flex-col gap-y-2'>
+                                <p>Gráfico de Evaluación de {processedEvaluationData.find(e => e.id === selectedEmployeeId)?.name || ''}</p>
+                                <p className='text-sm text-gray-500'>Resultados por categoría y tipo de evaluador</p>
+                            </div>
+                        </CardHeader>
+                        <CardBody>
+                            <EmployeeEvaluationChart
+                                data={chartData}
+                            />
+                        </CardBody>
+                    </Card>
+                    <Card>
+                        <CardHeader>
+                            <div className='flex flex-col gap-y-2'>
+                                <p>Gráfico de Evaluación de {processedEvaluationData.find(e => e.id === selectedEmployeeId)?.name || ''}</p>
+                                <p className='text-sm text-gray-500'>Resultados por categoría y tipo de evaluador</p>
+                            </div>
+                        </CardHeader>
+                        <CardBody>
+                            <EmployeeEvaluationChart
+                                data={chartData}
+                            />
+                        </CardBody>
+                    </Card>
+                </div>
             )}
         </div>
     )

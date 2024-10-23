@@ -1,4 +1,4 @@
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 
 import {
     Card,
@@ -55,6 +55,7 @@ export function BarCharts({ data }: { data: Record<string, Record<string, number
                                 axisLine={false}
                                 hide={true}
                             />
+                            <YAxis domain={[0, 5]} hide={true} />
                             <ChartTooltip
                                 cursor={true}
                                 content={<ChartTooltipContent indicator="dashed" />}

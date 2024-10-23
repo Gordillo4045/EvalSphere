@@ -10,15 +10,13 @@ import {
     Button,
     Pagination,
     SortDescriptor,
-    Tooltip,
     User,
     Spinner,
 } from "@nextui-org/react";
 import { IoIosCloseCircleOutline, IoIosSearch } from "react-icons/io";
-import { FaChartBar } from "react-icons/fa";
 import { toast } from 'sonner';
 import { generateChartData } from '@/utils/chartUtils';
-
+import { CiCircleMore } from "react-icons/ci";
 interface EvaluationAverage {
     [category: string]: number;
 }
@@ -50,7 +48,7 @@ const CATEGORIES = [
     "Adaptación",
 ];
 
-const INITIAL_VISIBLE_COLUMNS = ["name", ...CATEGORIES, "porcentaje_global", "ver_grafico"];
+const INITIAL_VISIBLE_COLUMNS = ["name", ...CATEGORIES, "porcentaje_global", "Ver_Mas"];
 
 const COLUMN_NAMES: { [key: string]: string } = {
     name: "Nombre",
@@ -62,7 +60,7 @@ const COLUMN_NAMES: { [key: string]: string } = {
     Aprendizaje: "Aprendizaje",
     Adaptación: "Adaptación",
     porcentaje_global: "% Global",
-    ver_grafico: "Ver Gráfico"
+    Ver_Mas: "Ver Más"
 };
 
 
@@ -77,7 +75,7 @@ export default function EvaluationHistoryTable({
 }: EvaluationHistoryTableProps) {
     const [filterValue, setFilterValue] = useState("");
     const [page, setPage] = useState(1);
-    const rowsPerPage = 6;
+    const rowsPerPage = 5;
     const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
         column: "name",
         direction: "ascending",
@@ -125,27 +123,25 @@ export default function EvaluationHistoryTable({
                         {item.name}
                     </User>
                 );
-            case "ver_grafico":
+            case "Ver_Mas":
                 return (
-                    <Tooltip content="Ver Gráfico">
-                        <Button
-                            isIconOnly
-                            size="sm"
-                            variant="light"
-                            onPress={async () => {
-                                try {
-                                    const chartData = await generateChartData(companyId, item.id);
-                                    onSelectEmployee(item.id, chartData);
-                                } catch (error) {
-                                    console.error("Error al obtener datos del gráfico:", error);
-                                    toast.error("Error al cargar los datos del gráfico");
-                                }
-                            }}
-                            aria-label={`Ver gráfico de ${item.name}`}
-                        >
-                            <FaChartBar size={20} />
-                        </Button>
-                    </Tooltip>
+                    <Button
+                        isIconOnly
+                        size="sm"
+                        variant="light"
+                        onPress={async () => {
+                            try {
+                                const chartData = await generateChartData(companyId, item.id);
+                                onSelectEmployee(item.id, chartData);
+                            } catch (error) {
+                                console.error("Error al obtener datos del gráfico:", error);
+                                toast.error("Error al cargar los datos del gráfico");
+                            }
+                        }}
+                        aria-label={`Ver gráfico de ${item.name}`}
+                    >
+                        <CiCircleMore size={20} />
+                    </Button>
                 );
             case "porcentaje_global":
                 return `${item.globalPercentage.toFixed(2)}%`;
@@ -184,14 +180,14 @@ export default function EvaluationHistoryTable({
                     />
                     {selectedEmployeeId && (
                         <Button
-                            color="primary"
-                            variant="light"
+                            color="danger"
+                            variant="bordered"
                             size="sm"
-                            startContent={<IoIosCloseCircleOutline />}
+                            startContent={<IoIosCloseCircleOutline size={20} />}
                             onPress={clearSelectedEmployee}
                             aria-label="Limpiar selección de empleado"
                         >
-                            Limpiar empleado
+                            Limpiar selección
                         </Button>
                     )}
                 </div>
@@ -245,8 +241,8 @@ export default function EvaluationHistoryTable({
                     {(column) => (
                         <TableColumn
                             key={column.uid}
-                            align={column.uid === "ver_grafico" ? "center" : "start"}
-                            allowsSorting={column.uid !== "ver_grafico"}
+                            align={column.uid === "Ver_Mas" ? "center" : "start"}
+                            allowsSorting={column.uid !== "Ver_Mas"}
                         >
                             {column.name}
                         </TableColumn>

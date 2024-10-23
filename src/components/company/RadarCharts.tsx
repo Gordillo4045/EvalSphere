@@ -1,4 +1,4 @@
-import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from "recharts"
+import { PolarAngleAxis, PolarGrid, Radar, RadarChart, PolarRadiusAxis } from "recharts"
 
 import {
     Card,
@@ -66,8 +66,8 @@ export function RadarCharts({ data }: { data: Record<string, Record<string, numb
                                     )
                                 }}
                             />
-
                             <PolarGrid />
+                            <PolarRadiusAxis domain={[0, 5]} axisLine={false} tick={false} />
                             <Radar
                                 dataKey="Promedio"
                                 fill="var(--color-desktop)"
