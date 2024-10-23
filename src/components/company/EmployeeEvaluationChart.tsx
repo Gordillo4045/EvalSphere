@@ -1,5 +1,5 @@
 import { LineChart, Line, XAxis, CartesianGrid, Legend } from 'recharts';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
 
 interface EvaluationData {
@@ -12,7 +12,6 @@ interface EvaluationData {
 
 interface EmployeeEvaluationChartProps {
     data: EvaluationData[];
-    employeeName: string;
 }
 
 const chartConfig = {
@@ -26,13 +25,9 @@ const chartConfig = {
     },
 } satisfies ChartConfig
 
-const EmployeeEvaluationChart: React.FC<EmployeeEvaluationChartProps> = ({ data, employeeName }) => {
+const EmployeeEvaluationChart: React.FC<EmployeeEvaluationChartProps> = ({ data }) => {
     return (
         <Card className="w-full ">
-            <CardHeader>
-                <CardTitle>Evaluación de {employeeName}</CardTitle>
-                <CardDescription>Resultados por categoría y tipo de evaluador</CardDescription>
-            </CardHeader>
             <CardContent>
                 <ChartContainer config={chartConfig} className=' h-[300px] w-full '>
                     <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>

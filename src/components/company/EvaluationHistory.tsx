@@ -5,6 +5,7 @@ import { db } from '@/config/config';
 import { Employee } from '@/types/applicaciontypes';
 import EvaluationHistoryTable from './EvaluationHistoryTable';
 import NumberTicker from '../ui/number-ticker';
+import EmployeeEvaluationChart from './EmployeeEvaluationChart';
 
 interface EvaluationAverage {
     [category: string]: number;
@@ -39,6 +40,7 @@ export default function EvaluationHistory({
 }: EvaluationHistoryProps) {
     const [processedEvaluationData, setProcessedEvaluationData] = useState<ProcessedEmployeeEvaluation[]>([]);
     const [totalEvaluations, setTotalEvaluations] = useState<number>(0);
+    const [selectedEmployeeChartData, setSelectedEmployeeChartData] = useState<any[]>([]);
 
     useEffect(() => {
         const processData = async () => {
@@ -79,6 +81,11 @@ export default function EvaluationHistory({
 
         processData();
     }, [evaluationData, companyId]);
+
+    const handleSelectEmployee = (employeeId: string, chartData: any[]) => {
+        setSelectedEmployeeId(employeeId);
+        setSelectedEmployeeChartData(chartData);
+    };
 
     if (isLoading) {
         return (
@@ -151,9 +158,26 @@ export default function EvaluationHistory({
                         isLoading={isLoading}
                         selectedEmployeeId={selectedEmployeeId}
                         clearSelectedEmployee={() => setSelectedEmployeeId(null)}
+                        onSelectEmployee={handleSelectEmployee}
                     />
                 </CardBody>
             </Card>
+
+            {selectedEmployeeId && selectedEmployeeChartData.length > 0 && (
+                <Card>
+                    <CardHeader>
+                        <div className='flex flex-col gap-y-2'>
+                            <p >Gráfico de Evaluación del {processedEvaluationData.find(e => e.id === selectedEmployeeId)?.name || ''}</p>
+                            <p className='text-sm text-gray-500'>Resultados por categoría y tipo de evaluador</p>
+                        </div>
+                    </CardHeader>
+                    <CardBody>
+                        <EmployeeEvaluationChart
+                            data={selectedEmployeeChartData}
+                        />
+                    </CardBody>
+                </Card>
+            )}
         </div>
     )
 }

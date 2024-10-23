@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navbar, NavbarContent, Link, DropdownItem, DropdownTrigger, Dropdown, DropdownMenu, Avatar, Spinner, Button, NavbarMenu, NavbarMenuItem, NavbarMenuToggle } from "@nextui-org/react";
+import { Navbar, NavbarContent, Link, DropdownItem, DropdownTrigger, Dropdown, DropdownMenu, Avatar, Spinner, Button, NavbarMenu, NavbarMenuItem, NavbarMenuToggle, Image } from "@nextui-org/react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useTheme } from "@/hooks/useTheme";
 import LoginForm from "@/components/LoginForm";
@@ -49,7 +49,7 @@ export default function NavbarCustom() {
                 className="bg-transparent py-2"
                 classNames={{
                     wrapper: "px-0 w-full justify-center bg-transparent h-fit",
-                    menu: "mx-auto mt-1 max-h-[40vh] max-w-[80vw] rounded-large border-small border-default-200/20 bg-background/60 py-6 shadow-medium backdrop-blur-sm backdrop-saturate-150 dark:bg-default-100/50",
+                    menu: "mx-auto mt-3 max-h-[40vh] max-w-[80vw] rounded-large border-small border-default-200/20 bg-background/60 py-6 shadow-medium backdrop-blur-sm backdrop-saturate-150 dark:bg-default-100/50",
                 }}
                 isMenuOpen={isMenuOpen}
                 onMenuOpenChange={setIsMenuOpen}
@@ -63,7 +63,7 @@ export default function NavbarCustom() {
 
                     <NavbarMenuToggle className="md:hidden pl-2 h-8 w-8" />
 
-                    <Link className="font-bold text-inherit text-2xl" href="/"><img width="50" src="public\img\Logo.png" alt="" /></Link>
+                    <Link className="font-bold text-inherit text-2xl" href="/"><Image width="50" src="img/Logo.png" alt="Logo Evalsphere" /></Link>
 
                     {user && (
                         <>
@@ -77,10 +77,10 @@ export default function NavbarCustom() {
                                     <Avatar
                                         isBordered
                                         as="button"
-                                        className={`transition-transform ml-32 ${isEmployee ? 'md:ml-20' : 'md:ml-80'}`}
+                                        className={`transition-transform ml-32 ${isEmployee ? 'md:ml-0' : 'md:ml-80'}`}
                                         color="secondary"
                                         name={user.displayName || "Usuario"}
-                                        size="sm"
+                                        size="md"
                                         src={user.photoURL || "https://i.pravatar.cc/150"}
                                         showFallback
                                     />
@@ -119,12 +119,11 @@ export default function NavbarCustom() {
                     >
                         <div className="flex items-center justify-center gap-2 h-8 w-8 md:h-fit md:w-fit">
                             <Button
-                                color="primary"
                                 variant="light"
                                 onClick={() => setIsLoginOpen(true)}
                                 startContent={<MdOutlineLogin />}
-                                className="hidden md:flex h-7 p-2"
-                                size="sm"
+                                className="hidden md:flex "
+                                size="md"
                             >
                                 Iniciar Sesión
                             </Button>
@@ -133,8 +132,8 @@ export default function NavbarCustom() {
                                     <Button
                                         variant="light"
                                         startContent={<FaUserPlus />}
-                                        className="hidden md:flex h-7"
-                                        size="sm"
+                                        className="hidden md:flex "
+                                        size="md"
                                     >
                                         Registrarse
                                     </Button>
