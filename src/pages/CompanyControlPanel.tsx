@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Button, Card, CardBody, CardHeader, Select, SelectItem, Spinner, Input, ButtonGroup, Snippet, Badge, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@nextui-org/react";
-import { collection, doc, getDoc, onSnapshot, query, updateDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, onSnapshot, orderBy, query, updateDoc } from 'firebase/firestore';
 import { db } from '@/config/config';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { Company, Department } from '@/types/applicaciontypes';
+import { Company, Department, Notification } from '@/types/applicaciontypes';
 import Sidebar from '@/components/Sidebar';
 import { toast } from 'sonner';
 import { MdEdit, MdGroupWork } from 'react-icons/md';
@@ -44,6 +44,9 @@ function CompanyControlPanel() {
     const [filteredResults, setFilteredResults] = useState(null);
     const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
     const isMobile = document.documentElement.clientWidth <= 768;
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+
     useEffect(() => {
         const fetchCompanyData = async () => {
             if (user && isCompany) {
@@ -159,6 +162,27 @@ function CompanyControlPanel() {
         }
     }, [evaluationResults, selectedDepartment]);
 
+    useEffect(() => {
+        if (!company?.id) return;
+
+        const notificationsRef = collection(db, `companies/${company.id}/notifications`);
+        const q = query(
+            notificationsRef,
+            orderBy('createdAt', 'desc')
+        );
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const notificationsData = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            })) as Notification[];
+
+            setNotifications(notificationsData);
+            setUnreadCount(notificationsData.filter(n => !n.read).length);
+        });
+
+        return () => unsubscribe();
+    }, [company?.id]);
 
     const handleChangeInvitationCode = async () => {
         if (!newInvitationCode) {
@@ -185,6 +209,19 @@ function CompanyControlPanel() {
         setActiveTab(tab);
         if (tab === 'evaluationHistory') {
             setSelectedEmployeeId(null);
+        }
+    };
+
+    const markAsRead = async (notificationId: string) => {
+        if (!company?.id) return;
+
+        try {
+            await updateDoc(
+                doc(db, `companies/${company.id}/notifications`, notificationId),
+                { read: true }
+            );
+        } catch (error) {
+            console.error('Error marking notification as read:', error);
         }
     };
 
@@ -494,20 +531,57 @@ function CompanyControlPanel() {
                         <BlurIn word={`Panel de Control de ${company.name}`} className="text-lg md:text-xl font-semibold text-center flex-grow" />
                         <Dropdown
                             classNames={{
-                                base: 'min-h-80 rounded-xl bg-background/95 p-2 shadow-medium backdrop-blur-xl backdrop-saturate-150 dark:bg-default-100/50',
+                                base: "min-h-80 rounded-xl bg-background/95 p-2 shadow-medium backdrop-blur-xl backdrop-saturate-150 dark:bg-default-100/95",
                             }}
                         >
                             <DropdownTrigger>
                                 <Button isIconOnly variant="light" size='md'>
-                                    <Badge content="3" color="danger" variant="shadow" aria-label="Notificaciones">
+                                    <Badge
+                                        content={unreadCount}
+                                        color="danger"
+                                        variant="shadow"
+                                        aria-label="Notificaciones"
+                                        isInvisible={unreadCount === 0}
+                                    >
                                         <BellIcon className='size-6' />
                                     </Badge>
                                 </Button>
                             </DropdownTrigger>
-                            <DropdownMenu variant="light" aria-label="Notificaciones">
-                                <DropdownItem>
-                                    <p>Notificación 1</p>
-                                </DropdownItem>
+                            <DropdownMenu
+                                variant="light"
+                                aria-label="Notificaciones"
+                                className="max-h-[400px] overflow-auto"
+                            >
+                                {notifications.length === 0 ? (
+                                    <DropdownItem>No hay notificaciones</DropdownItem>
+                                ) : (
+                                    notifications.map((notification) => (
+                                        <DropdownItem
+                                            key={notification.id}
+                                            onClick={() => markAsRead(notification.id)}
+                                            className={`${!notification.read ? 'bg-default-100' : ''} border-b last:border-b-0 border-default-100 mb-2`}
+                                            description={notification.createdAt instanceof Date
+                                                ? notification.createdAt.toLocaleString()
+                                                : notification.createdAt?.toDate().toLocaleString()
+                                            }
+                                        >
+                                            <div className="flex flex-col gap-1">
+                                                <p className="font-semibold">{notification.title}</p>
+                                                <p className="text-sm text-default-500">
+                                                    {notification.type === 'new_employee' ? (
+                                                        notification.message
+                                                    ) : notification.type === 'new_evaluation' ? (
+                                                        <>
+                                                            <span className="font-medium">{notification.evaluatorName}</span>
+                                                            {' ha completado una evaluación para '}
+                                                            <span className="font-medium">{notification.evaluatedName}</span>
+                                                        </>
+                                                    ) : notification.message}
+                                                </p>
+                                            </div>
+                                        </DropdownItem>
+                                    ))
+                                )}
                             </DropdownMenu>
                         </Dropdown>
                     </div>

@@ -37,7 +37,7 @@ export default {
 				},
 				secondary: {
 					DEFAULT: '#FF7F5B',
-					foreground: '#FF7F5B'
+					foreground: '#FFFFFF'
 				},
 				muted: {
 					DEFAULT: 'hsl(var(--muted))',

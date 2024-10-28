@@ -35,7 +35,7 @@ export default function ClienteTicketSupport() {
         <div className="container mx-auto p-4">
 
             <div className="mb-8">
-                <Button size="md" onPress={() => setIsNewTicketOpen(true)} variant='faded'>Crear Nueva Solicitud de Soporte</Button>
+                <Button size="md" onPress={() => setIsNewTicketOpen(true)} variant='flat' color='secondary'>Crear Nueva Solicitud de Soporte</Button>
                 <Modal isOpen={isNewTicketOpen} onClose={() => setIsNewTicketOpen(false)}>
                     <ModalContent>
                         <ModalHeader>Nueva Solicitud de Soporte</ModalHeader>
@@ -70,17 +70,20 @@ function NewTicketForm({ onSubmit }: { onSubmit: (title: string, description: st
         <form onSubmit={handleSubmit} className="space-y-4">
             <Input
                 label="Título de la Solicitud"
+                autoFocus
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
+                variant='bordered'
             />
             <Textarea
                 label="Descripción"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 required
+                variant='bordered'
             />
-            <Button type="submit">Enviar Solicitud</Button>
+            <Button type="submit" variant='ghost'>Enviar Solicitud</Button>
         </form>
     )
 }
