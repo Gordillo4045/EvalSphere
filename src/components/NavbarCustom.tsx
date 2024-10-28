@@ -12,6 +12,7 @@ import { FaUsersGear } from "react-icons/fa6";
 import EmployeeSignUpForm from "@/components/company/EmployeeSignUpForm";
 import { FaUserPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import CompanySignUpForm from "./company/CompanySignUpForm";
 
 
 export default function NavbarCustom() {
@@ -20,11 +21,15 @@ export default function NavbarCustom() {
     const [isLoginOpen, setIsLoginOpen] = useState(false);
     const { user, isAdmin, isCompany, loading } = useAuth();
     const [isEmployeeSignUpOpen, setIsEmployeeSignUpOpen] = useState(false);
+    const [isCompanySignUpOpen, setIsCompanySignUpOpen] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const { isEmployee } = useAuth();
 
     const handleEmployeeSignUp = () => {
         setIsEmployeeSignUpOpen(true);
+    };
+    const handleCompanySignUp = () => {
+        setIsCompanySignUpOpen(true);
     };
     const handleLogout = async () => {
         try {
@@ -78,7 +83,6 @@ export default function NavbarCustom() {
                                         isBordered
                                         as="button"
                                         className={`transition-transform ml-32 ${isEmployee ? 'md:ml-0' : 'md:ml-80'}`}
-                                        color="secondary"
                                         name={user.displayName || "Usuario"}
                                         size="md"
                                         src={user.photoURL || "https://i.pravatar.cc/150"}
@@ -142,6 +146,9 @@ export default function NavbarCustom() {
                                     <DropdownItem key="employee" onClick={handleEmployeeSignUp}>
                                         Como Empleado
                                     </DropdownItem>
+                                    <DropdownItem key="company" onClick={handleCompanySignUp}>
+                                        Como Compañía
+                                    </DropdownItem>
                                 </DropdownMenu>
                             </Dropdown>
                             <Button isIconOnly variant="solid" className="bg-transparent md:h-7 md:w-7" onPress={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
@@ -173,6 +180,16 @@ export default function NavbarCustom() {
                             >
                                 Registrarse como Empleado
                             </Button>
+                            <Button
+                                as={Link}
+                                href="#"
+                                variant="light"
+                                onPress={() => setIsCompanySignUpOpen(true)}
+                                startContent={<FaUserPlus size={15} />}
+                                className="p-0 w-full flex justify-start"
+                            >
+                                Registrarse como Compañía
+                            </Button>
                         </NavbarMenuItem>
                     ) : (
                         <NavbarMenuItem>
@@ -186,6 +203,11 @@ export default function NavbarCustom() {
                 <EmployeeSignUpForm
                     isOpen={isEmployeeSignUpOpen}
                     onClose={() => setIsEmployeeSignUpOpen(false)}
+                />
+
+                <CompanySignUpForm
+                    isOpen={isCompanySignUpOpen}
+                    onClose={() => setIsCompanySignUpOpen(false)}
                 />
             </Navbar >
 

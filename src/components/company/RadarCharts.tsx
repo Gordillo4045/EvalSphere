@@ -36,7 +36,7 @@ export function RadarCharts({ data }: { data: Record<string, Record<string, numb
 
     return (
         <Card className="w-full h-[380px] lg:h-full flex flex-col">
-            <CardHeader className="items-center pb-4">
+            <CardHeader className=" pb-4">
                 <CardTitle>Radar de Categorías</CardTitle>
                 <CardDescription>
                     Promedios por categoría de evaluación

@@ -17,6 +17,7 @@ import { IoIosCloseCircleOutline, IoIosSearch } from "react-icons/io";
 import { toast } from 'sonner';
 import { generateChartData } from '@/utils/chartUtils';
 import { CiCircleMore } from "react-icons/ci";
+import { FaFileExport } from 'react-icons/fa6';
 interface EvaluationAverage {
     [category: string]: number;
 }
@@ -161,12 +162,12 @@ export default function EvaluationHistoryTable({
 
     const topContent = useMemo(() => {
         return (
-            <div className="flex flex-col gap-4">
-                <div className="flex justify-between gap-3 items-end">
+            <div className="flex flex-col gap-4 overflow-auto">
+                <div className="flex justify-between gap-3 items-end ">
                     <Input
                         isClearable
                         classNames={{
-                            base: "w-full sm:max-w-[44%]",
+                            base: "min-w-[200px] sm:max-w-[40%]",
                             inputWrapper: "border-1",
                         }}
                         placeholder="Buscar por nombre"
@@ -179,16 +180,27 @@ export default function EvaluationHistoryTable({
                         aria-label="Buscar empleado por nombre"
                     />
                     {selectedEmployeeId && (
-                        <Button
-                            color="danger"
-                            variant="bordered"
-                            size="sm"
-                            startContent={<IoIosCloseCircleOutline size={20} />}
-                            onPress={clearSelectedEmployee}
-                            aria-label="Limpiar selección de empleado"
-                        >
-                            Limpiar selección
-                        </Button>
+                        <div className="flex gap-2">
+                            <Button
+                                color='secondary'
+                                variant="light"
+                                size="sm"
+                                startContent={<FaFileExport size={20} />}
+                                aria-label="Exportar resultados de la encuesta"
+                            >
+                                Exportar Resultados
+                            </Button>
+                            <Button
+                                color="danger"
+                                variant="bordered"
+                                size="sm"
+                                startContent={<IoIosCloseCircleOutline size={20} />}
+                                onPress={clearSelectedEmployee}
+                                aria-label="Limpiar selección de empleado"
+                            >
+                                Limpiar selección
+                            </Button>
+                        </div>
                     )}
                 </div>
             </div>

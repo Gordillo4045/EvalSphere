@@ -111,13 +111,6 @@ export const updateAdmin = functions.https.onCall(async (data, context) => {
 });
 
 export const createCompany = functions.https.onCall(async (data, context) => {
-    if (!context.auth?.token.admin) {
-        throw new functions.https.HttpsError(
-            "permission-denied",
-            "Debe ser un administrador para crear compañías.",
-        );
-    }
-
     const {
         name,
         email,
@@ -127,6 +120,10 @@ export const createCompany = functions.https.onCall(async (data, context) => {
         description,
         industry,
         photoURL,
+        rfc,
+        cardNumber,
+        expirationDate,
+        cvv
     } = data;
 
     try {
@@ -154,6 +151,10 @@ export const createCompany = functions.https.onCall(async (data, context) => {
             description: description || "",
             industry,
             invitationCode,
+            rfc: rfc || "",
+            cardNumber: cardNumber || "",
+            expirationDate: expirationDate || "",
+            cvv: cvv || "",
         };
 
         await admin

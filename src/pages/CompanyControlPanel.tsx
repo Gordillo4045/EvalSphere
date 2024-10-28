@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Button, Card, CardBody, CardHeader, Select, SelectItem, Spinner, Input, ButtonGroup, Snippet } from "@nextui-org/react";
+import { Button, Card, CardBody, CardHeader, Select, SelectItem, Spinner, Input, ButtonGroup, Snippet, Badge, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@nextui-org/react";
 import { collection, doc, getDoc, onSnapshot, query, updateDoc } from 'firebase/firestore';
 import { db } from '@/config/config';
 import { useAuth } from '@/hooks/useAuth';
@@ -8,7 +8,7 @@ import { Company, Department } from '@/types/applicaciontypes';
 import Sidebar from '@/components/Sidebar';
 import { toast } from 'sonner';
 import { MdEdit, MdGroupWork } from 'react-icons/md';
-import { FaFileExport, FaUsers } from 'react-icons/fa6';
+import { FaFileLines, FaUsers } from 'react-icons/fa6';
 import { BsPersonBadgeFill } from 'react-icons/bs';
 import { FaQuestionCircle } from 'react-icons/fa';
 import React, { Suspense } from 'react';
@@ -19,6 +19,8 @@ import { getFunctions, httpsCallable } from 'firebase/functions';
 import EvaluationHistory from '@/components/company/EvaluationHistory';
 import Support from '@/components/company/Support';
 import { IoReturnUpBack } from 'react-icons/io5';
+import { BellIcon } from '@heroicons/react/24/outline';
+import BlurIn from '@/components/ui/blur-in';
 
 const DepartmentTable = React.lazy(() => import("@/components/company/DepartmentTable"));
 const PositionTable = React.lazy(() => import("@/components/company/PositionTable"));
@@ -334,6 +336,21 @@ function CompanyControlPanel() {
                                     <Card
                                         isPressable
                                         shadow="sm"
+                                        onPress={() => { setActiveTab('evaluationHistory'); }}
+                                    >
+                                        <CardBody className="flex flex-row gap-2 items-center">
+                                            <div className="flex items-center justify-center h-fit rounded-medium border p-2 bg-default-50 border-default-100">
+                                                <FaFileLines size={20} />
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <p className="text-medium">Ver Historial de Resultados</p>
+                                                <p className="text-small text-default-400">Ver el historial de resultados de la encuesta.</p>
+                                            </div>
+                                        </CardBody>
+                                    </Card>
+                                    <Card
+                                        isPressable
+                                        shadow="sm"
                                         onPress={() => { setActiveTab('employees'); }}
                                     >
                                         <CardBody className="flex flex-row gap-2 items-center">
@@ -391,21 +408,7 @@ function CompanyControlPanel() {
                                             </div>
                                         </CardBody>
                                     </Card>
-                                    <Card
-                                        isPressable
-                                        shadow="sm"
-                                        onPress={() => { setActiveTab('results'); }}
-                                    >
-                                        <CardBody className="flex flex-row gap-2 items-center">
-                                            <div className="flex items-center justify-center h-fit rounded-medium border p-2 bg-default-50 border-default-100">
-                                                <FaFileExport size={20} />
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <p className="text-medium">Exportar Resultados</p>
-                                                <p className="text-small text-default-400">Exportar los resultados de la encuesta.</p>
-                                            </div>
-                                        </CardBody>
-                                    </Card>
+
                                 </div>
                             </CardBody>
                         </Card>
@@ -488,8 +491,25 @@ function CompanyControlPanel() {
                                 <span className="hidden md:block">Volver</span>
                             </Button>
                         )}
-                        <h1 className="text-lg md:text-xl font-semibold text-center flex-grow">Panel de Control de {company.name}</h1>
-                        {activeTab !== 'home' && <div className="w-[70px]"></div>}
+                        <BlurIn word={`Panel de Control de ${company.name}`} className="text-lg md:text-xl font-semibold text-center flex-grow" />
+                        <Dropdown
+                            classNames={{
+                                base: 'min-h-80 rounded-xl bg-background/95 p-2 shadow-medium backdrop-blur-xl backdrop-saturate-150 dark:bg-default-100/50',
+                            }}
+                        >
+                            <DropdownTrigger>
+                                <Button isIconOnly variant="light" size='md'>
+                                    <Badge content="3" color="danger" variant="shadow" aria-label="Notificaciones">
+                                        <BellIcon className='size-6' />
+                                    </Badge>
+                                </Button>
+                            </DropdownTrigger>
+                            <DropdownMenu variant="light" aria-label="Notificaciones">
+                                <DropdownItem>
+                                    <p>Notificación 1</p>
+                                </DropdownItem>
+                            </DropdownMenu>
+                        </Dropdown>
                     </div>
                 </div>
                 <div className={`w-full ${activeTab === 'home' || activeTab === 'evaluationHistory' || activeTab === 'support' ? 'h-fit' : 'max-w-5xl mx-auto'} flex flex-col shadow-inner rounded-xl dark:shadow-slate-300/20 overflow-x-auto p-3`}>

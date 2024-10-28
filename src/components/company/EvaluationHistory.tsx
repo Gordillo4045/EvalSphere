@@ -453,7 +453,7 @@ export default function EvaluationHistory({
                                                                                     'danger'
                                                                         }
                                                                     >
-                                                                        {plan.status}
+                                                                        {plan.status === 'completed' ? 'Completado' : plan.status === 'in-progress' ? 'En Progreso' : 'Pendiente'}
                                                                     </Chip>
                                                                 </div>
                                                                 <p className="text-xs">{plan.description}</p>
@@ -491,6 +491,7 @@ export default function EvaluationHistory({
                     setSelectedPlan(null);
                 }}
                 placement='top-center'
+                scrollBehavior='outside'
             >
                 <ModalContent >
                     <ModalHeader className='text-base font-bold '>

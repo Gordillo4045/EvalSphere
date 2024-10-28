@@ -20,7 +20,7 @@ export default function EmployeeSignUpForm({ isOpen, onClose }: EmployeeSignUpFo
         name: '',
         email: '',
         password: '',
-        confirmPassword: '', // Nuevo campo para confirmar contraseña
+        confirmPassword: '',
         companyId: '',
         departmentId: '',
         positionId: '',

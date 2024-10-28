@@ -79,6 +79,8 @@ export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProp
     const [questionToDelete, setQuestionToDelete] = useState<SurveyQuestion | null>(null);
     const [showBaseQuestionsModal, setShowBaseQuestionsModal] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [hasAddedBaseQuestions, setHasAddedBaseQuestions] = useState(false);
+    const [isAddingBaseQuestions, setIsAddingBaseQuestions] = useState(false);
 
     useEffect(() => {
         const questionsRef = collection(db, `companies/${companyId}/surveyQuestions`);
@@ -160,16 +162,30 @@ export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProp
     };
 
     const handleAddBaseQuestions = async () => {
+        if (hasAddedBaseQuestions) return;
+
         try {
+            setIsAddingBaseQuestions(true);
             const questionsRef = collection(db, `companies/${companyId}/surveyQuestions`);
-            for (const question of BASE_QUESTIONS) {
-                await addDoc(questionsRef, question);
-            }
+
+            await toast.promise(
+                Promise.all(BASE_QUESTIONS.map(question =>
+                    addDoc(questionsRef, question)
+                )),
+                {
+                    loading: 'Añadiendo preguntas base...',
+                    success: 'Preguntas base añadidas exitosamente',
+                    error: 'Error al añadir preguntas base'
+                }
+            );
+
+            setHasAddedBaseQuestions(true);
             setShowBaseQuestionsModal(false);
-            toast.success("Preguntas base añadidas exitosamente.");
         } catch (error) {
             console.error("Error al añadir preguntas base:", error);
             toast.error("Error al añadir preguntas base.");
+        } finally {
+            setIsAddingBaseQuestions(false);
         }
     };
 
@@ -304,11 +320,30 @@ export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProp
                         <p>No hay preguntas en la encuesta. ¿Deseas añadir las preguntas base?</p>
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="danger" variant="light" onPress={() => setShowBaseQuestionsModal(false)}>
+                        <Button
+                            color="danger"
+                            variant="light"
+                            onPress={() => setShowBaseQuestionsModal(false)}
+                            isDisabled={isAddingBaseQuestions}
+                        >
                             Cancelar
                         </Button>
-                        <Button color="primary" onPress={handleAddBaseQuestions} endContent={<FaClipboardList />}>
-                            Añadir Preguntas Base
+                        <Button
+                            color="primary"
+                            onPress={handleAddBaseQuestions}
+                            endContent={<FaClipboardList />}
+                            isDisabled={hasAddedBaseQuestions || isAddingBaseQuestions}
+                        >
+                            {isAddingBaseQuestions ? (
+                                <div className="flex items-center gap-2">
+                                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                                    Procesando...
+                                </div>
+                            ) : hasAddedBaseQuestions ? (
+                                'Preguntas Base Añadidas'
+                            ) : (
+                                'Añadir Preguntas Base'
+                            )}
                         </Button>
                     </ModalFooter>
                 </ModalContent>
