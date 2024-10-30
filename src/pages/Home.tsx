@@ -1,81 +1,132 @@
-import { Card, CardHeader, CardFooter, Image, Button } from "@nextui-org/react";
+import { MarqueeReview } from "@/components/MarqueeReview";
+import { useTheme } from "@/components/ThemeProvider";
+import BlurIn from "@/components/ui/blur-in";
+import { ContainerScroll } from "@/components/ui/container-scroll-animation";
+import { cn } from "@/lib/utils";
+import AnimatedGridPattern from "@/components/ui/animated-grid-pattern";
+import PricingSection from "@/components/PricingSection";
+import { Accordion, AccordionItem } from "@nextui-org/react";
+import BlurFade from "@/components/ui/blur-fade";
+import { MagicCard } from "@/components/ui/magic-card";
+
+const accordion1 = "This";
+const accordion2 = "is";
+const accordion3 = "the default.";
 
 export default function Home() {
-    return (
-        <div className="flex items-center justify-center">
-            <div className="max-w-[900px] gap-2 grid grid-cols-12 grid-rows-2 px-8">
+  useTheme();
+  return (
+    <div className="max-w-7xl mx-auto p-2 md:p-0">
+      <AnimatedGridPattern
+        numSquares={30}
+        maxOpacity={0.1}
+        duration={1}
+        repeatDelay={1}
+        className={cn(
+          "[mask-image:radial-gradient(500px_circle_at_center,white,transparent)]",
+          "inset-x-0 inset-y-[-30%] h-[200%] skew-y-12"
+        )}
+      />
+      <div className="flex flex-col overflow-hidden -translate-y-32">
+        <ContainerScroll
+          titleComponent={
+            <>
+              <BlurIn
+                word="EvalSphere"
+                className="pointer-events-none whitespace-pre-wrap bg-gradient-to-b from-black to-gray-300/80 bg-clip-text text-center text-9xl font-semibold leading-none text-transparent dark:from-white dark:to-slate-900/10"
+                duration={1.5}
+                variant={{
+                  hidden: { filter: "blur(15px)", opacity: 0 },
+                  visible: { filter: "blur(0px)", opacity: 1 },
+                }}
+              />
+              <br />
+              <BlurIn
+                word="Evaluación de desempeño 360°"
+                className="pointer-events-none whitespace-pre-wrap bg-gradient-to-b from-black to-gray-300/80 bg-clip-text text-center text-5xl font-semibold leading-none text-transparent dark:from-white dark:to-slate-900/10"
+                duration={1.5}
+                variant={{
+                  hidden: { filter: "blur(15px)", opacity: 0 },
+                  visible: { filter: "blur(0px)", opacity: 1 },
+                }}
+              />
+            </>
+          }
+          children={""}
+        ></ContainerScroll>
+      </div>
+      <MagicCard/>
 
-                <Card className="col-span-12 sm:col-span-4 h-[300px]">
-                    <CardHeader className="absolute z-10 top-1 flex-col !items-start">
-                        <p className="text-tiny text-white/60 uppercase font-bold">What to watch</p>
-                        <h4 className="text-white font-medium text-large">Stream the Acme event</h4>
-                    </CardHeader>
-                    <Image
-                        removeWrapper
-                        alt="Card background"
-                        className="z-0 w-full h-full object-cover"
-                        src="https://nextui.org/images/card-example-4.jpeg"
-                    />
-                </Card>
-                <Card className="col-span-12 sm:col-span-4 h-[300px]">
-                    <CardHeader className="absolute z-10 top-1 flex-col !items-start">
-                        <p className="text-tiny text-white/60 uppercase font-bold">Plant a tree</p>
-                        <h4 className="text-white font-medium text-large">Contribute to the planet</h4>
-                    </CardHeader>
-                    <Image
-                        removeWrapper
-                        alt="Card background"
-                        className="z-0 w-full h-full object-cover"
-                        src="https://nextui.org/images/card-example-3.jpeg"
-                    />
-                </Card>
-                <Card className="col-span-12 sm:col-span-4 h-[300px]">
-                    <CardHeader className="absolute z-10 top-1 flex-col !items-start">
-                        <p className="text-tiny text-white/60 uppercase font-bold">Supercharged</p>
-                        <h4 className="text-white font-medium text-large">Creates beauty like a beast</h4>
-                    </CardHeader>
-                    <Image
-                        removeWrapper
-                        alt="Card background"
-                        className="z-0 w-full h-full object-cover"
-                        src="https://nextui.org/images/card-example-2.jpeg"
-                    />
-                </Card>
-                <Card isFooterBlurred className="w-full h-[300px] col-span-12 sm:col-span-5">
-                    <CardHeader className="absolute z-10 top-1 flex-col items-start">
-                        <p className="text-tiny text-white/60 uppercase font-bold">New</p>
-                        <h4 className="text-black font-medium text-2xl">Acme camera</h4>
-                    </CardHeader>
-                    <Image
-                        removeWrapper
-                        alt="Card example background"
-                        className="z-0 w-full h-full scale-125 -translate-y-6 object-cover"
-                        src="https://nextui.org/images/card-example-6.jpeg"
-                    />
-                    <CardFooter className="absolute bg-white/30 bottom-0 border-t-1 border-zinc-100/50 z-10 justify-between">
-                        <div>
-                            <p className="text-black text-tiny">Available soon.</p>
-                            <p className="text-black text-tiny">Get notified.</p>
-                        </div>
-                        <Button className="text-tiny" color="primary" radius="full" size="sm">
-                            Notify Me
-                        </Button>
-                    </CardFooter>
-                </Card>
-                <Card isFooterBlurred className="w-full h-[300px] col-span-12 sm:col-span-7">
-                    <CardHeader className="absolute z-10 top-1 flex-col items-start">
-                        <p className="text-tiny text-white/60 uppercase font-bold">Your day your</p>
-                        <h4 className="text-white/90 font-medium text-xl">Your checklist for better sleep</h4>
-                    </CardHeader>
-                    <Image
-                        removeWrapper
-                        alt="Relaxing app background"
-                        className="z-0 w-full h-full object-cover"
-                        src="https://nextui.org/images/card-example-5.jpeg"
-                    />
-
-                </Card>
-            </div>
+      <div className="flex flex-col gap-2 -translate-y-[25%] md:-translate-y-[20%]">
+        <div>
+          
         </div>
-    )
+        <MarqueeReview />
+
+        <div className="pr-28 pl-28 pb-28">
+          <section id="header">
+            <BlurFade delay={0.25} inView>
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
+                Preguntas
+              </h2>
+            </BlurFade>
+            <BlurFade delay={0.25 * 2} inView>
+              <span className="text-xl text-pretty tracking-tighter sm:text-3xl xl:text-4xl/none">
+                Frecuentes
+              </span>
+            </BlurFade>
+          </section>
+          <Accordion
+            motionProps={{
+              variants: {
+                enter: {
+                  y: 0,
+                  opacity: 1,
+                  height: "auto",
+                  transition: {
+                    height: {
+                      type: "spring",
+                      stiffness: 500,
+                      damping: 30,
+                      duration: 1,
+                    },
+                    opacity: {
+                      easings: "ease",
+                      duration: 1,
+                    },
+                  },
+                },
+                exit: {
+                  y: -10,
+                  opacity: 0,
+                  height: 0,
+                  transition: {
+                    height: {
+                      easings: "ease",
+                      duration: 0.25,
+                    },
+                    opacity: {
+                      easings: "ease",
+                      duration: 0.3,
+                    },
+                  },
+                },
+              },
+            }}
+          >
+            <AccordionItem key="1" aria-label="Accordion 1" title="Accordion 1">
+              {accordion1}
+            </AccordionItem>
+            <AccordionItem key="2" aria-label="Accordion 2" title="Accordion 2">
+              {accordion2}
+            </AccordionItem>
+            <AccordionItem key="3" aria-label="Accordion 3" title="Accordion 3">
+              {accordion3}
+            </AccordionItem>
+          </Accordion>
+        </div>
+        <PricingSection />
+      </div>
+    </div>
+  );
 }

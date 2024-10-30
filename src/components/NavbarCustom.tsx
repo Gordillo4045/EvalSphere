@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navbar, NavbarContent, Link, DropdownItem, DropdownTrigger, Dropdown, DropdownMenu, Avatar, Spinner, Button, NavbarMenu, NavbarMenuItem, NavbarMenuToggle } from "@nextui-org/react";
+import { Navbar, NavbarContent, Link, DropdownItem, DropdownTrigger, Dropdown, DropdownMenu, Avatar, Spinner, Button, NavbarMenu, NavbarMenuItem, NavbarMenuToggle, Image } from "@nextui-org/react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useTheme } from "@/hooks/useTheme";
 import LoginForm from "@/components/LoginForm";
@@ -12,6 +12,7 @@ import { FaUsersGear } from "react-icons/fa6";
 import EmployeeSignUpForm from "@/components/company/EmployeeSignUpForm";
 import { FaUserPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import CompanySignUpForm from "./company/CompanySignUpForm";
 
 
 export default function NavbarCustom() {
@@ -20,11 +21,15 @@ export default function NavbarCustom() {
     const [isLoginOpen, setIsLoginOpen] = useState(false);
     const { user, isAdmin, isCompany, loading } = useAuth();
     const [isEmployeeSignUpOpen, setIsEmployeeSignUpOpen] = useState(false);
+    const [isCompanySignUpOpen, setIsCompanySignUpOpen] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const { isEmployee } = useAuth();
 
     const handleEmployeeSignUp = () => {
         setIsEmployeeSignUpOpen(true);
+    };
+    const handleCompanySignUp = () => {
+        setIsCompanySignUpOpen(true);
     };
     const handleLogout = async () => {
         try {
@@ -49,7 +54,7 @@ export default function NavbarCustom() {
                 className="bg-transparent py-2"
                 classNames={{
                     wrapper: "px-0 w-full justify-center bg-transparent h-fit",
-                    menu: "mx-auto mt-1 max-h-[40vh] max-w-[80vw] rounded-large border-small border-default-200/20 bg-background/60 py-6 shadow-medium backdrop-blur-sm backdrop-saturate-150 dark:bg-default-100/50",
+                    menu: "mx-auto mt-3 max-h-[40vh] max-w-[80vw] rounded-large border-small border-default-200/20 bg-background/60 py-6 shadow-medium backdrop-blur-sm backdrop-saturate-150 dark:bg-default-100/50",
                 }}
                 isMenuOpen={isMenuOpen}
                 onMenuOpenChange={setIsMenuOpen}
@@ -63,7 +68,9 @@ export default function NavbarCustom() {
 
                     <NavbarMenuToggle className="md:hidden pl-2 h-8 w-8" />
 
-                    <Link className=" text-inherit text-xl font-bold md:mx-2" href="/">EvalSphere</Link>
+                    <Link className="font-bold text-inherit text-2xl" href="/">
+                        <Image width="50" src="/img/Logo.png" alt="Logo Evalsphere" />
+                    </Link>
 
                     {user && (
                         <>
@@ -77,10 +84,9 @@ export default function NavbarCustom() {
                                     <Avatar
                                         isBordered
                                         as="button"
-                                        className={`transition-transform ml-32 ${isEmployee ? 'md:ml-20' : 'md:ml-80'}`}
-                                        color="secondary"
+                                        className={`transition-transform ml-32 ${isEmployee ? 'md:ml-0' : 'md:ml-80'}`}
                                         name={user.displayName || "Usuario"}
-                                        size="sm"
+                                        size="md"
                                         src={user.photoURL || "https://i.pravatar.cc/150"}
                                         showFallback
                                     />
@@ -119,12 +125,11 @@ export default function NavbarCustom() {
                     >
                         <div className="flex items-center justify-center gap-2 h-8 w-8 md:h-fit md:w-fit">
                             <Button
-                                color="primary"
                                 variant="light"
                                 onClick={() => setIsLoginOpen(true)}
                                 startContent={<MdOutlineLogin />}
-                                className="hidden md:flex h-7 p-2"
-                                size="sm"
+                                className="hidden md:flex "
+                                size="md"
                             >
                                 Iniciar Sesión
                             </Button>
@@ -133,8 +138,8 @@ export default function NavbarCustom() {
                                     <Button
                                         variant="light"
                                         startContent={<FaUserPlus />}
-                                        className="hidden md:flex h-7"
-                                        size="sm"
+                                        className="hidden md:flex "
+                                        size="md"
                                     >
                                         Registrarse
                                     </Button>
@@ -142,6 +147,9 @@ export default function NavbarCustom() {
                                 <DropdownMenu aria-label="Opciones de registro" variant="flat">
                                     <DropdownItem key="employee" onClick={handleEmployeeSignUp}>
                                         Como Empleado
+                                    </DropdownItem>
+                                    <DropdownItem key="company" onClick={handleCompanySignUp}>
+                                        Como Compañía
                                     </DropdownItem>
                                 </DropdownMenu>
                             </Dropdown>
@@ -174,6 +182,16 @@ export default function NavbarCustom() {
                             >
                                 Registrarse como Empleado
                             </Button>
+                            <Button
+                                as={Link}
+                                href="#"
+                                variant="light"
+                                onPress={() => setIsCompanySignUpOpen(true)}
+                                startContent={<FaUserPlus size={15} />}
+                                className="p-0 w-full flex justify-start"
+                            >
+                                Registrarse como Compañía
+                            </Button>
                         </NavbarMenuItem>
                     ) : (
                         <NavbarMenuItem>
@@ -187,6 +205,11 @@ export default function NavbarCustom() {
                 <EmployeeSignUpForm
                     isOpen={isEmployeeSignUpOpen}
                     onClose={() => setIsEmployeeSignUpOpen(false)}
+                />
+
+                <CompanySignUpForm
+                    isOpen={isCompanySignUpOpen}
+                    onClose={() => setIsCompanySignUpOpen(false)}
                 />
             </Navbar >
 

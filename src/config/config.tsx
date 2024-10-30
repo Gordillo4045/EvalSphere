@@ -3,7 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
-import { getFunctions as getFirebaseFunctions, httpsCallable as firebaseHttpsCallable } from "firebase/functions";
+import { getFunctions as getFirebaseFunctions, httpsCallable as firebaseHttpsCallable, connectFunctionsEmulator } from "firebase/functions";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -25,11 +25,11 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 const functions = getFirebaseFunctions(app);
-
-// connectFirestoreEmulator(db, '127.0.0.1', 8080);
-// connectFunctionsEmulator(functions, '127.0.0.1', 8000);
-// connectAuthEmulator(auth, "http://127.0.0.1:9099");
-
+if (import.meta.env.VITE_USE_FIREBASE_EMULATOR === 'true') {
+    // connectFirestoreEmulator(db, '127.0.0.1', 8080);
+    connectFunctionsEmulator(functions, '127.0.0.1', 8000);
+    // connectAuthEmulator(auth, "http://127.0.0.1:9099");
+}
 const httpsCallable = (name: string) => firebaseHttpsCallable(functions, name);
 
 export { auth, db, storage, functions, httpsCallable };

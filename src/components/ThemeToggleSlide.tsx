@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion';
 import { useTheme } from '@/components/ThemeProvider';
+import { Tooltip } from "@nextui-org/react";
+import { useState, useEffect } from 'react';
 
 interface ThemeToggleSlideProps {
     isOpen: boolean;
@@ -8,6 +10,13 @@ interface ThemeToggleSlideProps {
 const ThemeToggleSlide = ({ isOpen }: ThemeToggleSlideProps) => {
     const { setTheme, theme } = useTheme()
     const isChecked = theme === 'light';
+    const [isTooltipOpen, setIsTooltipOpen] = useState(false);
+
+    useEffect(() => {
+        if (isOpen) {
+            setIsTooltipOpen(false);
+        }
+    }, [isOpen]);
 
     const toggleVariants = {
         checked: { rotate: 0, scale: 1, opacity: 1 },
@@ -15,7 +24,12 @@ const ThemeToggleSlide = ({ isOpen }: ThemeToggleSlideProps) => {
     };
 
     return (
-        <>
+        <Tooltip
+            isOpen={isTooltipOpen && !isOpen}
+            onOpenChange={(open) => setIsTooltipOpen(open)}
+            content="Cambiar tema"
+            placement="right"
+        >
             <label className={`relative flex items-center justify-center cursor-pointer text-xl text-center select-none fill-current
              hover:bg-gray-600/10 hover:dark:bg-gray-700/40 rounded-lg hover:transition-all 
              ${isOpen
@@ -52,7 +66,7 @@ const ThemeToggleSlide = ({ isOpen }: ThemeToggleSlideProps) => {
                     <span className={`${isOpen ? 'block text-medium font-normal ml-7' : 'hidden'} `}>Tema</span>
                 </div>
             </label>
-        </>
+        </Tooltip>
     );
 };
 

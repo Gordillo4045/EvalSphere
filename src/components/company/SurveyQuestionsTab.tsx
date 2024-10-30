@@ -25,6 +25,7 @@ import { AiOutlineEdit } from "react-icons/ai";
 import { BiSolidTrashAlt } from "react-icons/bi";
 import { FaPlus } from 'react-icons/fa6';
 import DeleteConfirmationModal from '../DeleteConfirmationModal';
+import { FaClipboardList } from 'react-icons/fa';
 
 interface SurveyQuestion {
     id: string;
@@ -38,11 +39,35 @@ interface SurveyQuestionsTabProps {
 
 const CATEGORIES = [
     "Organización",
+    "Creatividad",
     "Liderazgo",
     "Comunicación",
     "Responsabilidad",
     "Aprendizaje",
     "Adaptación"
+];
+
+const BASE_QUESTIONS = [
+    { category: "Organización", question: "¿Trabaja de forma ordenada?" },
+    { category: "Organización", question: "¿Cumple con los plazos de entrega?" },
+    { category: "Organización", question: "¿Es capaz de priorizar tareas y manejar su tiempo de manera efectiva?" },
+    { category: "Creatividad", question: "¿Propone ideas creativas y de valor?" },
+    { category: "Creatividad", question: "¿Busca soluciones innovadoras para los problemas que enfrenta?" },
+    { category: "Liderazgo", question: "¿Muestra iniciativa y participa activamente en las reuniones?" },
+    { category: "Liderazgo", question: "¿Muestra seguridad en su trabajo?" },
+    { category: "Liderazgo", question: "¿Es capaz de tomar decisiones efectivas en momentos críticos?" },
+    { category: "Comunicación", question: "¿Se comunica de forma clara y eficaz?" },
+    { category: "Comunicación", question: "¿Sabe escuchar?" },
+    { category: "Comunicación", question: "¿Muestra una actitud receptiva frente a las opiniones de los demás?" },
+    { category: "Responsabilidad", question: "¿Cumple con los plazos de entrega?" },
+    { category: "Responsabilidad", question: "¿Su trabajo contribuye a que la empresa alcance sus objetivos?" },
+    { category: "Responsabilidad", question: "¿Asume la responsabilidad por sus errores y trabaja para corregirlos?" },
+    { category: "Aprendizaje", question: "¿Acepta las críticas y aplica los consejos de los demás en su manera de trabajar?" },
+    { category: "Aprendizaje", question: "¿Muestra disposición para aprender y mejorar continuamente?" },
+    { category: "Aprendizaje", question: "¿Busca activamente oportunidades para desarrollar nuevas habilidades?" },
+    { category: "Adaptación", question: "¿Sabe actuar de manera adecuada ante situaciones de estrés o conflictivas?" },
+    { category: "Adaptación", question: "¿Se adapta fácilmente a cambios en su entorno laboral?" },
+    { category: "Adaptación", question: "¿Muestra flexibilidad ante nuevas responsabilidades y desafíos?" },
 ];
 
 export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProps) {
@@ -52,6 +77,10 @@ export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProp
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [questionToDelete, setQuestionToDelete] = useState<SurveyQuestion | null>(null);
+    const [showBaseQuestionsModal, setShowBaseQuestionsModal] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [hasAddedBaseQuestions, setHasAddedBaseQuestions] = useState(false);
+    const [isAddingBaseQuestions, setIsAddingBaseQuestions] = useState(false);
 
     useEffect(() => {
         const questionsRef = collection(db, `companies/${companyId}/surveyQuestions`);
@@ -63,6 +92,10 @@ export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProp
                 questionsData.push({ id: doc.id, ...doc.data() } as SurveyQuestion);
             });
             setQuestions(questionsData);
+
+            if (questionsData.length === 0) {
+                setShowBaseQuestionsModal(true);
+            }
         });
 
         return () => unsubscribe();
@@ -112,6 +145,7 @@ export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProp
     };
 
     const confirmDeleteQuestion = async () => {
+        setIsDeleting(true);
         if (questionToDelete) {
             try {
                 await deleteDoc(doc(db, `companies/${companyId}/surveyQuestions`, questionToDelete.id));
@@ -121,13 +155,43 @@ export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProp
             } catch (error) {
                 console.error("Error al eliminar pregunta:", error);
                 toast.error("Error al eliminar pregunta.");
+            } finally {
+                setIsDeleting(false);
             }
+        }
+    };
+
+    const handleAddBaseQuestions = async () => {
+        if (hasAddedBaseQuestions) return;
+
+        try {
+            setIsAddingBaseQuestions(true);
+            const questionsRef = collection(db, `companies/${companyId}/surveyQuestions`);
+
+            await toast.promise(
+                Promise.all(BASE_QUESTIONS.map(question =>
+                    addDoc(questionsRef, question)
+                )),
+                {
+                    loading: 'Añadiendo preguntas base...',
+                    success: 'Preguntas base añadidas exitosamente',
+                    error: 'Error al añadir preguntas base'
+                }
+            );
+
+            setHasAddedBaseQuestions(true);
+            setShowBaseQuestionsModal(false);
+        } catch (error) {
+            console.error("Error al añadir preguntas base:", error);
+            toast.error("Error al añadir preguntas base.");
+        } finally {
+            setIsAddingBaseQuestions(false);
         }
     };
 
     return (
         <div>
-            <div className="flex gap-4 mb-4">
+            <div className="flex flex-col sm:flex-row gap-4 mb-4">
                 <Input
                     autoFocus
                     placeholder="Nueva pregunta"
@@ -135,20 +199,22 @@ export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProp
                     value={newQuestion.question}
                     onChange={(e) => setNewQuestion({ ...newQuestion, question: e.target.value })}
                 />
-                <Select
-                    placeholder="Categoría"
-                    aria-label="Categoría"
-                    selectedKeys={newQuestion.category ? [newQuestion.category] : []}
-                    onChange={(e) => setNewQuestion({ ...newQuestion, category: e.target.value })}
-                    className='w-60'
-                >
-                    {CATEGORIES.map((category) => (
-                        <SelectItem key={category} value={category}>
-                            {category}
-                        </SelectItem>
-                    ))}
-                </Select>
-                <Button color="primary" className='w-36' onPress={handleAddQuestion} endContent={<FaPlus />} >Agregar </Button>
+                <div className="flex gap-4">
+                    <Select
+                        placeholder="Categoría"
+                        aria-label="Categoría"
+                        selectedKeys={newQuestion.category ? [newQuestion.category] : []}
+                        onChange={(e) => setNewQuestion({ ...newQuestion, category: e.target.value })}
+                        className='w-60 sm:w-44'
+                    >
+                        {CATEGORIES.map((category) => (
+                            <SelectItem key={category} value={category}>
+                                {category}
+                            </SelectItem>
+                        ))}
+                    </Select>
+                    <Button color="primary" className='w-36' onPress={handleAddQuestion} endContent={<FaPlus />} >Agregar </Button>
+                </div>
             </div>
 
             <Table aria-label="Tabla de Preguntas de Encuesta" >
@@ -206,7 +272,7 @@ export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProp
                 </TableBody>
             </Table>
 
-            <Modal isOpen={isOpen} onClose={onClose}>
+            <Modal isOpen={isOpen} onClose={onClose} scrollBehavior='outside'>
                 <ModalContent>
                     <ModalHeader>Editar Pregunta</ModalHeader>
                     <ModalBody>
@@ -239,12 +305,49 @@ export default function SurveyQuestionsTab({ companyId }: SurveyQuestionsTabProp
             </Modal>
 
             <DeleteConfirmationModal
+                isDeleting={isDeleting}
                 isOpen={deleteModalOpen}
                 onCancel={() => setDeleteModalOpen(false)}
                 onConfirm={confirmDeleteQuestion}
                 title="Eliminar Pregunta"
                 content={`¿Estás seguro de que deseas eliminar la pregunta "${questionToDelete?.question}"?`}
             />
+
+            <Modal isOpen={showBaseQuestionsModal} onClose={() => setShowBaseQuestionsModal(false)}>
+                <ModalContent>
+                    <ModalHeader>Añadir Preguntas Base</ModalHeader>
+                    <ModalBody>
+                        <p>No hay preguntas en la encuesta. ¿Deseas añadir las preguntas base?</p>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button
+                            color="danger"
+                            variant="light"
+                            onPress={() => setShowBaseQuestionsModal(false)}
+                            isDisabled={isAddingBaseQuestions}
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            color="primary"
+                            onPress={handleAddBaseQuestions}
+                            endContent={<FaClipboardList />}
+                            isDisabled={hasAddedBaseQuestions || isAddingBaseQuestions}
+                        >
+                            {isAddingBaseQuestions ? (
+                                <div className="flex items-center gap-2">
+                                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                                    Procesando...
+                                </div>
+                            ) : hasAddedBaseQuestions ? (
+                                'Preguntas Base Añadidas'
+                            ) : (
+                                'Añadir Preguntas Base'
+                            )}
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
         </div>
     );
 }

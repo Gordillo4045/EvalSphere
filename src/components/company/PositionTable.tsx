@@ -58,7 +58,7 @@ export default function PositionTable({ companyId }: PositionTableProps) {
 
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [positionToDelete, setPositionToDelete] = useState<Position | null>(null);
-
+    const [isDeleting, setIsDeleting] = useState(false);
     useEffect(() => {
         const positionsQuery = query(collectionGroup(db, 'positions'));
 
@@ -121,6 +121,7 @@ export default function PositionTable({ companyId }: PositionTableProps) {
     };
 
     const handleDeleteConfirm = async () => {
+        setIsDeleting(true);
         if (positionToDelete) {
             try {
                 const positionRef = doc(db, `companies/${companyId}/departments/${positionToDelete.department}/positions`, positionToDelete.id);
@@ -130,6 +131,8 @@ export default function PositionTable({ companyId }: PositionTableProps) {
                 toast.success("Posición eliminada correctamente");
             } catch (error) {
                 console.error("Error al eliminar posición: ", error);
+            } finally {
+                setIsDeleting(false);
             }
         }
     };
@@ -225,6 +228,10 @@ export default function PositionTable({ companyId }: PositionTableProps) {
     };
 
     const onAddNew = () => {
+        if (departments.length === 0) {
+            toast.error("Debes crear al menos un departamento antes de agregar posiciones.");
+            return;
+        }
         setModalMode('add');
         setNewPosition({});
         setCurrentPosition(null);
@@ -340,7 +347,7 @@ export default function PositionTable({ companyId }: PositionTableProps) {
                 </TableBody>
             </Table>
 
-            <Modal isOpen={isOpen} onClose={onClose}>
+            <Modal isOpen={isOpen} onClose={onClose} scrollBehavior='outside'>
                 <ModalContent>
                     <ModalHeader>{modalMode === 'add' ? 'Agregar Posición' : 'Editar Posición'}</ModalHeader>
                     <ModalBody>
@@ -397,6 +404,7 @@ export default function PositionTable({ companyId }: PositionTableProps) {
             </Modal>
 
             <DeleteConfirmationModal
+                isDeleting={isDeleting}
                 isOpen={deleteModalOpen}
                 onCancel={() => setDeleteModalOpen(false)}
                 onConfirm={handleDeleteConfirm}

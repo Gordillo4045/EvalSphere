@@ -1,4 +1,6 @@
 //eval 360
+import { Timestamp } from 'firebase/firestore';
+
 export interface Company {
     id: string;
     name: string;
@@ -50,4 +52,17 @@ export interface Relationship {
     id: string;
     level: number;
     title: string;
+}
+
+export interface Notification {
+    id: string;
+    type: 'new_employee' | 'new_evaluation' | 'evaluation_completed';
+    title: string;
+    message: string;
+    read: boolean;
+    createdAt: Timestamp;
+    employeeId?: string;
+    evaluatedId?: string;
+    evaluatorName?: string;
+    evaluatedName?: string;
 }

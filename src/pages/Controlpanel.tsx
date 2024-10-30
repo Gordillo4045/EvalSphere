@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, updateDoc, doc, addDoc, serverTimestamp } from "firebase/firestore";
 import { toast } from 'sonner';
-import { db, httpsCallable } from '../config/config';
+import { db, httpsCallable } from '@/config/config';
 import { Tabs, Tab } from "@nextui-org/react";
 
-import UserForm from '../components/UserForm';
-import UserTable from '../components/UsersTable';
-import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
-
+import UserForm from '@/components/UserForm';
+import UserTable from '@/components/UsersTable';
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
+import TicketsTable from '@/components/TicketsTable';
 interface Usuario {
     id: string;
     name?: string;
@@ -15,6 +15,23 @@ interface Usuario {
     role?: string;
     puestoTrabajo?: string;
     avatar?: string;
+}
+
+interface Ticket {
+    id: string;
+    title: string;
+    description: string;
+    status: 'pendiente' | 'en-proceso' | 'resuelto';
+    createdAt: string;
+    companyId: string;
+}
+
+interface Reply {
+    id: string;
+    message: string;
+    createdAt: any;
+    createdBy: string;
+    isAdminReply: boolean;
 }
 
 export default function Controlpanel() {
@@ -25,12 +42,16 @@ export default function Controlpanel() {
     const [adminUsuarios, setAdminUsuarios] = useState<Usuario[]>([]);
     const [companyUsuarios, setCompanyUsuarios] = useState<Usuario[]>([]);
     const [selectedTab, setSelectedTab] = useState("companias");
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [tickets, setTickets] = useState<Ticket[]>([]);
+    const [companyNames, setCompanyNames] = useState<{ [key: string]: string }>({});
 
     useEffect(() => {
-        obtenerUsuarios();
+        getUsers();
+        getTickets();
     }, []);
 
-    const obtenerUsuarios = async () => {
+    const getUsers = async () => {
         try {
             const usuariosCollection = collection(db, "users");
             const usuariosSnapshot = await getDocs(usuariosCollection);
@@ -55,27 +76,90 @@ export default function Controlpanel() {
         }
     };
 
-    const handleEditar = async (item: Usuario) => {
+    const getTickets = async () => {
+        try {
+            const companiasSnapshot = await getDocs(collection(db, "companies"));
+            let allTickets: (Ticket & { companyId: string; replies: Reply[] })[] = [];
+            const companyNames: { [key: string]: string } = {};
+
+            await Promise.all(companiasSnapshot.docs.map(async (companyDoc) => {
+
+                companyNames[companyDoc.id] = companyDoc.data().name;
+
+                const ticketsSnapshot = await getDocs(collection(db, `companies/${companyDoc.id}/support`));
+
+                const ticketsPromises = ticketsSnapshot.docs.map(async (ticketDoc) => {
+                    const repliesSnapshot = await getDocs(
+                        collection(db, `companies/${companyDoc.id}/support/${ticketDoc.id}/replies`)
+                    );
+
+                    const replies = repliesSnapshot.docs.map(replyDoc => ({
+                        id: replyDoc.id,
+                        ...replyDoc.data()
+                    })) as Reply[];
+
+                    return {
+                        id: ticketDoc.id,
+                        ...ticketDoc.data(),
+                        companyId: companyDoc.id,
+                        replies
+                    } as Ticket & { companyId: string; replies: Reply[] };
+                });
+
+                const ticketsCompania = await Promise.all(ticketsPromises);
+                allTickets = [...allTickets, ...ticketsCompania];
+            }));
+
+            allTickets.sort((a, b) =>
+                new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
+
+            setTickets(allTickets);
+            setCompanyNames(companyNames);
+        } catch (error) {
+            console.error('Error al obtener tickets:', error);
+            toast.error('Error al cargar los tickets de soporte');
+        }
+    };
+
+    const updateTicketStatus = async (ticketId: string, newStatus: Ticket['status'], companyId: string) => {
+        try {
+            const ticketRef = doc(db, `companies/${companyId}/support`, ticketId);
+            await updateDoc(ticketRef, {
+                status: newStatus
+            });
+            await getTickets();
+            toast.success('Estado del ticket actualizado');
+        } catch (error) {
+            console.error('Error al actualizar ticket:', error);
+            toast.error('Error al actualizar el estado del ticket');
+        }
+    };
+
+    const handleEdit = async (item: Usuario) => {
         setEditItem(item);
         setIsUserFormOpen(true);
     };
 
-    const handleEliminar = (item: Usuario) => {
+    const handleDelete = (item: Usuario) => {
         setItemToDelete(item);
         setShowDeleteModal(true);
     };
 
-    const confirmarEliminar = async () => {
+    const confirmDelete = async () => {
+        setIsDeleting(true);
         if (itemToDelete) {
             try {
                 const deleteUserFunction = httpsCallable('deleteUser');
                 await deleteUserFunction({ uid: itemToDelete.id });
 
-                obtenerUsuarios();
+                getUsers();
                 toast.success("Usuario eliminado con éxito");
             } catch (error) {
                 console.error(error);
                 toast.error("Error al eliminar el usuario");
+            } finally {
+                setIsDeleting(false);
             }
         }
         setItemToDelete(null);
@@ -85,7 +169,27 @@ export default function Controlpanel() {
     const handleUserFormClose = () => {
         setIsUserFormOpen(false);
         setEditItem(null);
-        obtenerUsuarios();
+        getUsers();
+    };
+
+    const handleTicketReply = async (ticketId: string, message: string, companyId: string) => {
+        try {
+            const replyRef = collection(db, `companies/${companyId}/support/${ticketId}/replies`);
+
+            await addDoc(replyRef, {
+                message,
+                createdAt: serverTimestamp(),
+                createdBy: 'admin',
+                isAdminReply: true
+            });
+
+            getTickets();
+
+            toast.success('Respuesta enviada correctamente');
+        } catch (error) {
+            console.error('Error al enviar la respuesta:', error);
+            toast.error('Error al enviar la respuesta');
+        }
     };
 
     return (
@@ -96,7 +200,7 @@ export default function Controlpanel() {
                     isOpen={isUserFormOpen}
                     onClose={handleUserFormClose}
                     editItem={editItem}
-                    onUpdate={obtenerUsuarios}
+                    onUpdate={getUsers}
                 />
 
                 <Tabs
@@ -109,26 +213,35 @@ export default function Controlpanel() {
                         <UserTable
                             usuarios={companyUsuarios}
                             onAddNew={() => setIsUserFormOpen(true)}
-                            onEdit={handleEditar}
-                            onDelete={handleEliminar}
-                            onRefresh={obtenerUsuarios}
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
+                            onRefresh={getUsers}
                         />
                     </Tab>
                     <Tab key="administradores" title="Administradores">
                         <UserTable
                             usuarios={adminUsuarios}
                             onAddNew={() => setIsUserFormOpen(true)}
-                            onEdit={handleEditar}
-                            onDelete={handleEliminar}
-                            onRefresh={obtenerUsuarios}
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
+                            onRefresh={getUsers}
                         />
                     </Tab>
-
+                    <Tab key="soporte" title="Tickets de Soporte">
+                        <TicketsTable
+                            companyNames={companyNames}
+                            tickets={tickets}
+                            onStatusChange={updateTicketStatus}
+                            onRefresh={getTickets}
+                            onReply={handleTicketReply}
+                        />
+                    </Tab>
                 </Tabs>
 
                 <DeleteConfirmationModal
                     isOpen={showDeleteModal}
-                    onConfirm={confirmarEliminar}
+                    isDeleting={isDeleting}
+                    onConfirm={confirmDelete}
                     onCancel={() => setShowDeleteModal(false)}
                     title="Eliminar Usuario"
                     content={`¿Estás seguro de que deseas eliminar el usuario "${itemToDelete?.name}"?`}
