@@ -115,7 +115,7 @@ function CompanyControlPanel() {
         if (company?.id) {
             fetchEvaluationResults();
         }
-    }, [company?.id, fetchEvaluationResults]);
+    }, [fetchEvaluationResults]);
 
     useEffect(() => {
         if (evaluationResults && selectedDepartment) {

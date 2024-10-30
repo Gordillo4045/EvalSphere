@@ -68,7 +68,9 @@ export default function NavbarCustom() {
 
                     <NavbarMenuToggle className="md:hidden pl-2 h-8 w-8" />
 
-                    <Link className="font-bold text-inherit text-2xl" href="/"><Image width="50" src="img/Logo.png" alt="Logo Evalsphere" /></Link>
+                    <Link className="font-bold text-inherit text-2xl" href="/">
+                        <Image width="50" src="/img/Logo.png" alt="Logo Evalsphere" />
+                    </Link>
 
                     {user && (
                         <>
