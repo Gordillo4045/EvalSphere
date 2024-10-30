@@ -32,6 +32,31 @@ export default function CompanySignUpForm({ isOpen, onClose }: { isOpen: boolean
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
 
+    const resetForm = () => {
+        setCurrentStep(1);
+        setAvatar(null);
+        setPreviewUrl(null);
+        setNewCompany({
+            name: "",
+            email: "",
+            password: "",
+            confirmPassword: "",
+            location: "",
+            description: "",
+            industry: "",
+            rfc: "",
+            cardNumber: "",
+            expirationDate: "",
+            cvv: "",
+        });
+        setIsSubmitting(false);
+    };
+
+    const handleClose = () => {
+        resetForm();
+        onClose();
+    };
+
     const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
@@ -197,7 +222,7 @@ export default function CompanySignUpForm({ isOpen, onClose }: { isOpen: boolean
                 }
             );
 
-            onClose();
+            handleClose();
         } catch (error) {
             console.error("Error al crear la compañía:", error);
         } finally {
@@ -206,13 +231,13 @@ export default function CompanySignUpForm({ isOpen, onClose }: { isOpen: boolean
     };
 
     const handleShowLogin = () => {
-        onClose(); // Cierra el modal de registro
-        setShowLoginModal(true); // Abre el modal de login
+        handleClose();
+        setShowLoginModal(true);
     };
 
     return (
         <>
-            <Modal isOpen={isOpen} onClose={onClose} placement="top-center" scrollBehavior='outside'>
+            <Modal isOpen={isOpen} onClose={handleClose} placement="top-center" scrollBehavior='outside'>
                 <ModalContent className="w-full max-w-md p-2">
                     <ModalHeader className="flex justify-between items-center">
                         Registro de empresa

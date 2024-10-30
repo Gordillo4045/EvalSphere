@@ -306,7 +306,7 @@ function CompanyControlPanel() {
                         </CardHeader>
                         <CardBody>
                             <Suspense fallback={<div>Cargando...</div>}>
-                                <Support />
+                                <Support companyId={company.id} />
                             </Suspense>
                         </CardBody>
                     </Card>

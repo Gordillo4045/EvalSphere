@@ -78,6 +78,29 @@ export default function EmployeeSignUpForm({ isOpen, onClose }: EmployeeSignUpFo
         setPositions(positionsData);
     };
 
+    const resetForm = () => {
+        setStep('code');
+        setInvitationCode('');
+        setNewEmployee({
+            name: '',
+            email: '',
+            password: '',
+            confirmPassword: '',
+            companyId: '',
+            departmentId: '',
+            positionId: '',
+        });
+        setAvatar(null);
+        setPreviewUrl(null);
+        setDepartments([]);
+        setPositions([]);
+    };
+
+    const handleClose = () => {
+        resetForm();
+        onClose();
+    };
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!newEmployee.name || !newEmployee.email || !newEmployee.password || !newEmployee.companyId || !newEmployee.departmentId || !newEmployee.positionId) {
@@ -109,20 +132,7 @@ export default function EmployeeSignUpForm({ isOpen, onClose }: EmployeeSignUpFo
                         invitationCode,
                     });
 
-                    onClose();
-                    setNewEmployee({
-                        name: '',
-                        email: '',
-                        password: '',
-                        confirmPassword: '',
-                        companyId: '',
-                        departmentId: '',
-                        positionId: '',
-                    });
-                    setAvatar(null);
-                    setPreviewUrl(null);
-                    setStep('code');
-                    setInvitationCode('');
+                    handleClose();
                 },
                 {
                     loading: 'Procesando registro...',
@@ -163,7 +173,7 @@ export default function EmployeeSignUpForm({ isOpen, onClose }: EmployeeSignUpFo
     }, [newEmployee.password, newEmployee.confirmPassword]);
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} scrollBehavior='outside'>
+        <Modal isOpen={isOpen} onClose={handleClose} scrollBehavior='outside'>
             <ModalContent>
                 <ModalHeader>Registro de Empleado</ModalHeader>
                 <ModalBody>
@@ -284,7 +294,7 @@ export default function EmployeeSignUpForm({ isOpen, onClose }: EmployeeSignUpFo
                                 <Button color="primary" type="submit">
                                     Registrarse
                                 </Button>
-                                <Button color="danger" variant="light" onPress={onClose}>
+                                <Button color="danger" variant="light" onPress={handleClose}>
                                     Cancelar
                                 </Button>
                             </ModalFooter>
