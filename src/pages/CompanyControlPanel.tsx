@@ -265,7 +265,7 @@ function CompanyControlPanel() {
                                     selectedEmployeeId={selectedEmployeeId}
                                     setSelectedEmployeeId={setSelectedEmployeeId}
                                     companyId={company.id}
-                                    evaluationData={evaluationResults?.employeeCategoryAverages}
+                                    evaluationData={evaluationResults}
                                     isLoading={isLoading}
                                 />
                             </Suspense>
@@ -356,8 +356,8 @@ function CompanyControlPanel() {
                                 </CardHeader>
                                 <CardBody className="overflow-auto h-full flex flex-col md:flex-row gap-2">
                                     <Suspense fallback={<div>Cargando...</div>}>
-                                        <RadarCharts data={filteredResults?.departmentCategoryAverages} />
-                                        <BarCharts data={filteredResults?.departmentCategoryAverages} />
+                                        <RadarCharts data={filteredResults?.departmentCategoryAverages} isDepartmentView={true} />
+                                        <BarCharts data={filteredResults?.departmentCategoryAverages} isDepartmentView={true} />
                                         <LineCharts data={filteredResults?.employeeCategoryAverages} companyId={company.id} />
                                     </Suspense>
                                 </CardBody>

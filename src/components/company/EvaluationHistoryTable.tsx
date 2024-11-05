@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { generateChartData } from '@/utils/chartUtils';
 import { CiCircleMore } from "react-icons/ci";
 import { FaFileExport } from 'react-icons/fa6';
+
 interface EvaluationAverage {
     [category: string]: number;
 }
@@ -64,15 +65,13 @@ const COLUMN_NAMES: { [key: string]: string } = {
     Ver_Mas: "Ver Más"
 };
 
-
-
 export default function EvaluationHistoryTable({
     companyId,
     evaluationData,
     isLoading,
     selectedEmployeeId,
     clearSelectedEmployee,
-    onSelectEmployee
+    onSelectEmployee,
 }: EvaluationHistoryTableProps) {
     const [filterValue, setFilterValue] = useState("");
     const [page, setPage] = useState(1);
@@ -225,6 +224,7 @@ export default function EvaluationHistoryTable({
             </div>
         );
     }, [filteredItems.length, page, rowsPerPage]);
+
 
     if (isLoading) {
         return (
