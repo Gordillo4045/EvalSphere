@@ -513,21 +513,21 @@ export default function Home() {
           <div className="justify-around flex flex-wrap">
             <div className="m-2">
               <img
-                src="img/paypal.png"
+                src="./public/img/paypal.png"
                 alt="PayPal payment method"
                 className="h-40 mx-auto"
               />
             </div>
             <div className="m-2">
               <img
-                src="img/visa.png"
+                src="./public/img/visa.png"
                 alt="Visa payment method"
                 className="h-40 mx-auto"
               />
             </div>
             <div className="m-2">
               <img
-                src="img/mastercard.png"
+                src="./public/img/mastercard.png"
                 alt="MasterCard payment method"
                 className="h-40
           mx-auto"
@@ -535,7 +535,7 @@ export default function Home() {
             </div>
             <div className="m-2">
               <img
-                src="img/american.png"
+                src="./public/img/american.png"
                 alt="American payment method"
                 className="h-40 mx-auto"
               />
