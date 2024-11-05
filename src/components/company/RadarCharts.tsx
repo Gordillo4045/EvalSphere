@@ -24,56 +24,75 @@ const chartConfig = {
     },
 } satisfies ChartConfig
 
-export function RadarCharts({ data }: { data: Record<string, Record<string, number>> }) {
+type RadarChartsProps = {
+    data: Record<string, Record<string, number>> | Record<string, number>;
+    isDepartmentView?: boolean;
+};
+
+export function RadarCharts({ data, isDepartmentView = false }: RadarChartsProps) {
     const chartData = useMemo(() => {
         if (!data) return [];
-        const departmentData = Object.values(data)[0] || {};
-        return Object.entries(departmentData).map(([category, average]) => ({
-            categoria: category,
-            Promedio: average,
-        }));
-    }, [data]);
+
+        if (isDepartmentView) {
+            // Lógica para datos de departamento
+            const departmentData = Object.values(data)[0] || {};
+            return Object.entries(departmentData).map(([category, average]) => ({
+                categoria: category,
+                Promedio: average,
+            }));
+        } else {
+            // Lógica para datos individuales
+            return Object.entries(data as Record<string, number>).map(([category, value]) => ({
+                categoria: category,
+                Promedio: value,
+            }));
+        }
+    }, [data, isDepartmentView]);
 
     return (
         <Card className="w-full h-[380px] lg:h-full flex flex-col">
-            <CardHeader className=" pb-4">
+            <CardHeader className="pb-4">
                 <CardTitle>Radar de Categorías</CardTitle>
                 <CardDescription>
                     Promedios por categoría de evaluación
                 </CardDescription>
             </CardHeader>
-            <CardContent className="flex-grow flex items-center justify-center p-1 ">
+            <CardContent className="flex-grow flex items-center justify-center p-1">
                 {chartData.length > 0 ? (
                     <ChartContainer
                         config={chartConfig}
                         className="w-full h-[150px] lg:h-full"
                     >
-                        <RadarChart data={chartData} >
+                        <RadarChart data={chartData}>
                             <PolarAngleAxis
                                 dataKey="categoria"
-                                tick={({ x, y, textAnchor, value, index, ...props }) => {
-                                    return (
-                                        <text
-                                            className="hidden"
-                                            x={x}
-                                            y={index === 0 ? y - 10 : y}
-                                            textAnchor={textAnchor}
-                                            fontSize={1}
-                                            fontWeight={500}
-                                            {...props}
-                                        >
-                                        </text>
-                                    )
-                                }}
+                                tick={({ x, y, payload }) => (
+                                    <text
+                                        x={x}
+                                        y={y}
+                                        textAnchor="middle"
+                                        fill="currentColor"
+                                        fontSize={12}
+                                    >
+                                        {isDepartmentView ?
+                                            <span className="text-muted-foreground dark:text-muted-foreground-dark">
+                                                {payload.value}
+                                            </span> :
+                                            payload.value
+                                        }
+                                    </text>
+                                )}
                             />
                             <PolarGrid />
-                            <PolarRadiusAxis domain={[0, 5]} axisLine={false} tick={false} />
+                            <PolarRadiusAxis domain={[0, 5]} axisLine={false} />
                             <Radar
                                 dataKey="Promedio"
                                 fill="var(--color-desktop)"
                                 fillOpacity={0.6}
+                                stroke="var(--color-desktop)"
                             />
-                            <ChartTooltip cursor={false}
+                            <ChartTooltip
+                                cursor={false}
                                 content={<ChartTooltipContent />}
                             />
                         </RadarChart>
@@ -85,5 +104,5 @@ export function RadarCharts({ data }: { data: Record<string, Record<string, numb
                 )}
             </CardContent>
         </Card>
-    )
+    );
 }
