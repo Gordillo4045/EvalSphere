@@ -19,6 +19,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { GrActions } from "react-icons/gr";
 import { GiExtractionOrb } from "react-icons/gi";
+import { RadarCharts } from './RadarCharts';
 
 interface EvaluationAverage {
     [category: string]: number;
@@ -38,7 +39,15 @@ interface ProcessedEmployeeEvaluation {
 
 interface EvaluationHistoryProps {
     companyId: string;
-    evaluationData: EmployeeEvaluation;
+    evaluationData: {
+        employeeCategoryAverages: EmployeeEvaluation;
+        departmentCategoryAverages: any;
+        evaluationStats: {
+            completed: number;
+            inProgress: number;
+            total: number;
+        };
+    };
     isLoading: boolean;
     selectedEmployeeId: string | null;
     setSelectedEmployeeId: (id: string | null) => void;
@@ -92,7 +101,6 @@ export default function EvaluationHistory({
     setSelectedEmployeeId,
 }: EvaluationHistoryProps) {
     const [processedEvaluationData, setProcessedEvaluationData] = useState<ProcessedEmployeeEvaluation[]>([]);
-    const [totalEvaluations, setTotalEvaluations] = useState<number>(0);
     const [chartData, setChartData] = useState<any[] | null>(null);
     const [newAction, setNewAction] = useState<ActionPlan>({
         actionType: '',
@@ -113,19 +121,12 @@ export default function EvaluationHistory({
     useEffect(() => {
         const processData = async () => {
             try {
-                if (!evaluationData) {
+                if (!evaluationData?.employeeCategoryAverages) {
                     throw new Error("No se han recibido datos de evaluación");
                 }
 
-                const employeesRef = collection(db, `companies/${companyId}/employees`);
-                const employeesSnap = await getDocs(employeesRef);
-                const totalEmployeesCount = employeesSnap.size;
-
-                const totalEvaluationsCount = totalEmployeesCount * (totalEmployeesCount - 1);
-                setTotalEvaluations(totalEvaluationsCount);
-
                 const processedData = await Promise.all(
-                    Object.entries(evaluationData).map(async ([id, averages]) => {
+                    Object.entries(evaluationData.employeeCategoryAverages).map(async ([id, averages]) => {
                         const employeeRef = doc(db, `companies/${companyId}/employees/${id}`);
                         const employeeSnap = await getDoc(employeeRef);
                         const employeeData = employeeSnap.data() as Employee | undefined;
@@ -148,7 +149,7 @@ export default function EvaluationHistory({
         };
 
         processData();
-    }, [evaluationData, companyId]);
+    }, [evaluationData?.employeeCategoryAverages, companyId]);
 
     useEffect(() => {
         const loadChartData = async () => {
@@ -299,8 +300,6 @@ export default function EvaluationHistory({
     const averageEvaluation = processedEvaluationData.length > 0
         ? processedEvaluationData.reduce((sum, employee) => sum + employee.globalPercentage, 0) / processedEvaluationData.length
         : 0;
-    const completedEvaluations = Object.keys(evaluationData).length;
-    const pendingEvaluations = totalEvaluations - completedEvaluations;
 
     return (
         <div className="container mx-auto p-4 space-y-6" aria-label="Resumen de evaluaciones">
@@ -327,8 +326,8 @@ export default function EvaluationHistory({
                         Evaluaciones Completadas
                     </CardHeader>
                     <CardBody className='flex flex-col justify-end'>
-                        <NumberTicker value={completedEvaluations} className="text-3xl font-bold" />
-                        <div className="text-sm text-gray-500">de {totalEvaluations}</div>
+                        <NumberTicker value={evaluationData?.evaluationStats?.completed || 0} className="text-3xl font-bold" />
+                        <div className="text-sm text-gray-500">de {evaluationData?.evaluationStats?.total || 0}</div>
                     </CardBody>
                 </Card>
                 <Card className='flex flex-col justify-between'>
@@ -336,8 +335,8 @@ export default function EvaluationHistory({
                         Evaluaciones en Proceso
                     </CardHeader>
                     <CardBody className='flex flex-col justify-end'>
-                        <NumberTicker value={pendingEvaluations} className="text-3xl font-bold" />
-                        <div className="text-sm text-gray-500">de {totalEvaluations}</div>
+                        <NumberTicker value={evaluationData?.evaluationStats?.inProgress || 0} className="text-3xl font-bold" />
+                        <div className="text-sm text-gray-500">de {evaluationData?.evaluationStats?.total || 0}</div>
                     </CardBody>
                 </Card>
             </div>
@@ -356,6 +355,7 @@ export default function EvaluationHistory({
                         }}
                         onSelectEmployee={handleSelectEmployee}
                     />
+
                 </CardBody>
             </Card>
 
@@ -479,6 +479,7 @@ export default function EvaluationHistory({
                             <EmployeeEvaluationChart
                                 data={chartData}
                             />
+                            {false && <RadarCharts data={processedEvaluationData.find(e => e.id === selectedEmployeeId)?.averages || {}} />}
                         </CardBody>
                     </Card>
                 </div>
