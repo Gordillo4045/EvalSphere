@@ -228,6 +228,10 @@ export default function PositionTable({ companyId }: PositionTableProps) {
     };
 
     const onAddNew = () => {
+        if (departments.length === 0) {
+            toast.error("Debes crear al menos un departamento antes de agregar posiciones.");
+            return;
+        }
         setModalMode('add');
         setNewPosition({});
         setCurrentPosition(null);

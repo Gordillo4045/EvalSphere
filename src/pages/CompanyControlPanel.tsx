@@ -1,14 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Button, Card, CardBody, CardHeader, Select, SelectItem, Spinner, Input, ButtonGroup, Snippet } from "@nextui-org/react";
-import { collection, doc, getDoc, onSnapshot, query, updateDoc } from 'firebase/firestore';
+import { Button, Card, CardBody, CardHeader, Select, SelectItem, Spinner, Input, ButtonGroup, Snippet, Badge, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@nextui-org/react";
+import { collection, doc, getDoc, onSnapshot, orderBy, query, updateDoc } from 'firebase/firestore';
 import { db } from '@/config/config';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { Company, Department } from '@/types/applicaciontypes';
+import { Company, Department, Notification } from '@/types/applicaciontypes';
 import Sidebar from '@/components/Sidebar';
 import { toast } from 'sonner';
 import { MdEdit, MdGroupWork } from 'react-icons/md';
-import { FaFileExport, FaUsers } from 'react-icons/fa6';
+import { FaFileLines, FaUsers } from 'react-icons/fa6';
 import { BsPersonBadgeFill } from 'react-icons/bs';
 import { FaQuestionCircle } from 'react-icons/fa';
 import React, { Suspense } from 'react';
@@ -19,6 +19,8 @@ import { getFunctions, httpsCallable } from 'firebase/functions';
 import EvaluationHistory from '@/components/company/EvaluationHistory';
 import Support from '@/components/company/Support';
 import { IoReturnUpBack } from 'react-icons/io5';
+import { BellIcon } from '@heroicons/react/24/outline';
+import BlurIn from '@/components/ui/blur-in';
 
 const DepartmentTable = React.lazy(() => import("@/components/company/DepartmentTable"));
 const PositionTable = React.lazy(() => import("@/components/company/PositionTable"));
@@ -42,6 +44,9 @@ function CompanyControlPanel() {
     const [filteredResults, setFilteredResults] = useState(null);
     const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
     const isMobile = document.documentElement.clientWidth <= 768;
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+
     useEffect(() => {
         const fetchCompanyData = async () => {
             if (user && isCompany) {
@@ -110,7 +115,7 @@ function CompanyControlPanel() {
         if (company?.id) {
             fetchEvaluationResults();
         }
-    }, [company?.id, fetchEvaluationResults]);
+    }, [fetchEvaluationResults]);
 
     useEffect(() => {
         if (evaluationResults && selectedDepartment) {
@@ -157,6 +162,27 @@ function CompanyControlPanel() {
         }
     }, [evaluationResults, selectedDepartment]);
 
+    useEffect(() => {
+        if (!company?.id) return;
+
+        const notificationsRef = collection(db, `companies/${company.id}/notifications`);
+        const q = query(
+            notificationsRef,
+            orderBy('createdAt', 'desc')
+        );
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const notificationsData = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            })) as Notification[];
+
+            setNotifications(notificationsData);
+            setUnreadCount(notificationsData.filter(n => !n.read).length);
+        });
+
+        return () => unsubscribe();
+    }, [company?.id]);
 
     const handleChangeInvitationCode = async () => {
         if (!newInvitationCode) {
@@ -183,6 +209,19 @@ function CompanyControlPanel() {
         setActiveTab(tab);
         if (tab === 'evaluationHistory') {
             setSelectedEmployeeId(null);
+        }
+    };
+
+    const markAsRead = async (notificationId: string) => {
+        if (!company?.id) return;
+
+        try {
+            await updateDoc(
+                doc(db, `companies/${company.id}/notifications`, notificationId),
+                { read: true }
+            );
+        } catch (error) {
+            console.error('Error marking notification as read:', error);
         }
     };
 
@@ -267,7 +306,7 @@ function CompanyControlPanel() {
                         </CardHeader>
                         <CardBody>
                             <Suspense fallback={<div>Cargando...</div>}>
-                                <Support />
+                                <Support companyId={company.id} />
                             </Suspense>
                         </CardBody>
                     </Card>
@@ -334,6 +373,21 @@ function CompanyControlPanel() {
                                     <Card
                                         isPressable
                                         shadow="sm"
+                                        onPress={() => { setActiveTab('evaluationHistory'); }}
+                                    >
+                                        <CardBody className="flex flex-row gap-2 items-center">
+                                            <div className="flex items-center justify-center h-fit rounded-medium border p-2 bg-default-50 border-default-100">
+                                                <FaFileLines size={20} />
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <p className="text-medium">Ver Historial de Resultados</p>
+                                                <p className="text-small text-default-400">Ver el historial de resultados de la encuesta.</p>
+                                            </div>
+                                        </CardBody>
+                                    </Card>
+                                    <Card
+                                        isPressable
+                                        shadow="sm"
                                         onPress={() => { setActiveTab('employees'); }}
                                     >
                                         <CardBody className="flex flex-row gap-2 items-center">
@@ -391,21 +445,7 @@ function CompanyControlPanel() {
                                             </div>
                                         </CardBody>
                                     </Card>
-                                    <Card
-                                        isPressable
-                                        shadow="sm"
-                                        onPress={() => { setActiveTab('results'); }}
-                                    >
-                                        <CardBody className="flex flex-row gap-2 items-center">
-                                            <div className="flex items-center justify-center h-fit rounded-medium border p-2 bg-default-50 border-default-100">
-                                                <FaFileExport size={20} />
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <p className="text-medium">Exportar Resultados</p>
-                                                <p className="text-small text-default-400">Exportar los resultados de la encuesta.</p>
-                                            </div>
-                                        </CardBody>
-                                    </Card>
+
                                 </div>
                             </CardBody>
                         </Card>
@@ -488,8 +528,62 @@ function CompanyControlPanel() {
                                 <span className="hidden md:block">Volver</span>
                             </Button>
                         )}
-                        <h1 className="text-lg md:text-xl font-semibold text-center flex-grow">Panel de Control de {company.name}</h1>
-                        {activeTab !== 'home' && <div className="w-[70px]"></div>}
+                        <BlurIn word={`Panel de Control de ${company.name}`} className="text-lg md:text-xl font-semibold text-center flex-grow" />
+                        <Dropdown
+                            classNames={{
+                                base: "min-h-80 rounded-xl bg-background/95 p-2 shadow-medium backdrop-blur-xl backdrop-saturate-150 dark:bg-default-100/95",
+                            }}
+                        >
+                            <DropdownTrigger>
+                                <Button isIconOnly variant="light" size='md'>
+                                    <Badge
+                                        content={unreadCount}
+                                        color="danger"
+                                        variant="shadow"
+                                        aria-label="Notificaciones"
+                                        isInvisible={unreadCount === 0}
+                                    >
+                                        <BellIcon className='size-6' />
+                                    </Badge>
+                                </Button>
+                            </DropdownTrigger>
+                            <DropdownMenu
+                                variant="light"
+                                aria-label="Notificaciones"
+                                className="max-h-[400px] overflow-auto"
+                            >
+                                {notifications.length === 0 ? (
+                                    <DropdownItem>No hay notificaciones</DropdownItem>
+                                ) : (
+                                    notifications.map((notification) => (
+                                        <DropdownItem
+                                            key={notification.id}
+                                            onClick={() => markAsRead(notification.id)}
+                                            className={`${!notification.read ? 'bg-default-100' : ''} border-b last:border-b-0 border-default-100 mb-2`}
+                                            description={notification.createdAt instanceof Date
+                                                ? notification.createdAt.toLocaleString()
+                                                : notification.createdAt?.toDate().toLocaleString()
+                                            }
+                                        >
+                                            <div className="flex flex-col gap-1">
+                                                <p className="font-semibold">{notification.title}</p>
+                                                <p className="text-sm text-default-500">
+                                                    {notification.type === 'new_employee' ? (
+                                                        notification.message
+                                                    ) : notification.type === 'new_evaluation' ? (
+                                                        <>
+                                                            <span className="font-medium">{notification.evaluatorName}</span>
+                                                            {' ha completado una evaluación para '}
+                                                            <span className="font-medium">{notification.evaluatedName}</span>
+                                                        </>
+                                                    ) : notification.message}
+                                                </p>
+                                            </div>
+                                        </DropdownItem>
+                                    ))
+                                )}
+                            </DropdownMenu>
+                        </Dropdown>
                     </div>
                 </div>
                 <div className={`w-full ${activeTab === 'home' || activeTab === 'evaluationHistory' || activeTab === 'support' ? 'h-fit' : 'max-w-5xl mx-auto'} flex flex-col shadow-inner rounded-xl dark:shadow-slate-300/20 overflow-x-auto p-3`}>

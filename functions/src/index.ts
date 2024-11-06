@@ -111,13 +111,6 @@ export const updateAdmin = functions.https.onCall(async (data, context) => {
 });
 
 export const createCompany = functions.https.onCall(async (data, context) => {
-    if (!context.auth?.token.admin) {
-        throw new functions.https.HttpsError(
-            "permission-denied",
-            "Debe ser un administrador para crear compañías.",
-        );
-    }
-
     const {
         name,
         email,
@@ -127,6 +120,10 @@ export const createCompany = functions.https.onCall(async (data, context) => {
         description,
         industry,
         photoURL,
+        rfc,
+        cardNumber,
+        expirationDate,
+        cvv
     } = data;
 
     try {
@@ -154,6 +151,10 @@ export const createCompany = functions.https.onCall(async (data, context) => {
             description: description || "",
             industry,
             invitationCode,
+            rfc: rfc || "",
+            cardNumber: cardNumber || "",
+            expirationDate: expirationDate || "",
+            cvv: cvv || "",
         };
 
         await admin
@@ -574,3 +575,100 @@ export const calculateEvaluationAverages = functions.https.onCall(async (data: {
         throw new functions.https.HttpsError('internal', 'Error al calcular los promedios de evaluación');
     }
 });
+
+export const createNotification = functions.https.onCall(async (data, context) => {
+    const { type, title, message, companyId, employeeId } = data;
+
+    try {
+        await admin.firestore()
+            .collection('companies')
+            .doc(companyId)
+            .collection('notifications')
+            .add({
+                type,
+                title,
+                message,
+                read: false,
+                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                employeeId
+            });
+
+        return { success: true };
+    } catch (error) {
+        throw new functions.https.HttpsError('internal', 'Error creating notification');
+    }
+});
+
+// Trigger cuando un empleado se registra
+export const onEmployeeCreated = functions.firestore
+    .document('employees/{employeeId}')
+    .onCreate(async (snap, context) => {
+        const newEmployee = snap.data();
+
+        try {
+            await admin.firestore()
+                .collection('companies')
+                .doc(newEmployee.companyId)
+                .collection('notifications')
+                .add({
+                    type: 'new_employee',
+                    title: 'Nuevo Empleado Registrado',
+                    message: `${newEmployee.name} se ha unido a la empresa`,
+                    read: false,
+                    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                    employeeId: context.params.employeeId
+                });
+        } catch (error) {
+            console.error('Error creating notification:', error);
+        }
+    });
+
+// Trigger cuando se completa una evaluación
+export const onEvaluationCreated = functions.firestore
+    .document('companies/{companyId}/evaluations/{evaluationId}')
+    .onCreate(async (snap, context) => {
+        const newEvaluation = snap.data();
+        const companyId = context.params.companyId;
+
+        try {
+            const evaluatorDoc = await admin.firestore()
+                .collection('companies')
+                .doc(companyId)
+                .collection('employees')
+                .doc(newEvaluation.evaluatorId)
+                .get();
+
+            const evaluatorName = evaluatorDoc.exists ?
+                evaluatorDoc.data()?.name || 'Usuario' :
+                'Usuario';
+
+            const evaluatedDoc = await admin.firestore()
+                .collection('companies')
+                .doc(companyId)
+                .collection('employees')
+                .doc(newEvaluation.evaluatedId)
+                .get();
+
+            const evaluatedName = evaluatedDoc.exists ?
+                evaluatedDoc.data()?.name || 'Usuario' :
+                'Usuario';
+
+            await admin.firestore()
+                .collection('companies')
+                .doc(companyId)
+                .collection('notifications')
+                .add({
+                    type: 'new_evaluation',
+                    title: 'Nueva Evaluación Completada',
+                    message: `${evaluatorName} ha completado una evaluación para ${evaluatedName}`,
+                    read: false,
+                    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                    employeeId: newEvaluation.evaluatorId,
+                    evaluatedId: newEvaluation.evaluatedId,
+                    evaluatorName,
+                    evaluatedName
+                });
+        } catch (error) {
+            console.error('Error creating notification:', error);
+        }
+    });
