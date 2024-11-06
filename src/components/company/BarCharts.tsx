@@ -28,15 +28,30 @@ const chartConfig = {
     },
 } satisfies ChartConfig
 
-export function BarCharts({ data }: { data: Record<string, Record<string, number>> }) {
+type BarChartsProps = {
+    data: Record<string, Record<string, number>> | Record<string, number>;
+    isDepartmentView?: boolean;
+};
+
+export function BarCharts({ data, isDepartmentView = false }: BarChartsProps) {
     const chartData = useMemo(() => {
         if (!data) return [];
-        const departmentData = Object.values(data)[0] || {};
-        return Object.entries(departmentData).map(([category, average]) => ({
-            categoria: category,
-            Promedio: average,
-        }));
-    }, [data]);
+
+        if (isDepartmentView) {
+            // Lógica para datos de departamento
+            const departmentData = Object.values(data)[0] || {};
+            return Object.entries(departmentData).map(([category, average]) => ({
+                categoria: category,
+                Promedio: average,
+            }));
+        } else {
+            // Lógica para datos individuales
+            return Object.entries(data as Record<string, number>).map(([category, value]) => ({
+                categoria: category,
+                Promedio: value,
+            }));
+        }
+    }, [data, isDepartmentView]);
     return (
         <Card className="w-full h-[380px] lg:h-full flex flex-col">
             <CardHeader>

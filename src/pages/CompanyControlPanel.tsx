@@ -265,7 +265,7 @@ function CompanyControlPanel() {
                                     selectedEmployeeId={selectedEmployeeId}
                                     setSelectedEmployeeId={setSelectedEmployeeId}
                                     companyId={company.id}
-                                    evaluationData={evaluationResults?.employeeCategoryAverages}
+                                    evaluationData={evaluationResults}
                                     isLoading={isLoading}
                                 />
                             </Suspense>
@@ -356,8 +356,8 @@ function CompanyControlPanel() {
                                 </CardHeader>
                                 <CardBody className="overflow-auto h-full flex flex-col md:flex-row gap-2">
                                     <Suspense fallback={<div>Cargando...</div>}>
-                                        <RadarCharts data={filteredResults?.departmentCategoryAverages} />
-                                        <BarCharts data={filteredResults?.departmentCategoryAverages} />
+                                        <RadarCharts data={filteredResults?.departmentCategoryAverages} isDepartmentView={true} />
+                                        <BarCharts data={filteredResults?.departmentCategoryAverages} isDepartmentView={true} />
                                         <LineCharts data={filteredResults?.employeeCategoryAverages} companyId={company.id} />
                                     </Suspense>
                                 </CardBody>
@@ -512,8 +512,8 @@ function CompanyControlPanel() {
     return (
         <div className="flex min-h-dvh">
             <Sidebar setActiveTab={handleSetActiveTab} />
-            <main className="flex-1 flex flex-col overflow-hidden ml-[3.5rem] md:ml-20 p-2 md:p-3">
-                <div className="flex flex-col items-center pb-4">
+            <main className="flex-1 flex flex-col overflow-hidden ml-[3.5rem] md:ml-20">
+                <div className="fixed top-0 right-0 left-[3.5rem] md:left-20 shadow backdrop-blur-sm backdrop-saturate-150 border-r border-gray-300 dark:border-gray-700/50 z-40 px-2 md:px-3 py-2 border-b ">
                     <div className="w-full flex justify-between items-center">
                         {activeTab !== 'home' && (
                             <Button
@@ -586,8 +586,10 @@ function CompanyControlPanel() {
                         </Dropdown>
                     </div>
                 </div>
-                <div className={`w-full ${activeTab === 'home' || activeTab === 'evaluationHistory' || activeTab === 'support' ? 'h-fit' : 'max-w-5xl mx-auto'} flex flex-col shadow-inner rounded-xl dark:shadow-slate-300/20 overflow-x-auto p-3`}>
-                    {renderContent()}
+                <div className="p-2 md:p-3 mt-14">
+                    <div className={`w-full ${activeTab === 'home' || activeTab === 'evaluationHistory' || activeTab === 'support' ? 'h-fit' : 'max-w-5xl mx-auto'} flex flex-col shadow-inner rounded-xl dark:shadow-slate-300/20 overflow-x-auto p-3`}>
+                        {renderContent()}
+                    </div>
                 </div>
             </main >
         </div >
