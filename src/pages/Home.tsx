@@ -36,7 +36,7 @@ export default function Home() {
             <>
               <BlurIn
                 word="EvalSphere"
-                className="pointer-events-none whitespace-pre-wrap bg-gradient-to-b from-black to-gray-300/80 bg-clip-text text-center text-7xl font-semibold leading-none text-transparent dark:from-white dark:to-slate-900/10"
+                className="pointer-events-none whitespace-pre-wrap bg-gradient-to-b from-black to-gray-300/80 bg-clip-text text-center text-6xl font-semibold leading-none text-transparent dark:from-white dark:to-slate-900/10"
                 duration={1.5}
                 variant={{
                   hidden: { filter: "blur(15px)", opacity: 0 },
@@ -46,7 +46,7 @@ export default function Home() {
               <br />
               <BlurIn
                 word="Evaluación de desempeño 360°"
-                className="pointer-events-none whitespace-pre-wrap bg-gradient-to-b from-black to-gray-300/80 bg-clip-text text-center text-5xl font-semibold leading-none text-transparent dark:from-white dark:to-slate-900/10"
+                className="pointer-events-none whitespace-pre-wrap bg-gradient-to-b from-black to-gray-300/80 bg-clip-text text-center text-3xl font-semibold leading-none text-transparent dark:from-white dark:to-slate-900/10"
                 duration={1.5}
                 variant={{
                   hidden: { filter: "blur(15px)", opacity: 0 },
@@ -429,8 +429,8 @@ export default function Home() {
         </div>
         
       </section>
-      <div className="flex flex-col gap-2 -translate-y-[25%] md:-translate-y-[20%] pt-80">
-        <div className="pr-28 pl-28 pb-1">
+      <div className="flex flex-col gap-2 -translate-y-[25%] md:-translate-y-[30%] pt-80">
+        <div className="pl-10 pr-10 pb-1 md:pl-10 md:pr-10">
           <section id="header">
             <BlurFade delay={0.25} inView>
               <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
@@ -513,21 +513,21 @@ export default function Home() {
           <div className="justify-around flex flex-wrap">
             <div className="m-2">
               <img
-                src="./public/img/paypal.png"
+                src="./img/paypal.png"
                 alt="PayPal payment method"
                 className="h-40 mx-auto"
               />
             </div>
             <div className="m-2">
               <img
-                src="./public/img/visa.png"
+                src="./img/visa.png"
                 alt="Visa payment method"
                 className="h-40 mx-auto"
               />
             </div>
             <div className="m-2">
               <img
-                src="./public/img/mastercard.png"
+                src="./img/mastercard.png"
                 alt="MasterCard payment method"
                 className="h-40
           mx-auto"
@@ -535,7 +535,7 @@ export default function Home() {
             </div>
             <div className="m-2">
               <img
-                src="./public/img/american.png"
+                src="./img/american.png"
                 alt="American payment method"
                 className="h-40 mx-auto"
               />
