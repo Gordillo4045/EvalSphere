@@ -21,6 +21,8 @@
     "firebase-admin": "^12.4.0",
     "flowbite-react": "^0.10.2",
     "framer-motion": "^11.11.9",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.2",
     "lucide-react": "^0.447.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -36,6 +38,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
+    "@types/jspdf": "^2.0.0",
     "@types/node": "^22.7.4",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
