@@ -27,9 +27,14 @@ const chartConfig = {
 type RadarChartsProps = {
     data: Record<string, Record<string, number>> | Record<string, number>;
     isDepartmentView?: boolean;
+    forceColors?: {
+        text: string;
+        grid: string;
+        labels: string;
+    };
 };
 
-export function RadarCharts({ data, isDepartmentView = false }: RadarChartsProps) {
+export function RadarCharts({ data, isDepartmentView = false, forceColors }: RadarChartsProps) {
     const chartData = useMemo(() => {
         if (!data) return [];
 
@@ -51,7 +56,7 @@ export function RadarCharts({ data, isDepartmentView = false }: RadarChartsProps
 
     return (
         <Card id="radarChart" className="w-full h-[380px] lg:h-full flex flex-col">
-            <CardHeader className="pb-4">
+            <CardHeader className={`pb-4 ${forceColors ? 'text-black' : ''}`}>
                 <CardTitle>Radar de Categorías</CardTitle>
                 <CardDescription>
                     Promedios por categoría de evaluación
@@ -71,7 +76,7 @@ export function RadarCharts({ data, isDepartmentView = false }: RadarChartsProps
                                         x={x}
                                         y={y}
                                         textAnchor="middle"
-                                        fill="currentColor"
+                                        fill={forceColors?.labels || 'currentColor'}
                                         fontSize={12}
                                     >
                                         {isDepartmentView ?
@@ -87,9 +92,9 @@ export function RadarCharts({ data, isDepartmentView = false }: RadarChartsProps
                             <PolarRadiusAxis domain={[0, 5]} axisLine={false} />
                             <Radar
                                 dataKey="Promedio"
-                                fill="var(--color-desktop)"
+                                fill={forceColors?.grid || 'var(--color-desktop)'}
                                 fillOpacity={0.6}
-                                stroke="var(--color-desktop)"
+                                stroke={forceColors?.grid || 'var(--color-desktop)'}
                             />
                             <ChartTooltip
                                 cursor={false}

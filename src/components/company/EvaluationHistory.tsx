@@ -22,7 +22,7 @@ import { GiExtractionOrb } from "react-icons/gi";
 import { RadarCharts } from './RadarCharts';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 interface EvaluationAverage {
     [category: string]: number;
@@ -284,15 +284,18 @@ export default function EvaluationHistory({
         setSelectedPlan(null);
     };
 
-    const exportToPDF = async () => {
+    const generatePDF = async () => {
         if (!selectedEmployeeId || !chartData) return;
 
         try {
+            const loadingToast = toast.loading('Generando PDF...');
+
             // Crear un contenedor temporal para el reporte
             const reportContainer = document.createElement('div');
             reportContainer.style.width = '800px';
             reportContainer.style.padding = '20px';
             reportContainer.style.backgroundColor = 'white';
+            reportContainer.style.color = 'black';
 
             // Crear un contenedor temporal para el radar chart
             const tempRadarContainer = document.createElement('div');
@@ -304,9 +307,16 @@ export default function EvaluationHistory({
 
             // Renderizar el radar chart en el contenedor temporal
             const radarData = processedEvaluationData.find(e => e.id === selectedEmployeeId)?.averages || {};
-            ReactDOM.render(
-                <RadarCharts data={radarData} />,
-                tempRadarContainer
+            const root = createRoot(tempRadarContainer);
+            root.render(
+                <RadarCharts
+                    data={radarData}
+                    forceColors={{
+                        text: 'black',
+                        grid: 'rgba(60,179,113,0.2)',
+                        labels: 'black'
+                    }}
+                />
             );
 
             // Esperar a que el radar chart se renderice
@@ -322,11 +332,11 @@ export default function EvaluationHistory({
 
             // Crear el contenido del reporte
             reportContainer.innerHTML = `
-                <div style="font-family: Arial, sans-serif;">
-                    <h1 style="text-align: center; margin-bottom: 20px;">Reporte de Evaluación</h1>
+                <div style="font-family: Arial, sans-serif; color: black;">
+                    <h1 style="text-align: center; margin-bottom: 20px; color: black;">Reporte de Evaluación</h1>
                     <div style="margin-bottom: 10px;">
-                        <p style="margin: 5px 0;">Empleado: ${processedEvaluationData.find(e => e.id === selectedEmployeeId)?.name}</p>
-                        <p style="margin: 5px 0;">Puntuación Global: ${processedEvaluationData.find(e => e.id === selectedEmployeeId)?.globalPercentage.toFixed(2)}%</p>
+                        <p style="margin: 5px 0; color: black;">Empleado: ${processedEvaluationData.find(e => e.id === selectedEmployeeId)?.name}</p>
+                        <p style="margin: 5px 0; color: black;">Puntuación Global: ${processedEvaluationData.find(e => e.id === selectedEmployeeId)?.globalPercentage.toFixed(2)}%</p>
                     </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
                         <table style="width: 100%; border-collapse: collapse;">
@@ -340,17 +350,17 @@ export default function EvaluationHistory({
                                 ${Object.entries(radarData)
                     .map(([category, score]) => `
                                         <tr style="border-bottom: 1px solid #ddd;">
-                                            <td style="padding: 8px;">${category}</td>
-                                            <td style="padding: 8px;">${score.toFixed(2)}</td>
+                                            <td style="padding: 8px; color: black;">${category}</td>
+                                            <td style="padding: 8px; color: black;">${score.toFixed(2)}</td>
                                         </tr>
                                     `).join('')}
                             </tbody>
                         </table>
                         <img src="${radarCanvas.toDataURL()}" style="width: 100%; height: auto;" />
                     </div>
-                    <h2 style="margin-bottom: 10px;">Gráfico de evaluación por categoría y tipo de evaluador</h2>
+                    <h2 style="margin-bottom: 10px; color: black;">Gráfico de evaluación por categoría y tipo de evaluador</h2>
                     <div id="lineChartContainer" style="margin: 20px 0;"></div>
-                    <h2 style="margin-bottom: 10px;">Planes de Acción</h2>
+                    <h2 style="margin-bottom: 10px; color: black;">Planes de Acción</h2>
                     <table style="width: 100%; border-collapse: collapse;">
                         <thead>
                             <tr style="background-color: #2980b9; color: white;">
@@ -362,9 +372,9 @@ export default function EvaluationHistory({
                         <tbody>
                             ${actionPlans.map(plan => `
                                 <tr style="border-bottom: 1px solid #ddd;">
-                                    <td style="padding: 8px;">${formatActionType(plan.actionType)}</td>
-                                    <td style="padding: 8px;">${plan.description}</td>
-                                    <td style="padding: 8px;">${plan.status === 'completed' ? 'Completado' :
+                                    <td style="padding: 8px; color: black;">${formatActionType(plan.actionType)}</td>
+                                    <td style="padding: 8px; color: black;">${plan.description}</td>
+                                    <td style="padding: 8px; color: black;">${plan.status === 'completed' ? 'Completado' :
                             plan.status === 'in-progress' ? 'En Progreso' : 'Pendiente'
                         }</td>
                                 </tr>
@@ -377,10 +387,21 @@ export default function EvaluationHistory({
             // Agregar el contenedor al documento
             document.body.appendChild(reportContainer);
 
-            // Clonar y agregar el gráfico de líneas
+            // Clonar y modificar el gráfico de líneas
             const originalChart = document.querySelector('#employeeChart');
             if (originalChart) {
-                const chartClone = originalChart.cloneNode(true);
+                const chartClone = originalChart.cloneNode(true) as HTMLElement;
+
+                // Forzar colores oscuros para el texto del gráfico
+                chartClone.querySelectorAll('text').forEach(text => {
+                    text.style.fill = 'black';
+                });
+
+                // Forzar colores oscuros para los ejes
+                chartClone.querySelectorAll('.domain, .tick line').forEach(element => {
+                    (element as SVGElement).style.stroke = 'black';
+                });
+
                 reportContainer.querySelector('#lineChartContainer')?.appendChild(chartClone);
             }
 
@@ -402,15 +423,30 @@ export default function EvaluationHistory({
                 format: [canvas.width, canvas.height]
             });
 
-            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, canvas.width, canvas.height);
-            pdf.save(`evaluacion_${processedEvaluationData.find(e => e.id === selectedEmployeeId)?.name.replace(/\s+/g, '_')}.pdf`);
+            // Añadir la imagen al PDF
+            pdf.addImage(
+                canvas.toDataURL('image/png'),
+                'PNG',
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+            // Descargar el PDF directamente
+            const employeeName = processedEvaluationData.find(e => e.id === selectedEmployeeId)?.name.replace(/\s+/g, '_');
+            pdf.save(`evaluacion_${employeeName}.pdf`);
 
             // Limpiar
             document.body.removeChild(reportContainer);
             document.body.removeChild(tempRadarContainer);
 
+            toast.dismiss(loadingToast);
+            toast.success('PDF descargado correctamente');
+
         } catch (error) {
             console.error('Error al generar PDF:', error);
+            toast.error('Error al generar el PDF');
         }
     };
 
@@ -487,7 +523,7 @@ export default function EvaluationHistory({
                             setChartData(null);
                         }}
                         onSelectEmployee={handleSelectEmployee}
-                        onExport={exportToPDF}
+                        onExport={generatePDF}
                     />
 
                 </CardBody>
