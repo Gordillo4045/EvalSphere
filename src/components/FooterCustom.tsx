@@ -113,26 +113,26 @@ export default function FooterCustom() {
                     </div>
                 </div> */}
                   <Card className="rounded-none border-t">
-        <CardFooter className="flex flex-row flex-wrap items-center justify-center gap-y-6 gap-x-12 text-center md:justify-between pt-5">
-          <div className="flex justify-center space-x-4 mb-4">
-            <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-600">
+        <CardFooter className="flex flex-row flex-wrap items-center justify-center gap-y-6 gap-x-12 text-center md:justify-between">
+          <div className="flex justify-center space-x-4 mb-4 pt-2">
+            <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" className="text-black-400 hover:text-blue-600">
               <FaFacebook size={24} />
             </a>
-            <a href="https://www.twitter.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-400">
+            <a href="https://www.twitter.com" target="_blank" rel="noopener noreferrer" className="text-black-400 hover:text-blue-400">
               <FaTwitter size={24} />
             </a>
-            <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-700">
+            <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" className="text-black-400 hover:text-blue-700">
               <FaLinkedin size={24} />
             </a>
           </div>
-          <p className="text-gray-400 text-center select-none text-xs sm:text-sm pr-20">
+          <p className="text-black-400 text-center select-none text-xs sm:text-sm">
             &copy; 2024 Evalsphere. <span className="hidden sm:inline">Todos los derechos reservados.</span>
           </p>
-          <div className="flex justify-end space-x-4 mt-4">
-            <a href="/" className="text-gray-400 hover:text-blue-500">Home</a>
-            <a href="#" className="text-gray-400 hover:text-blue-500">About Us</a>
-            <a href="#" className="text-gray-400 hover:text-blue-500">Contact Us</a>
-            <a href="#" className="text-gray-400 hover:text-blue-500">License</a>
+          <div className="flex justify-end space-x-4 mt-4 pb-5">
+            <a href="/" className="text-black-400 hover:text-blue-500">Home</a>
+            <a href="#" className="text-black-400 hover:text-blue-500">About Us</a>
+            <a href="#" className="text-black-400 hover:text-blue-500">Contact Us</a>
+            <a href="#" className="text-black-400 hover:text-blue-500">License</a>
           </div>
         </CardFooter>
       </Card>
