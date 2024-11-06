@@ -1,9 +1,9 @@
-import { Card, CardFooter } from "@nextui-org/react";
-import { FaFacebook, FaTwitter, FaLinkedin } from "react-icons/fa";
+import { Card, CardBody, Link } from "@nextui-org/react";
+import { FaFacebook, FaTwitter, FaLinkedin, FaHome } from "react-icons/fa";
 
 export default function FooterCustom() {
     return (
-        <footer className="bg-gray-100 border-t">
+        <footer>
             {/* <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
                 <div className="xl:grid xl:grid-cols-3 xl:gap-8">
                     <div className="space-y-8 xl:col-span-1">
@@ -112,31 +112,34 @@ export default function FooterCustom() {
                         </div>
                     </div>
                 </div> */}
-                  <Card className="rounded-none border-t">
-        <CardFooter className="flex flex-row flex-wrap items-center justify-center gap-y-6 gap-x-12 text-center md:justify-between">
-          <div className="flex justify-center space-x-4 mb-4 pt-2">
-            <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" className="text-black-400 hover:text-blue-600">
-              <FaFacebook size={24} />
-            </a>
-            <a href="https://www.twitter.com" target="_blank" rel="noopener noreferrer" className="text-black-400 hover:text-blue-400">
-              <FaTwitter size={24} />
-            </a>
-            <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" className="text-black-400 hover:text-blue-700">
-              <FaLinkedin size={24} />
-            </a>
-          </div>
-          <p className="text-black-400 text-center select-none text-xs sm:text-sm">
-            &copy; 2024 Evalsphere. <span className="hidden sm:inline">Todos los derechos reservados.</span>
-          </p>
-          <div className="flex justify-end space-x-4 mt-4 pb-5">
-            <a href="/" className="text-black-400 hover:text-blue-500">Home</a>
-            <a href="#" className="text-black-400 hover:text-blue-500">About Us</a>
-            <a href="#" className="text-black-400 hover:text-blue-500">Contact Us</a>
-            <a href="#" className="text-black-400 hover:text-blue-500">License</a>
-          </div>
-        </CardFooter>
-      </Card>
+            <Card className="rounded-none  border-t">
+                <CardBody className="flex flex-row flex-wrap items-center justify-center gap-y-6 gap-x-12 text-center md:justify-around pt-5">
+                    <div className="flex justify-center items-center space-x-4 ">
+                        <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-600">
+                            <FaFacebook size={24} />
+                        </a>
+                        <a href="https://www.twitter.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-400">
+                            <FaTwitter size={24} />
+                        </a>
+                        <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-700">
+                            <FaLinkedin size={24} />
+                        </a>
+                    </div>
+                    <p className="text-gray-400 text-center select-none text-xs sm:text-sm ">
+                        &copy; 2024 Evalsphere. <span className="hidden sm:inline">Todos los derechos reservados.</span>
+                    </p>
+                    <div className="flex items-center justify-center gap-1">
 
+                        <Link
+                            href="/"
+                            className="text-gray-400 hover:text-blue-500"
+                            showAnchorIcon
+                            anchorIcon={<FaHome className="pl-1" size={20} />}>
+                            Home
+                        </Link>
+                    </div>
+                </CardBody>
+            </Card>
         </footer>
     )
 }
