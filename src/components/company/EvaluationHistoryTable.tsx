@@ -38,6 +38,7 @@ interface EvaluationHistoryTableProps {
     selectedEmployeeId: string | null;
     clearSelectedEmployee: () => void;
     onSelectEmployee: (employeeId: string, chartData: any[]) => void;
+    onExport: () => void;
 }
 
 const CATEGORIES = [
@@ -72,6 +73,7 @@ export default function EvaluationHistoryTable({
     selectedEmployeeId,
     clearSelectedEmployee,
     onSelectEmployee,
+    onExport,
 }: EvaluationHistoryTableProps) {
     const [filterValue, setFilterValue] = useState("");
     const [page, setPage] = useState(1);
@@ -186,6 +188,7 @@ export default function EvaluationHistoryTable({
                                 size="sm"
                                 startContent={<FaFileExport size={20} />}
                                 aria-label="Exportar resultados de la encuesta"
+                                onPress={onExport}
                             >
                                 Exportar Resultados
                             </Button>
@@ -248,6 +251,7 @@ export default function EvaluationHistoryTable({
                 topContent={topContent}
                 topContentPlacement="outside"
                 onSortChange={setSortDescriptor}
+                id="evaluation-scores-table"
             >
                 <TableHeader columns={INITIAL_VISIBLE_COLUMNS.map(col => ({ uid: col, name: COLUMN_NAMES[col] }))}>
                     {(column) => (

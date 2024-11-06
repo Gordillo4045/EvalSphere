@@ -20,6 +20,9 @@ import {
 import { GrActions } from "react-icons/gr";
 import { GiExtractionOrb } from "react-icons/gi";
 import { RadarCharts } from './RadarCharts';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import ReactDOM from 'react-dom';
 
 interface EvaluationAverage {
     [category: string]: number;
@@ -281,6 +284,136 @@ export default function EvaluationHistory({
         setSelectedPlan(null);
     };
 
+    const exportToPDF = async () => {
+        if (!selectedEmployeeId || !chartData) return;
+
+        try {
+            // Crear un contenedor temporal para el reporte
+            const reportContainer = document.createElement('div');
+            reportContainer.style.width = '800px';
+            reportContainer.style.padding = '20px';
+            reportContainer.style.backgroundColor = 'white';
+
+            // Crear un contenedor temporal para el radar chart
+            const tempRadarContainer = document.createElement('div');
+            tempRadarContainer.style.width = '400px';
+            tempRadarContainer.style.height = '400px';
+            tempRadarContainer.style.position = 'absolute';
+            tempRadarContainer.style.left = '-9999px';
+            document.body.appendChild(tempRadarContainer);
+
+            // Renderizar el radar chart en el contenedor temporal
+            const radarData = processedEvaluationData.find(e => e.id === selectedEmployeeId)?.averages || {};
+            ReactDOM.render(
+                <RadarCharts data={radarData} />,
+                tempRadarContainer
+            );
+
+            // Esperar a que el radar chart se renderice
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // Capturar el radar chart
+            const radarCanvas = await html2canvas(tempRadarContainer, {
+                scale: 2,
+                logging: false,
+                useCORS: true,
+                backgroundColor: 'white'
+            });
+
+            // Crear el contenido del reporte
+            reportContainer.innerHTML = `
+                <div style="font-family: Arial, sans-serif;">
+                    <h1 style="text-align: center; margin-bottom: 20px;">Reporte de Evaluación</h1>
+                    <div style="margin-bottom: 10px;">
+                        <p style="margin: 5px 0;">Empleado: ${processedEvaluationData.find(e => e.id === selectedEmployeeId)?.name}</p>
+                        <p style="margin: 5px 0;">Puntuación Global: ${processedEvaluationData.find(e => e.id === selectedEmployeeId)?.globalPercentage.toFixed(2)}%</p>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background-color: #2980b9; color: white;">
+                                    <th style="padding: 8px; text-align: left;">Categoría</th>
+                                    <th style="padding: 8px; text-align: left;">Puntuación</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${Object.entries(radarData)
+                    .map(([category, score]) => `
+                                        <tr style="border-bottom: 1px solid #ddd;">
+                                            <td style="padding: 8px;">${category}</td>
+                                            <td style="padding: 8px;">${score.toFixed(2)}</td>
+                                        </tr>
+                                    `).join('')}
+                            </tbody>
+                        </table>
+                        <img src="${radarCanvas.toDataURL()}" style="width: 100%; height: auto;" />
+                    </div>
+                    <h2 style="margin-bottom: 10px;">Gráfico de evaluación por categoría y tipo de evaluador</h2>
+                    <div id="lineChartContainer" style="margin: 20px 0;"></div>
+                    <h2 style="margin-bottom: 10px;">Planes de Acción</h2>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background-color: #2980b9; color: white;">
+                                <th style="padding: 8px; text-align: left;">Tipo</th>
+                                <th style="padding: 8px; text-align: left;">Descripción</th>
+                                <th style="padding: 8px; text-align: left;">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${actionPlans.map(plan => `
+                                <tr style="border-bottom: 1px solid #ddd;">
+                                    <td style="padding: 8px;">${formatActionType(plan.actionType)}</td>
+                                    <td style="padding: 8px;">${plan.description}</td>
+                                    <td style="padding: 8px;">${plan.status === 'completed' ? 'Completado' :
+                            plan.status === 'in-progress' ? 'En Progreso' : 'Pendiente'
+                        }</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            // Agregar el contenedor al documento
+            document.body.appendChild(reportContainer);
+
+            // Clonar y agregar el gráfico de líneas
+            const originalChart = document.querySelector('#employeeChart');
+            if (originalChart) {
+                const chartClone = originalChart.cloneNode(true);
+                reportContainer.querySelector('#lineChartContainer')?.appendChild(chartClone);
+            }
+
+            // Esperar a que todo se renderice
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // Capturar todo el reporte
+            const canvas = await html2canvas(reportContainer, {
+                scale: 2,
+                logging: false,
+                useCORS: true,
+                backgroundColor: 'white'
+            });
+
+            // Crear el PDF
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'px',
+                format: [canvas.width, canvas.height]
+            });
+
+            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, canvas.width, canvas.height);
+            pdf.save(`evaluacion_${processedEvaluationData.find(e => e.id === selectedEmployeeId)?.name.replace(/\s+/g, '_')}.pdf`);
+
+            // Limpiar
+            document.body.removeChild(reportContainer);
+            document.body.removeChild(tempRadarContainer);
+
+        } catch (error) {
+            console.error('Error al generar PDF:', error);
+        }
+    };
+
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -354,135 +487,151 @@ export default function EvaluationHistory({
                             setChartData(null);
                         }}
                         onSelectEmployee={handleSelectEmployee}
+                        onExport={exportToPDF}
                     />
 
                 </CardBody>
             </Card>
 
             {selectedEmployeeId && chartData && (
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                    <Card>
-                        <CardHeader className='pb-0'>
-                            <div className='flex flex-col gap-y-2'>
-                                <p>Plan de acción para {processedEvaluationData.find(e => e.id === selectedEmployeeId)?.name || ''}</p>
-                                <p className='text-sm'>Puntuación Global: {processedEvaluationData.find(e => e.id === selectedEmployeeId)?.globalPercentage.toFixed(2)}%</p>
+                <>
+                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                        <Card>
+                            <CardHeader className='pb-0'>
+                                <div className='flex flex-col gap-y-2'>
+                                    <p>Plan de acción para {processedEvaluationData.find(e => e.id === selectedEmployeeId)?.name || ''}</p>
+                                    <p className='text-sm'>Puntuación Global: {processedEvaluationData.find(e => e.id === selectedEmployeeId)?.globalPercentage.toFixed(2)}%</p>
 
-                            </div>
-                        </CardHeader>
-                        <CardBody>
-                            <Accordion defaultExpandedKeys={['recomendacion']} className='pt-0 mt-0'>
-                                <AccordionItem
-                                    key="recomendacion"
-                                    aria-label="Recomendación"
-                                    indicator={<GrActions />}
-                                    title={<p className='text-sm'>Nuevo plan de acción</p>}
-                                    subtitle={<p className='text-sm text-gray-500'>Recomendación: {
-                                        processedEvaluationData.find(e => e.id === selectedEmployeeId)?.globalPercentage >= 90 ? "Considerar para promoción o bonificación" :
-                                            processedEvaluationData.find(e => e.id === selectedEmployeeId)?.globalPercentage >= 75 ? "Buen desempeño, ofrecer oportunidades de desarrollo" :
-                                                "Necesita mejora, considerar capacitación adicional"
-                                    }</p>} >
-                                    <div className='mb-2 space-y-3'>
-                                        <Select
-                                            required
-                                            label="Tipo de Plan de Acción"
-                                            variant='underlined'
-                                            value={newAction.actionType}
-                                            onSelectionChange={handleSelectChange as (keys: SharedSelection) => void}
-                                        >
-                                            <SelectItem key="capacitacion" value="capacitacion">Capacitación</SelectItem>
-                                            <SelectItem key="mentoria" value="mentoria">Mentoría</SelectItem>
-                                            <SelectItem key="proyecto" value="Asignacion de Proyecto">Asignación de Proyecto</SelectItem>
-                                            <SelectItem key="reconocimiento" value="reconocimiento">Reconocimiento</SelectItem>
-                                            <SelectItem key="bonificacion" value="bonificacion">Bonificación</SelectItem>
-                                            <SelectItem key="promocion" value="Consideración para Promoción">Consideración para Promoción</SelectItem>
-                                        </Select>
-                                        <Textarea
-                                            value={newAction.description}
-                                            onChange={(e) => setNewAction({ ...newAction, description: e.target.value })}
-                                            placeholder="Descripción de la acción"
-                                            name="description"
-                                            aria-label="Descripción de la acción"
-                                            maxRows={5}
-                                            variant='underlined'
-                                        />
-                                        <DatePicker
-                                            value={newAction.startDate}
-                                            onChange={(date) => setNewAction({ ...newAction, startDate: date })}
-                                            label="Fecha de Inicio"
-                                            name="startDate"
-                                            aria-label="Fecha de Inicio"
-                                            variant='underlined'
-                                        />
-                                        <Button
-                                            onClick={handleSaveAction}
-                                            color="primary"
-                                            variant="shadow"
-                                            size='sm'
-                                            aria-label="Guardar Plan de Acción">
-                                            Guardar Plan de Acción
-                                        </Button>
-                                    </div>
-                                </AccordionItem>
-                                <AccordionItem key="actionPlans" aria-label="Planes de Acción" title={<p className='text-sm '>Planes de Acción</p>} indicator={<GiExtractionOrb />}>
-                                    <div className="space-y-2">
-                                        {actionPlans.length === 0 ? (
-                                            <p className="text-sm text-gray-500">No hay planes de acción registrados</p>
-                                        ) : (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {actionPlans.map((plan) => (
-                                                    <Card
-                                                        key={plan.id}
-                                                        className="mb-2"
-                                                        isPressable
-                                                        isHoverable
-                                                        onPress={() => handleStatusUpdate(plan.id, plan.status)}
-                                                    >
-                                                        <CardBody className="p-3">
-                                                            <div className="space-y-1">
-                                                                <div className="flex justify-between items-center text-sm">
-                                                                    <div className="flex items-center gap-2">
-                                                                        {getActionIcon(plan.actionType)}
-                                                                        <p className="font-medium">{formatActionType(plan.actionType)}</p>
+                                </div>
+                            </CardHeader>
+                            <CardBody>
+                                <Accordion defaultExpandedKeys={['recomendacion']} className='pt-0 mt-0'>
+                                    <AccordionItem
+                                        key="recomendacion"
+                                        aria-label="Recomendación"
+                                        indicator={<GrActions />}
+                                        title={<p className='text-sm'>Nuevo plan de acción</p>}
+                                        subtitle={<p className='text-sm text-gray-500'>Recomendación: {
+                                            processedEvaluationData.find(e => e.id === selectedEmployeeId)?.globalPercentage >= 90 ? "Considerar para promoción o bonificación" :
+                                                processedEvaluationData.find(e => e.id === selectedEmployeeId)?.globalPercentage >= 75 ? "Buen desempeño, ofrecer oportunidades de desarrollo" :
+                                                    "Necesita mejora, considerar capacitación adicional"
+                                        }</p>} >
+                                        <div className='mb-2 space-y-3'>
+                                            <Select
+                                                required
+                                                label="Tipo de Plan de Acción"
+                                                variant='underlined'
+                                                value={newAction.actionType}
+                                                onSelectionChange={handleSelectChange as (keys: SharedSelection) => void}
+                                            >
+                                                <SelectItem key="capacitacion" value="capacitacion">Capacitación</SelectItem>
+                                                <SelectItem key="mentoria" value="mentoria">Mentoría</SelectItem>
+                                                <SelectItem key="proyecto" value="Asignacion de Proyecto">Asignación de Proyecto</SelectItem>
+                                                <SelectItem key="reconocimiento" value="reconocimiento">Reconocimiento</SelectItem>
+                                                <SelectItem key="bonificacion" value="bonificacion">Bonificación</SelectItem>
+                                                <SelectItem key="promocion" value="Consideración para Promoción">Consideración para Promoción</SelectItem>
+                                            </Select>
+                                            <Textarea
+                                                value={newAction.description}
+                                                onChange={(e) => setNewAction({ ...newAction, description: e.target.value })}
+                                                placeholder="Descripción de la acción"
+                                                name="description"
+                                                aria-label="Descripción de la acción"
+                                                maxRows={5}
+                                                variant='underlined'
+                                            />
+                                            <DatePicker
+                                                value={newAction.startDate}
+                                                onChange={(date) => setNewAction({ ...newAction, startDate: date })}
+                                                label="Fecha de Inicio"
+                                                name="startDate"
+                                                aria-label="Fecha de Inicio"
+                                                variant='underlined'
+                                            />
+                                            <Button
+                                                onClick={handleSaveAction}
+                                                color="primary"
+                                                variant="shadow"
+                                                size='sm'
+                                                aria-label="Guardar Plan de Acción">
+                                                Guardar Plan de Acción
+                                            </Button>
+                                        </div>
+                                    </AccordionItem>
+                                    <AccordionItem key="actionPlans" aria-label="Planes de Acción" title={<p className='text-sm '>Planes de Acción</p>} indicator={<GiExtractionOrb />}>
+                                        <div className="space-y-2">
+                                            {actionPlans.length === 0 ? (
+                                                <p className="text-sm text-gray-500">No hay planes de acción registrados</p>
+                                            ) : (
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {actionPlans.map((plan) => (
+                                                        <Card
+                                                            key={plan.id}
+                                                            className="mb-2"
+                                                            isPressable
+                                                            isHoverable
+                                                            onPress={() => handleStatusUpdate(plan.id, plan.status)}
+                                                        >
+                                                            <CardBody className="p-3">
+                                                                <div className="space-y-1">
+                                                                    <div className="flex justify-between items-center text-sm">
+                                                                        <div className="flex items-center gap-2">
+                                                                            {getActionIcon(plan.actionType)}
+                                                                            <p className="font-medium">{formatActionType(plan.actionType)}</p>
+                                                                        </div>
+                                                                        <Chip
+                                                                            className="capitalize"
+                                                                            size='sm'
+                                                                            color={
+                                                                                plan.status === 'completed' ? 'success' :
+                                                                                    plan.status === 'in-progress' ? 'warning' :
+                                                                                        'danger'
+                                                                            }
+                                                                        >
+                                                                            {plan.status === 'completed' ? 'Completado' : plan.status === 'in-progress' ? 'En Progreso' : 'Pendiente'}
+                                                                        </Chip>
                                                                     </div>
-                                                                    <Chip
-                                                                        className="capitalize"
-                                                                        size='sm'
-                                                                        color={
-                                                                            plan.status === 'completed' ? 'success' :
-                                                                                plan.status === 'in-progress' ? 'warning' :
-                                                                                    'danger'
-                                                                        }
-                                                                    >
-                                                                        {plan.status === 'completed' ? 'Completado' : plan.status === 'in-progress' ? 'En Progreso' : 'Pendiente'}
-                                                                    </Chip>
+                                                                    <p className="text-xs">{plan.description}</p>
                                                                 </div>
-                                                                <p className="text-xs">{plan.description}</p>
-                                                            </div>
-                                                        </CardBody>
-                                                    </Card>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                </AccordionItem>
-                            </Accordion>
-                        </CardBody>
-                    </Card>
-                    <Card>
-                        <CardHeader>
-                            <div className='flex flex-col gap-y-2'>
-                                <p>Gráfico de Evaluación de {processedEvaluationData.find(e => e.id === selectedEmployeeId)?.name || ''}</p>
-                                <p className='text-sm text-gray-500'>Resultados por categoría y tipo de evaluador</p>
-                            </div>
-                        </CardHeader>
-                        <CardBody>
-                            <EmployeeEvaluationChart
-                                data={chartData}
-                            />
-                            {false && <RadarCharts data={processedEvaluationData.find(e => e.id === selectedEmployeeId)?.averages || {}} />}
-                        </CardBody>
-                    </Card>
-                </div>
+                                                            </CardBody>
+                                                        </Card>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </AccordionItem>
+                                </Accordion>
+                            </CardBody>
+                        </Card>
+                        <Card>
+                            <CardHeader>
+                                <div className='flex flex-col gap-y-2'>
+                                    <p>Gráfico de Evaluación de {processedEvaluationData.find(e => e.id === selectedEmployeeId)?.name || ''}</p>
+                                    <p className='text-sm text-gray-500'>Resultados por categoría y tipo de evaluador</p>
+                                </div>
+                            </CardHeader>
+                            <CardBody>
+                                <EmployeeEvaluationChart
+                                    data={chartData}
+                                />
+                            </CardBody>
+                        </Card>
+                    </div>
+
+                    {/* RadarChart oculto para el PDF */}
+                    <div
+                        id="radarChart"
+                        style={{
+                            display: 'none',
+                            width: '600px',
+                            height: '300px'
+                        }}
+                    >
+                        <RadarCharts
+                            data={processedEvaluationData.find(e => e.id === selectedEmployeeId)?.averages || {}}
+                        />
+                    </div>
+                </>
             )}
 
             <Modal

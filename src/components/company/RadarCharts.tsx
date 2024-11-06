@@ -50,7 +50,7 @@ export function RadarCharts({ data, isDepartmentView = false }: RadarChartsProps
     }, [data, isDepartmentView]);
 
     return (
-        <Card className="w-full h-[380px] lg:h-full flex flex-col">
+        <Card id="radarChart" className="w-full h-[380px] lg:h-full flex flex-col">
             <CardHeader className="pb-4">
                 <CardTitle>Radar de Categorías</CardTitle>
                 <CardDescription>
