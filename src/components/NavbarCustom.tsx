@@ -99,6 +99,11 @@ export default function NavbarCustom() {
                                     <DropdownItem key="theme" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} textValue='tema' startContent={<ThemeToggle />} className="pl-2 ">
                                         Tema
                                     </DropdownItem>
+                                    {isEmployee && (
+                                        <DropdownItem key="support" href="/employee/support" startContent={<FaUsersGear />} textValue="soporte">
+                                            Soporte
+                                        </DropdownItem>
+                                    )}
                                     {isAdmin && (
                                         <DropdownItem key="controlpanel" href="/controlpanel" startContent={<FaUsersGear />} textValue="panel de control">
                                             Panel de Control Admin
