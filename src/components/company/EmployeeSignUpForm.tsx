@@ -3,7 +3,7 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage, httpsCallable, db } from '@/config/config';
 import { toast } from 'sonner';
-import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, DocumentData, QuerySnapshot } from 'firebase/firestore';
 import { Company, Department, Position } from '@/types/applicaciontypes';
 
 interface EmployeeSignUpFormProps {
@@ -30,6 +30,7 @@ export default function EmployeeSignUpForm({ isOpen, onClose }: EmployeeSignUpFo
     const [companies, setCompanies] = useState<Company[]>([]);
     const [departments, setDepartments] = useState<Department[]>([]);
     const [positions, setPositions] = useState<Position[]>([]);
+    const [departmentsSnapshot, setDepartmentsSnapshot] = useState<QuerySnapshot<DocumentData> | null>(null);
 
     useEffect(() => {
         const fetchCompanies = async () => {
@@ -48,7 +49,17 @@ export default function EmployeeSignUpForm({ isOpen, onClose }: EmployeeSignUpFo
                 const companyRef = doc(db, 'companies', company.id);
                 const companySnap = await getDoc(companyRef);
                 const companyData = companySnap.data();
+
+                const departmentsRef = collection(db, `companies/${company.id}/departments`);
+                const departmentsSnapshot = await getDocs(departmentsRef);
+                setDepartmentsSnapshot(departmentsSnapshot);
+
                 if (companyData && companyData.invitationCode === invitationCode) {
+                    if (departmentsSnapshot.empty) {
+                        toast.error("La compañía aún no esta configurada. Por favor, contacte al administrador.");
+                        return;
+                    }
+
                     setNewEmployee(prev => ({ ...prev, companyId: company.id }));
                     await handleCompanyChange(company.id);
                     setStep('form');
@@ -64,10 +75,8 @@ export default function EmployeeSignUpForm({ isOpen, onClose }: EmployeeSignUpFo
 
     const handleCompanyChange = async (companyId: string) => {
         setNewEmployee(prev => ({ ...prev, companyId, departmentId: '', positionId: '' }));
-        const departmentsRef = collection(db, `companies/${companyId}/departments`);
-        const departmentsSnapshot = await getDocs(departmentsRef);
-        const departmentsData = departmentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Department));
-        setDepartments(departmentsData);
+        const departmentsData = departmentsSnapshot?.docs.map(doc => ({ id: doc.id, ...doc.data() } as Department));
+        setDepartments(departmentsData || []);
     };
 
     const handleDepartmentChange = async (departmentId: string) => {
