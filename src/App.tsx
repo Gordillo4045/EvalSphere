@@ -12,10 +12,12 @@ import CompanyControlPanel from './pages/CompanyControlPanel';
 import Formulario from './pages/Formulario';
 import Home from "./pages/Home";
 import ProtectedUserRoute from "./components/ProtectedUserRoute";
-
+import EmployeeSupport from "./pages/EmployeeSupport";
+import { useAuth } from "@/hooks/useAuth";
 function AppContent() {
   const location = useLocation();
   const isCompanyControlPanel = location.pathname === "/company/controlpanel";
+  const { isEmployee, user } = useAuth();
 
   return (
     <div className={`text-foreground bg-background flex flex-col min-h-dvh`}>
@@ -36,6 +38,11 @@ function AppContent() {
           <Route path="/employee/formulario" element={
             <ProtectedUserRoute>
               <Formulario />
+            </ProtectedUserRoute>
+          } />
+          <Route path="/employee/support" element={
+            <ProtectedUserRoute>
+              <EmployeeSupport employeeId={isEmployee ? user?.uid : ''} />
             </ProtectedUserRoute>
           } />
         </Routes>
