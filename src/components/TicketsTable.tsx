@@ -24,36 +24,27 @@ import {
 } from "@nextui-org/react";
 import { IoIosEye, IoIosSearch } from "react-icons/io";
 import { IoReload } from "react-icons/io5";
-
-interface Reply {
-    id: string;
-    message: string;
-    createdAt: any;
-    createdBy: string;
-    isAdminReply: boolean;
-}
-
-interface Ticket {
-    id: string;
-    title: string;
-    description: string;
-    status: 'pendiente' | 'en-proceso' | 'resuelto';
-    createdAt: string;
-    companyId: string;
-    replies?: Reply[];
-}
+import { Ticket } from '@/types/tickets';
 
 interface TicketsTableProps {
+    companyNames?: { [key: string]: string };
     tickets: Ticket[];
-    companyNames: { [key: string]: string };
-    onStatusChange: (ticketId: string, newStatus: Ticket['status'], companyId: string) => void;
+    onStatusChange: (id: string, status: Ticket['status'], companyId?: string, employeeId?: string) => void;
     onRefresh: () => void;
-    onReply: (ticketId: string, message: string, companyId: string) => void;
+    onReply: (id: string, message: string, companyId?: string, employeeId?: string) => void;
+    isEmployeeTickets?: boolean;
 }
 
 const INITIAL_VISIBLE_COLUMNS = ["companyId", "ticket", "status", "date", "actions"];
 
-export default function TicketsTable({ tickets, companyNames, onStatusChange, onRefresh, onReply }: TicketsTableProps) {
+export default function TicketsTable({
+    companyNames,
+    tickets,
+    onStatusChange,
+    onRefresh,
+    onReply,
+    isEmployeeTickets = false
+}: TicketsTableProps) {
     const [filterValue, setFilterValue] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
     const [visibleColumns] = useState(new Set(INITIAL_VISIBLE_COLUMNS));
@@ -71,12 +62,15 @@ export default function TicketsTable({ tickets, companyNames, onStatusChange, on
     const hasSearchFilter = Boolean(filterValue);
 
     const headerColumns = useMemo(() => [
-        { uid: "companyId", name: "Compañía" },
+        {
+            uid: "companyId",
+            name: isEmployeeTickets ? "Empleado" : "Compañía"
+        },
         { uid: "ticket", name: "Ticket" },
         { uid: "status", name: "Estado" },
         { uid: "date", name: "Fecha" },
         { uid: "actions", name: "Acciones" },
-    ], []);
+    ], [isEmployeeTickets]);
 
     const filteredItems = useMemo(() => {
         let filteredTickets = [...tickets];
@@ -125,12 +119,22 @@ export default function TicketsTable({ tickets, companyNames, onStatusChange, on
     const renderCell = (item: Ticket, columnKey: React.Key) => {
         switch (columnKey) {
             case "companyId":
-                return <span>{companyNames[item.companyId] || 'Desconocido'}</span>;
+                if (isEmployeeTickets) {
+                    return (
+                        <div>
+                            <p className="font-medium">{item.employeeName}</p>
+                        </div>
+                    );
+                }
+                return <span>{companyNames?.[item.companyId || ''] || 'Desconocido'}</span>;
+
             case "ticket":
                 return (
                     <div>
                         <p className="font-medium">{item.title}</p>
-                        <p className="text-small text-default-400 truncate ">{item.description.split(' ').slice(0, 5).join(' ')}</p>
+                        <p className="text-small text-default-400 truncate">
+                            {item.description.split(' ').slice(0, 5).join(' ')}
+                        </p>
                     </div>
                 );
             case "status":
@@ -185,6 +189,7 @@ export default function TicketsTable({ tickets, companyNames, onStatusChange, on
                         variant="bordered"
                         onClear={() => setFilterValue("")}
                         onValueChange={onSearchChange}
+                        aria-label="Buscar por título o ID"
                     />
                     <div className="flex gap-3 items-center">
                         <Tooltip content="Actualizar">
@@ -203,6 +208,7 @@ export default function TicketsTable({ tickets, companyNames, onStatusChange, on
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
                             defaultSelectedKeys={['all']}
+                            aria-label="Filtrar por estado"
                         >
                             {statusOptions.map((option) => (
                                 <SelectItem key={option.value} value={option.value}>
@@ -228,6 +234,7 @@ export default function TicketsTable({ tickets, companyNames, onStatusChange, on
                     total={Math.max(1, Math.ceil(filteredItems.length / rowsPerPage))}
                     variant="light"
                     onChange={setPage}
+                    aria-label="Paginación"
                 />
                 <span className="text-small text-default-400">
                     {`${filteredItems.length} tickets`}
@@ -237,9 +244,13 @@ export default function TicketsTable({ tickets, companyNames, onStatusChange, on
     }, [filteredItems.length, page, rowsPerPage]);
 
     const handleReply = () => {
-        if (selectedTicket && replyMessage.trim()) {
-            onReply(selectedTicket.id, replyMessage, selectedTicket.companyId);
-            setReplyMessage("");
+        if (selectedTicket && replyMessage) {
+            if (isEmployeeTickets) {
+                onReply(selectedTicket.id, replyMessage, undefined, selectedTicket.employeeId);
+            } else {
+                onReply(selectedTicket.id, replyMessage, selectedTicket.companyId);
+            }
+            setReplyMessage('');
             setIsModalOpen(false);
         }
     };
@@ -257,6 +268,7 @@ export default function TicketsTable({ tickets, companyNames, onStatusChange, on
             size="2xl"
             placement="top-center"
             scrollBehavior="outside"
+            aria-label="Modal de Detalles del Ticket"
         >
             <ModalContent>
                 {(onClose) => (
@@ -265,7 +277,7 @@ export default function TicketsTable({ tickets, companyNames, onStatusChange, on
                             Detalles del Ticket
                             <div className='flex flex-row gap-3 items-center'>
                                 <p className="text-sm text-default-500">ID</p>
-                                <p className='text-xs'>{selectedTicket.id}</p>
+                                <p className='text-xs'>{selectedTicket?.id}</p>
                             </div>
                         </ModalHeader>
                         <ModalBody>
@@ -292,9 +304,14 @@ export default function TicketsTable({ tickets, companyNames, onStatusChange, on
                                             </ScrollShadow>
                                         </div>
                                         <div className="col-span-1 flex flex-col gap-1 items-end">
-                                            <p className="text-sm text-default-500">Compañia</p>
-                                            <p className=''>{companyNames[selectedTicket.companyId] || 'Desconocido'}</p>
-
+                                            {isEmployeeTickets && (
+                                                <>
+                                                    <p className="text-sm text-default-500">Empleado</p>
+                                                    <p className=''>{selectedTicket.employeeName}</p>
+                                                </>
+                                            )}
+                                            <p className="text-sm text-default-500">Compañía</p>
+                                            <p className=''>{companyNames?.[selectedTicket.companyId || ''] || 'Desconocido'}</p>
                                             <p className="text-sm text-default-500">Fecha</p>
                                             <p className='text-xs'>{new Date(selectedTicket.createdAt).toLocaleDateString()}</p>
                                         </div>
@@ -306,16 +323,28 @@ export default function TicketsTable({ tickets, companyNames, onStatusChange, on
                                             autoFocus
                                             className="max-w-xs"
                                             value={selectedTicket.status}
-                                            onChange={(e) => onStatusChange(
-                                                selectedTicket.id,
-                                                e.target.value as Ticket['status'],
-                                                selectedTicket.companyId
-                                            )}
+                                            onChange={(e) => {
+                                                if (isEmployeeTickets) {
+                                                    onStatusChange(
+                                                        selectedTicket.id,
+                                                        e.target.value as Ticket['status'],
+                                                        undefined,
+                                                        selectedTicket.employeeId
+                                                    );
+                                                } else {
+                                                    onStatusChange(
+                                                        selectedTicket.id,
+                                                        e.target.value as Ticket['status'],
+                                                        selectedTicket.companyId
+                                                    );
+                                                }
+                                            }}
                                             defaultSelectedKeys={[selectedTicket.status]}
                                             variant="bordered"
+                                            aria-label="Filtrar por estado"
                                         >
-                                            {statusOptions.map((option) => (
-                                                <SelectItem key={option.value} value={option.value}>
+                                            {statusOptions.slice(1).map((option) => (
+                                                <SelectItem aria-label={option.label} key={option.value} value={option.value}>
                                                     {option.label}
                                                 </SelectItem>
                                             ))}
@@ -347,6 +376,7 @@ export default function TicketsTable({ tickets, companyNames, onStatusChange, on
                                     <div>
                                         <p className="text-sm text-default-500">Nueva Respuesta</p>
                                         <Textarea
+                                            aria-label="Nueva Respuesta"
                                             placeholder="Escribe tu respuesta aquí..."
                                             value={replyMessage}
                                             onChange={(e) => setReplyMessage(e.target.value)}
@@ -365,6 +395,7 @@ export default function TicketsTable({ tickets, companyNames, onStatusChange, on
                                 color="primary"
                                 onPress={handleReply}
                                 isDisabled={!replyMessage.trim()}
+                                aria-label="Enviar Respuesta"
                             >
                                 Enviar Respuesta
                             </Button>
@@ -374,11 +405,10 @@ export default function TicketsTable({ tickets, companyNames, onStatusChange, on
             </ModalContent>
         </Modal>
     );
-
     return (
         <>
             <Table
-                aria-label="Tabla de tickets"
+                aria-label={isEmployeeTickets ? "Tabla de tickets de empleados" : "Tabla de tickets de empresas"}
                 isHeaderSticky
                 bottomContent={bottomContent}
                 bottomContentPlacement="outside"

@@ -8,6 +8,8 @@ import UserForm from '@/components/UserForm';
 import UserTable from '@/components/UsersTable';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import TicketsTable from '@/components/TicketsTable';
+import { Ticket, Reply } from '@/types/tickets';
+
 interface Usuario {
     id: string;
     name?: string;
@@ -15,23 +17,6 @@ interface Usuario {
     role?: string;
     puestoTrabajo?: string;
     avatar?: string;
-}
-
-interface Ticket {
-    id: string;
-    title: string;
-    description: string;
-    status: 'pendiente' | 'en-proceso' | 'resuelto';
-    createdAt: string;
-    companyId: string;
-}
-
-interface Reply {
-    id: string;
-    message: string;
-    createdAt: any;
-    createdBy: string;
-    isAdminReply: boolean;
 }
 
 export default function Controlpanel() {
@@ -45,10 +30,12 @@ export default function Controlpanel() {
     const [isDeleting, setIsDeleting] = useState(false);
     const [tickets, setTickets] = useState<Ticket[]>([]);
     const [companyNames, setCompanyNames] = useState<{ [key: string]: string }>({});
+    const [employeeTickets, setEmployeeTickets] = useState<Ticket[]>([]);
 
     useEffect(() => {
         getUsers();
         getTickets();
+        getEmployeeTickets();
     }, []);
 
     const getUsers = async () => {
@@ -122,13 +109,70 @@ export default function Controlpanel() {
         }
     };
 
-    const updateTicketStatus = async (ticketId: string, newStatus: Ticket['status'], companyId: string) => {
+    const getEmployeeTickets = async () => {
         try {
-            const ticketRef = doc(db, `companies/${companyId}/support`, ticketId);
+            const employeesSnapshot = await getDocs(collection(db, 'employees'));
+
+            const allTicketsPromises = employeesSnapshot.docs.map(async (employeeDoc) => {
+                const employeeId = employeeDoc.id;
+
+                const ticketsSnapshot = await getDocs(
+                    collection(db, `employees/${employeeId}/support`)
+                );
+
+                const employeeTickets = await Promise.all(
+                    ticketsSnapshot.docs.map(async (ticketDoc) => {
+                        const repliesSnapshot = await getDocs(
+                            collection(db, `employees/${employeeId}/support/${ticketDoc.id}/replies`)
+                        );
+
+                        const replies = repliesSnapshot.docs.map(replyDoc => ({
+                            id: replyDoc.id,
+                            ...replyDoc.data()
+                        })) as Reply[];
+
+                        return {
+                            id: ticketDoc.id,
+                            employeeId,
+                            ...ticketDoc.data(),
+                            replies,
+                            type: 'employee'
+                        } as Ticket & { replies: Reply[] };
+                    })
+                );
+
+                return employeeTickets;
+            });
+
+            const allTickets = (await Promise.all(allTicketsPromises)).flat();
+
+            setEmployeeTickets(allTickets);
+
+        } catch (error) {
+            console.error('Error al obtener tickets de empleados:', error);
+        }
+    };
+
+    const updateTicketStatus = async (ticketId: string, newStatus: Ticket['status'], type: 'company' | 'employee', companyId?: string, employeeId?: string) => {
+        try {
+            let ticketRef;
+
+            if (type === 'company') {
+                ticketRef = doc(db, `companies/${companyId}/support`, ticketId);
+            } else {
+                ticketRef = doc(db, `employees/${employeeId}/support`, ticketId);
+            }
+
             await updateDoc(ticketRef, {
                 status: newStatus
             });
-            await getTickets();
+
+            if (type === 'company') {
+                await getTickets();
+            } else {
+                await getEmployeeTickets();
+            }
+
             toast.success('Estado del ticket actualizado');
         } catch (error) {
             console.error('Error al actualizar ticket:', error);
@@ -172,9 +216,15 @@ export default function Controlpanel() {
         getUsers();
     };
 
-    const handleTicketReply = async (ticketId: string, message: string, companyId: string) => {
+    const handleTicketReply = async (ticketId: string, message: string, type: 'company' | 'employee', companyId?: string, employeeId?: string) => {
         try {
-            const replyRef = collection(db, `companies/${companyId}/support/${ticketId}/replies`);
+            let replyRef;
+
+            if (type === 'company') {
+                replyRef = collection(db, `companies/${companyId}/support/${ticketId}/replies`);
+            } else {
+                replyRef = collection(db, `employees/${employeeId}/support/${ticketId}/replies`);
+            }
 
             await addDoc(replyRef, {
                 message,
@@ -183,7 +233,11 @@ export default function Controlpanel() {
                 isAdminReply: true
             });
 
-            getTickets();
+            if (type === 'company') {
+                await getTickets();
+            } else {
+                await getEmployeeTickets();
+            }
 
             toast.success('Respuesta enviada correctamente');
         } catch (error) {
@@ -209,7 +263,7 @@ export default function Controlpanel() {
                     aria-label="Opciones"
                     className='pl-1'
                 >
-                    <Tab key="companias" title="Compañías">
+                    <Tab key="companias" title="Compañías" aria-label="Compañías">
                         <UserTable
                             usuarios={companyUsuarios}
                             onAddNew={() => setIsUserFormOpen(true)}
@@ -218,7 +272,7 @@ export default function Controlpanel() {
                             onRefresh={getUsers}
                         />
                     </Tab>
-                    <Tab key="administradores" title="Administradores">
+                    <Tab key="administradores" title="Administradores" aria-label="Administradores">
                         <UserTable
                             usuarios={adminUsuarios}
                             onAddNew={() => setIsUserFormOpen(true)}
@@ -227,13 +281,28 @@ export default function Controlpanel() {
                             onRefresh={getUsers}
                         />
                     </Tab>
-                    <Tab key="soporte" title="Tickets de Soporte">
+                    <Tab key="soporte" title="Tickets de Soporte Empresas" aria-label="Tickets de Soporte Empresas">
                         <TicketsTable
                             companyNames={companyNames}
                             tickets={tickets}
-                            onStatusChange={updateTicketStatus}
+                            onStatusChange={(id, status, companyId) =>
+                                updateTicketStatus(id, status, 'company', companyId)}
                             onRefresh={getTickets}
-                            onReply={handleTicketReply}
+                            onReply={(id, message, companyId) =>
+                                handleTicketReply(id, message, 'company', companyId)}
+                            isEmployeeTickets={false}
+                        />
+                    </Tab>
+                    <Tab key="soporteEmpleados" title="Tickets de Soporte Empleados" aria-label="Tickets de Soporte Empleados">
+                        <TicketsTable
+                            companyNames={companyNames}
+                            tickets={employeeTickets}
+                            onStatusChange={(id, status, _, employeeId) =>
+                                updateTicketStatus(id, status, 'employee', undefined, employeeId)}
+                            onRefresh={getEmployeeTickets}
+                            onReply={(id, message, _, employeeId) =>
+                                handleTicketReply(id, message, 'employee', undefined, employeeId)}
+                            isEmployeeTickets={true}
                         />
                     </Tab>
                 </Tabs>

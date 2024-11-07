@@ -3,22 +3,7 @@ import { Button, Input, Textarea, Card, CardBody, CardHeader, Modal, ModalConten
 import { collection, addDoc, query, getDocs } from 'firebase/firestore';
 import { db } from '../../config/config';
 import { toast } from 'sonner';
-
-type Reply = {
-    id: string;
-    message: string;
-    createdAt: string;
-}
-
-type Ticket = {
-    id: string;
-    title: string;
-    description: string;
-    status: 'pendiente' | 'en-proceso' | 'resuelto';
-    createdAt: string;
-    companyId: string;
-    replies?: Reply[];
-}
+import { Ticket, Reply } from '@/types/tickets';
 
 export default function ClienteTicketSupport({ companyId }: { companyId: string }) {
     const [tickets, setTickets] = useState<Ticket[]>([]);
