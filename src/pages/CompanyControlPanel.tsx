@@ -567,7 +567,7 @@ function CompanyControlPanel() {
                                         >
                                             <div className="flex flex-col gap-1">
                                                 <p className="font-semibold">{notification.title}</p>
-                                                <p className="text-sm text-default-500">
+                                                <p className="text-sm text-default-500 text-pretty">
                                                     {notification.type === 'new_employee' ? (
                                                         notification.message
                                                     ) : notification.type === 'new_evaluation' ? (

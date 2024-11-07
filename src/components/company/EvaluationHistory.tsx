@@ -228,7 +228,6 @@ export default function EvaluationHistory({
                 status: newAction.status
             });
 
-            // Recargar los planes inmediatamente después de guardar
             const plansRef = collection(db, `companies/${companyId}/employees/${selectedEmployeeId}/actionPlans`);
             const plansSnap = await getDocs(plansRef);
             const plansData = plansSnap.docs.map(doc => ({
@@ -471,7 +470,7 @@ export default function EvaluationHistory({
         : 0;
 
     return (
-        <div className="container mx-auto p-4 space-y-6" aria-label="Resumen de evaluaciones">
+        <div className="container mx-auto p-0 md:p-4 space-y-6" aria-label="Resumen de evaluaciones">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <Card className='flex flex-col justify-between'>
                     <CardHeader>
