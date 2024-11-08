@@ -158,7 +158,7 @@ export default function NavbarCustom() {
                                     </DropdownItem>
                                 </DropdownMenu>
                             </Dropdown>
-                            <Button isIconOnly variant="solid" className="bg-transparent size-20" onPress={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
+                            <Button isIconOnly variant="solid" className="bg-transparent size-10 md:size-7" onPress={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
                                 <ThemeToggle />
                             </Button>
                         </div>
