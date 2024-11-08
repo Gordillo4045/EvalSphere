@@ -128,7 +128,7 @@ export default function NavbarCustom() {
                         justify="center"
                         className=" gap-4 py-2 rounded-full border-small border-default-200/20 bg-background/60 px-2 shadow-medium backdrop-blur-md backdrop-saturate-150 dark:bg-default-100/50"
                     >
-                        <div className="flex items-center justify-center gap-2 h-8 w-8 md:h-fit md:w-fit">
+                        <div className="flex items-center justify-center gap-2 size-10 md:h-fit md:w-fit">
                             <Button
                                 variant="light"
                                 onClick={() => setIsLoginOpen(true)}
@@ -158,7 +158,7 @@ export default function NavbarCustom() {
                                     </DropdownItem>
                                 </DropdownMenu>
                             </Dropdown>
-                            <Button isIconOnly variant="solid" className="bg-transparent md:h-7 md:w-7" onPress={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
+                            <Button isIconOnly variant="solid" className="bg-transparent size-20" onPress={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
                                 <ThemeToggle />
                             </Button>
                         </div>

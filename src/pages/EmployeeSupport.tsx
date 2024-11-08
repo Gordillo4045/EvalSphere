@@ -73,7 +73,9 @@ export default function EmployeeSupport({ employeeId }: { employeeId: string }) 
     }, [employeeId]);
 
     return (
-        <div className="container mx-auto p-4">
+        <div className="max-w-5xl mx-auto min-h-[calc(100vh-10rem)] flex flex-col gap-4 shadow-inner rounded-xl dark:shadow-slate-300/20 overflow-x-auto p-3">
+            <h2 className='text-2xl font-semibold'>Soporte</h2>
+            <p className='text-sm text-default-500'>Aquí podrás crear y ver las solicitudes de soporte que has realizado.</p>
             <div className="mb-8">
                 <Button size="md" onPress={() => setIsNewTicketOpen(true)} variant='flat' color='secondary'>
                     Crear Nueva Solicitud de Soporte
