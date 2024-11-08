@@ -21,7 +21,7 @@ const ThemeToggle = () => {
     };
 
     return (
-        <div className="flex items-center justify-center px-2 size-10 md:size-1" >
+        <div className="flex items-center justify-center px-2" >
             <motion.svg
                 viewBox="0 0 384 512"
                 className="absolute h-1/2"
