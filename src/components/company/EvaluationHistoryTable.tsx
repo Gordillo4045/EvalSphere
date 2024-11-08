@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
     Table,
     TableHeader,
@@ -83,6 +83,9 @@ export default function EvaluationHistoryTable({
         direction: "ascending",
     });
 
+    useEffect(() => {
+        setPage(1);
+    }, [selectedEmployeeId]);
 
     const filteredItems = useMemo(() => {
         if (Array.isArray(evaluationData)) {
