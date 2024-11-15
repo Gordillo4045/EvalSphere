@@ -10,9 +10,9 @@ import { motion } from "framer-motion";
 import BlurFade from "@/components/ui/blur-fade";
 
 const accordion1 =
-  "Una evaluación de desempeño 360 es un proceso de retroalimentación en el que un empleado recibe evaluaciones de múltiples fuentes, incluyendo supervisores, compañeros de trabajo, subordinados y, a veces, clientes. El objetivo es obtener una visión integral del desempeño del empleado desde diferentes perspectivas. A menudo incluye una autoevaluación por parte del empleado.";
+  "Una evaluación de desempeño 360° es un proceso de retroalimentación en el que un empleado recibe evaluaciones de múltiples fuentes, incluyendo supervisores, compañeros de trabajo, subordinados y, a veces, clientes. El objetivo es obtener una visión integral del desempeño del empleado desde diferentes perspectivas. A menudo incluye una autoevaluación por parte del empleado.";
 const accordion2 =
-  "La evaluación 360 proporciona a los empleados una retroalimentación más completa y detallada, lo que les permite identificar áreas de mejora y fortalezas. Para la organización, es una herramienta valiosa para desarrollar el talento, mejorar la comunicación interna y fortalecer la cultura de retroalimentación. También puede mejorar la autoconciencia de los empleados, fomentando el crecimiento y el desarrollo profesional.";
+  "La evaluación 360° proporciona a los empleados una retroalimentación más completa y detallada, lo que les permite identificar áreas de mejora y fortalezas. Para la organización, es una herramienta valiosa para desarrollar el talento, mejorar la comunicación interna y fortalecer la cultura de retroalimentación. También puede mejorar la autoconciencia de los empleados, fomentando el crecimiento y el desarrollo profesional.";
 const accordion3 =
   "La confidencialidad es clave para garantizar que los participantes brinden retroalimentación honesta y constructiva. Por lo general, los comentarios se recopilan de forma anónima, especialmente cuando provienen de compañeros y subordinados. Los resultados se presentan de manera agregada para proteger la identidad de los evaluadores, lo que aumenta la confianza en el proceso y fomenta una mayor participación.";
 
@@ -353,7 +353,7 @@ export default function Home() {
                   </svg>
                   <h3 className="mt-8 text-lg font-semibold text-black dark:text-neutral-50"></h3>
                   <p className="mt-4 text-base text-gray-600 dark:text-gray-300">
-                    Mejora la equidad y poromoción interna justa.
+                    Mejora la equidad y promoción interna justa.
                   </p>
                 </div>
               </div>
@@ -482,21 +482,21 @@ export default function Home() {
             <AccordionItem
               key="1"
               aria-label="Accordion 1"
-              title="¿Qué es una evaluación de desempeño 360?"
+              title="¿Qué es una evaluación de desempeño 360°?"
             >
               {accordion1}
             </AccordionItem>
             <AccordionItem
               key="2"
               aria-label="Accordion 2"
-              title="¿Cómo beneficia la evaluación 360 a los empleados y a la organización?"
+              title="¿Cómo beneficia la evaluación 360° a los empleados y a la organización?"
             >
               {accordion2}
             </AccordionItem>
             <AccordionItem
               key="3"
               aria-label="Accordion 3"
-              title="¿Cómo se asegura la confidencialidad en una evaluación 360?"
+              title="¿Cómo se asegura la confidencialidad en una evaluación 360°?"
             >
               {accordion3}
             </AccordionItem>

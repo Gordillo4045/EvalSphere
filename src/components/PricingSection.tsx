@@ -9,12 +9,12 @@ const PricingSection: React.FC = () => {
         <div className="bg-gray-800 text-white p-8 rounded-lg shadow-lg w-72 transform transition-transform hover:scale-105">
           <h3 className="text-2xl font-semibold mb-4 text-color-3">Starter</h3>
           <h4 className="text-small font-thin mb-4">
-            Ideal para equipos pequeños que inician con la evaluación 360.
+            Ideal para equipos pequeños que inician con la evaluación 360°.
           </h4>
           <p className="text-2xl font-bold mb-4">$499 MXN/mes</p>
           <ul className="mb-1 space-y-2 pb-40 text-small">
             <li>
-            <svg
+              <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -28,10 +28,10 @@ const PricingSection: React.FC = () => {
                   d="m4.5 12.75 6 6 9-13.5"
                 />
               </svg>
-              Creación de hasta 3 formularios de evaluación 360.
-              </li>
+              Creación de hasta 3 formularios de evaluación 360°.
+            </li>
             <li>
-            <svg
+              <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -46,9 +46,9 @@ const PricingSection: React.FC = () => {
                 />
               </svg>
               Evaluaciones limitadas a 50 participantes por mes.
-              </li>
+            </li>
             <li>
-            <svg
+              <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -63,9 +63,9 @@ const PricingSection: React.FC = () => {
                 />
               </svg>
               Reporte de resultados en formato PDF.
-              </li>
+            </li>
             <li>
-            <svg
+              <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -80,10 +80,10 @@ const PricingSection: React.FC = () => {
                 />
               </svg>
               Soporte por correo electrónico.
-              </li>
+            </li>
           </ul>
           <div>
-          <RainbowButton>Comprar</RainbowButton>
+            <RainbowButton>Comprar</RainbowButton>
           </div>
         </div>
         <div className="bg-gray-800 text-white p-8 rounded-lg shadow-lg w-72 transform transition-transform hover:scale-105">
@@ -95,7 +95,7 @@ const PricingSection: React.FC = () => {
           <p className="text-2xl font-bold mb-4">$1,199 MXN/mes</p>
           <ul className="mb-12 space-y-2 pb-1 text-small">
             <li>
-            <svg
+              <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -110,9 +110,9 @@ const PricingSection: React.FC = () => {
                 />
               </svg>
               Creación ilimitada de formularios de evaluación.
-              </li>
+            </li>
             <li>
-            <svg
+              <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -127,9 +127,9 @@ const PricingSection: React.FC = () => {
                 />
               </svg>
               Hasta 500 evaluaciones al mes.
-              </li>
+            </li>
             <li>
-            <svg
+              <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -144,9 +144,9 @@ const PricingSection: React.FC = () => {
                 />
               </svg>
               Acceso a plantillas personalizables.
-              </li>
+            </li>
             <li>
-            <svg
+              <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -161,9 +161,9 @@ const PricingSection: React.FC = () => {
                 />
               </svg>
               Reportes avanzados con gráficos y análisis detallado.
-              </li>
+            </li>
             <li>
-            <svg
+              <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -182,7 +182,7 @@ const PricingSection: React.FC = () => {
             <li>Soporte prioritario.</li>
           </ul>
           <div className="pt-4">
-          <RainbowButton>Comprar</RainbowButton>
+            <RainbowButton>Comprar</RainbowButton>
           </div>
         </div>
 
@@ -197,7 +197,7 @@ const PricingSection: React.FC = () => {
           <p className="text-2xl font-bold mb-4">$3,499 MXN/mes</p>
           <ul className="mb-12 space-y-2 text-small">
             <li>
-            <svg
+              <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -214,7 +214,7 @@ const PricingSection: React.FC = () => {
               Formularios y evaluaciones ilimitadas.
             </li>
             <li>
-            <svg
+              <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -229,9 +229,9 @@ const PricingSection: React.FC = () => {
                 />
               </svg>
               Personalización de marca y plantillas a medida.
-              </li>
+            </li>
             <li>
-            <svg
+              <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -245,9 +245,10 @@ const PricingSection: React.FC = () => {
                   d="m4.5 12.75 6 6 9-13.5"
                 />
               </svg>
-              Informes en tiempo real y paneles de control interactivos.</li>
+              Informes en tiempo real y paneles de control interactivos.
+            </li>
             <li>
-            <svg
+              <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -265,7 +266,7 @@ const PricingSection: React.FC = () => {
               rendimiento.
             </li>
             <li>
-            <svg
+              <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -280,7 +281,7 @@ const PricingSection: React.FC = () => {
                 />
               </svg>
               Soporte dedicado con un gerente de cuenta.
-              </li>
+            </li>
           </ul>
           <div className="pt-2">
             <RainbowButton>Comprar</RainbowButton>
