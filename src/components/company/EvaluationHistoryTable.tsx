@@ -266,6 +266,7 @@ export default function EvaluationHistoryTable({
                             key={column.uid}
                             align={column.uid === "Ver_Mas" ? "center" : "start"}
                             allowsSorting={column.uid !== "Ver_Mas"}
+
                         >
                             {column.name}
                         </TableColumn>

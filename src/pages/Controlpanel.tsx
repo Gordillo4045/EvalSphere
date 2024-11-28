@@ -9,6 +9,7 @@ import UserTable from '@/components/UsersTable';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import TicketsTable from '@/components/TicketsTable';
 import { Ticket, Reply } from '@/types/tickets';
+import BlurIn from "@/components/ui/blur-in";
 
 interface Usuario {
     id: string;
@@ -248,7 +249,12 @@ export default function Controlpanel() {
 
     return (
         <div className="w-full min-h-dvh px-4 md:px-0 md:mx-auto">
-            <h1 className="text-xl font-semibold mb-4 text-center">Panel de Control de Usuarios</h1>
+            <div className="flex justify-center my-3">
+                <div className="flex items-end justify-between">
+                    <BlurIn word={`Panel de Control`} className="text-lg md:text-xl font-semibold text-center flex-grow" />
+                    <span className="pl-1 text-default-400 text-sm">Admin</span>
+                </div>
+            </div>
             <div className="flex flex-col p-4 max-w-4xl mx-auto shadow-inner dark:shadow-slate-300/20 rounded-xl overflow-x-auto">
                 <UserForm
                     isOpen={isUserFormOpen}
