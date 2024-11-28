@@ -3,6 +3,32 @@ import * as admin from "firebase-admin";
 
 admin.initializeApp();
 
+interface EvaluationStats {
+    total: number;
+    count: number;
+}
+
+interface EmployeeData {
+    name: string;
+    positionId: string;
+    departmentId: string;
+}
+
+interface QuestionData {
+    category: string;
+    question: string;
+}
+
+interface QuestionDetail {
+    evaluatorId: string;
+    evaluatorName: string;
+    question: string;
+    score: number;
+    relationship: string;
+    evaluatorPosition: string;
+    evaluatedPosition: string;
+
+}
 export const createAdmin = functions.https.onCall(async (data, context) => {
     const { email, password, displayName, photoURL, puestoTrabajo } = data;
 
@@ -476,14 +502,243 @@ export const updateEmployee = functions.https.onCall(async (data, context) => {
     }
 });
 
-export const calculateEvaluationAverages = functions.https.onCall(async (data: { companyId: string }, context: functions.https.CallableContext) => {
+// export const calculateEvaluationAverages = functions.https.onCall(async (data: { companyId: string }, context: functions.https.CallableContext) => {
+//     if (!context.auth) {
+//         throw new functions.https.HttpsError('unauthenticated', 'El usuario debe estar autenticado para realizar esta acción.');
+//     }
+
+//     const { companyId } = data;
+//     if (!companyId) {
+//         throw new functions.https.HttpsError('invalid-argument', 'Se requiere el ID de la compañía.');
+//     }
+
+//     try {
+//         const db = admin.firestore();
+//         const companyRef = db.collection('companies').doc(companyId);
+
+//         // Realizar todas las consultas en paralelo
+//         const [questionsSnapshot, employeesSnapshot, evaluationsSnapshot, positionsSnapshot] = await Promise.all([
+//             companyRef.collection('surveyQuestions').get(),
+//             companyRef.collection('employees').get(),
+//             companyRef.collection('evaluations').get(),
+//             companyRef.collection('positions').get()
+//         ]);
+
+//         interface Stats {
+//             total: number;
+//             count: number;
+//         }
+
+//         interface CategoryMap extends Map<string, Stats> { }
+
+//         // Crear índices optimizados
+//         const questionCategories = new Map<string, string>(
+//             questionsSnapshot.docs.map(doc => [doc.id, doc.data().category])
+//         );
+
+//         // Crear mapa de posiciones con sus niveles
+//         const positionsData = Object.fromEntries(
+//             positionsSnapshot.docs.map(doc => [doc.id, doc.data().level || 0])
+//         );
+
+//         const questionFull = Object.fromEntries(
+//             questionsSnapshot.docs.map(doc => [doc.id, doc.data().question])
+//         );
+
+//         const employeeDepartments = new Map<string, string>(
+//             employeesSnapshot.docs.map(doc => [doc.id, doc.data().departmentId])
+//         );
+
+//         const employeesData = Object.fromEntries(
+//             employeesSnapshot.docs.map(doc => [doc.id, doc.data()])
+//         );
+
+//         // Calcular estadísticas básicas
+//         const totalExpectedEvaluations = employeesSnapshot.size * employeesSnapshot.size;
+//         const completedEvaluations = evaluationsSnapshot.docs.filter(
+//             doc => Object.keys(doc.data()).length > 5
+//         ).length;
+//         const inProgressEvaluations = totalExpectedEvaluations - completedEvaluations;
+
+//         const employeeCategoryTotals = new Map<string, CategoryMap>();
+//         const departmentCategoryTotals = new Map<string, CategoryMap>();
+
+//         // Añadir estructura para almacenar detalles por pregunta
+//         interface QuestionDetail {
+//             evaluatorId: string;
+//             evaluatorName: string;
+//             question: string;
+//             score: number;
+//             relationship: string;
+//         }
+
+//         const questionDetails = new Map<string, Map<string, QuestionDetail[]>>();
+
+//         // Procesar evaluaciones
+//         for (const evalDoc of evaluationsSnapshot.docs) {
+//             const evaluationData = evalDoc.data();
+//             const evaluatedEmployeeId = evaluationData.evaluatedId;
+//             const evaluatorId = evaluationData.evaluatorId;
+
+//             // Determinar la relación basada en las posiciones
+//             const evaluatorPosition = employeesData[evaluatorId]?.positionId;
+//             const evaluatedPosition = employeesData[evaluatedEmployeeId]?.positionId;
+
+//             const relationship = evaluatorId === evaluatedEmployeeId
+//                 ? "AutoEval"
+//                 : evaluatorPosition === evaluatedPosition
+//                     ? "Companeros"
+//                     : (positionsData[evaluatorPosition] || 0) > (positionsData[evaluatedPosition] || 0)
+//                         ? "Jefe"
+//                         : "Subordinados";
+
+//             // Obtener nombre del evaluador
+//             const evaluatorDoc = await db
+//                 .collection('companies')
+//                 .doc(companyId)
+//                 .collection('employees')
+//                 .doc(evaluatorId)
+//                 .get();
+
+//             const evaluatorName = evaluatorDoc.exists ? evaluatorDoc.data()?.name : 'Usuario Desconocido';
+
+//             // Procesar cada pregunta
+//             for (const [questionId, score] of Object.entries(evaluationData)) {
+//                 if (typeof score !== 'number' || !questionCategories.has(questionId)) continue;
+
+//                 const questionText = questionFull.get(questionId) || 'Pregunta no encontrada';
+
+//                 if (!questionDetails.has(evaluatedEmployeeId)) {
+//                     questionDetails.set(evaluatedEmployeeId, new Map());
+//                 }
+
+//                 const employeeQuestions = questionDetails.get(evaluatedEmployeeId)!;
+//                 if (!employeeQuestions.has(questionId)) {
+//                     employeeQuestions.set(questionId, []);
+//                 }
+
+//                 employeeQuestions.get(questionId)!.push({
+//                     evaluatorId,
+//                     evaluatorName,
+//                     question: questionText,
+//                     score,
+//                     relationship
+//                 });
+//             }
+//         }
+
+//         // Convertir el Map a un objeto para la respuesta
+//         const questionDetailsObject = Object.fromEntries(
+//             Array.from(questionDetails.entries()).map(([employeeId, questions]) => [
+//                 employeeId,
+//                 Object.fromEntries(
+//                     Array.from(questions.entries())
+//                 )
+//             ])
+//         );
+
+//         // Procesar evaluaciones
+//         for (const evalDoc of evaluationsSnapshot.docs) {
+//             const evaluationData = evalDoc.data();
+//             const evaluatedEmployeeId = evaluationData.evaluatedId;
+//             const departmentId = employeeDepartments.get(evaluatedEmployeeId);
+
+//             if (!departmentId) {
+//                 console.warn(`Empleado ${evaluatedEmployeeId} no tiene departamento asignado.`);
+//                 continue;
+//             }
+
+//             if (!employeeCategoryTotals.has(evaluatedEmployeeId)) {
+//                 employeeCategoryTotals.set(evaluatedEmployeeId, new Map());
+//             }
+//             if (!departmentCategoryTotals.has(departmentId)) {
+//                 departmentCategoryTotals.set(departmentId, new Map());
+//             }
+
+//             // Procesar cada pregunta
+//             for (const [questionId, score] of Object.entries(evaluationData)) {
+//                 if (typeof score !== 'number' || !questionCategories.has(questionId)) continue;
+
+//                 const category = questionCategories.get(questionId)!;
+//                 const employeeCategories = employeeCategoryTotals.get(evaluatedEmployeeId)!;
+//                 const departmentCategories = departmentCategoryTotals.get(departmentId)!;
+
+//                 // Actualizar totales para empleado
+//                 if (!employeeCategories.has(category)) {
+//                     employeeCategories.set(category, { total: 0, count: 0 });
+//                 }
+//                 const employeeStats = employeeCategories.get(category)!;
+//                 employeeStats.total += score;
+//                 employeeStats.count++;
+
+//                 // Actualizar totales para departamento
+//                 if (!departmentCategories.has(category)) {
+//                     departmentCategories.set(category, { total: 0, count: 0 });
+//                 }
+//                 const departmentStats = departmentCategories.get(category)!;
+//                 departmentStats.total += score;
+//                 departmentStats.count++;
+//             }
+//         }
+
+//         const employeeCategoryAverages = Object.fromEntries(
+//             Array.from(employeeCategoryTotals.entries()).map(([employeeId, categories]): [string, Record<string, number>] => [
+//                 employeeId,
+//                 Object.fromEntries(
+//                     Array.from(categories.entries()).map(([category, stats]): [string, number] => [
+//                         category,
+//                         stats.total / stats.count
+//                     ])
+//                 )
+//             ])
+//         );
+
+//         const departmentCategoryAverages = Object.fromEntries(
+//             Array.from(departmentCategoryTotals.entries()).map(([departmentId, categories]): [string, Record<string, number>] => [
+//                 departmentId,
+//                 Object.fromEntries(
+//                     Array.from(categories.entries()).map(([category, stats]): [string, number] => [
+//                         category,
+//                         stats.total / stats.count
+//                     ])
+//                 )
+//             ])
+//         );
+
+//         return {
+//             employeeCategoryAverages,
+//             departmentCategoryAverages,
+//             evaluationStats: {
+//                 completed: completedEvaluations,
+//                 inProgress: inProgressEvaluations,
+//                 total: totalExpectedEvaluations
+//             },
+//             questionDetails: questionDetailsObject
+//         };
+//     } catch (error) {
+//         console.error("Error al calcular promedios:", error);
+//         throw new functions.https.HttpsError('internal', 'Error al calcular los promedios de evaluación');
+//     }
+// });
+
+export const calculateEvaluationAverages = functions.https.onCall(async (
+    data: { companyId: string },
+    context: functions.https.CallableContext
+) => {
+    // Validación de autenticación
     if (!context.auth) {
-        throw new functions.https.HttpsError('unauthenticated', 'El usuario debe estar autenticado para realizar esta acción.');
+        throw new functions.https.HttpsError(
+            'unauthenticated',
+            'El usuario debe estar autenticado para realizar esta acción.'
+        );
     }
 
     const { companyId } = data;
     if (!companyId) {
-        throw new functions.https.HttpsError('invalid-argument', 'Se requiere el ID de la compañía.');
+        throw new functions.https.HttpsError(
+            'invalid-argument',
+            'Se requiere el ID de la compañía.'
+        );
     }
 
     try {
@@ -491,26 +746,62 @@ export const calculateEvaluationAverages = functions.https.onCall(async (data: {
         const companyRef = db.collection('companies').doc(companyId);
 
         // Realizar todas las consultas en paralelo
-        const [questionsSnapshot, employeesSnapshot, evaluationsSnapshot] = await Promise.all([
+        const [
+            questionsSnapshot,
+            employeesSnapshot,
+            evaluationsSnapshot,
+            departmentsSnapshot
+        ] = await Promise.all([
             companyRef.collection('surveyQuestions').get(),
             companyRef.collection('employees').get(),
-            companyRef.collection('evaluations').get()
+            companyRef.collection('evaluations').get(),
+            companyRef.collection('departments').get()
         ]);
 
-        interface Stats {
-            total: number;
-            count: number;
-        }
+        // Crear mapa de posiciones con sus niveles
+        const positionsLevels = new Map<string, number>();
+        const positionsTitle = new Map<string, string>();
 
-        interface CategoryMap extends Map<string, Stats> { }
+        // Obtener las posiciones de cada departamento
+        const positionPromises = departmentsSnapshot.docs.map(async (deptDoc) => {
+            const positionsSnapshot = await deptDoc.ref
+                .collection('positions')
+                .get();
+
+            positionsSnapshot.docs.forEach(posDoc => {
+                const data = posDoc.data();
+                if (typeof data.level === 'number') {
+                    positionsLevels.set(posDoc.id, data.level);
+                }
+                if (typeof data.title === 'string') {
+                    positionsTitle.set(posDoc.id, data.title);
+                }
+            });
+        });
+
+        // Esperar a que se completen todas las consultas de posiciones
+        await Promise.all(positionPromises);
 
         // Crear índices optimizados
-        const questionCategories = new Map<string, string>(
-            questionsSnapshot.docs.map(doc => [doc.id, doc.data().category])
+        const questionCategories = new Map<string, QuestionData>(
+            questionsSnapshot.docs.map(doc => [
+                doc.id,
+                {
+                    category: doc.data().category,
+                    question: doc.data().question
+                }
+            ])
         );
 
-        const employeeDepartments = new Map<string, string>(
-            employeesSnapshot.docs.map(doc => [doc.id, doc.data().departmentId])
+        // Crear mapa de posiciones con sus niveles
+        const positionsData = Object.fromEntries(positionsLevels);
+
+        // Mapa de empleados
+        const employeesData = Object.fromEntries(
+            employeesSnapshot.docs.map(doc => [
+                doc.id,
+                doc.data() as EmployeeData
+            ])
         );
 
         // Calcular estadísticas básicas
@@ -520,76 +811,79 @@ export const calculateEvaluationAverages = functions.https.onCall(async (data: {
         ).length;
         const inProgressEvaluations = totalExpectedEvaluations - completedEvaluations;
 
-        const employeeCategoryTotals = new Map<string, CategoryMap>();
-        const departmentCategoryTotals = new Map<string, CategoryMap>();
+        // Mapas para almacenar totales por categoría
+        const employeeCategoryTotals = new Map<string, Map<string, EvaluationStats>>();
+        const departmentCategoryTotals = new Map<string, Map<string, EvaluationStats>>();
+
+        // Mapa para almacenar detalles de preguntas
+        const questionDetails = new Map<string, Map<string, QuestionDetail[]>>();
 
         // Procesar evaluaciones
         for (const evalDoc of evaluationsSnapshot.docs) {
             const evaluationData = evalDoc.data();
             const evaluatedEmployeeId = evaluationData.evaluatedId;
-            const departmentId = employeeDepartments.get(evaluatedEmployeeId);
+            const evaluatorId = evaluationData.evaluatorId;
 
-            if (!departmentId) {
-                console.warn(`Empleado ${evaluatedEmployeeId} no tiene departamento asignado.`);
+            // Verificar existencia de empleados
+            if (!employeesData[evaluatedEmployeeId] || !employeesData[evaluatorId]) {
+                console.warn(`Empleado no encontrado: ${evaluatedEmployeeId} o ${evaluatorId}`);
                 continue;
             }
 
-            if (!employeeCategoryTotals.has(evaluatedEmployeeId)) {
-                employeeCategoryTotals.set(evaluatedEmployeeId, new Map());
-            }
-            if (!departmentCategoryTotals.has(departmentId)) {
-                departmentCategoryTotals.set(departmentId, new Map());
-            }
+            // Determinar la relación basada en las posiciones
+            const evaluatorPosition = employeesData[evaluatorId].positionId;
+            const evaluatedPosition = employeesData[evaluatedEmployeeId].positionId;
+
+            const relationship = determineRelationship(
+                evaluatorId,
+                evaluatedEmployeeId,
+                evaluatorPosition,
+                evaluatedPosition,
+                positionsData
+            );
+
+            // Obtener nombre del evaluador
+            const evaluatorName = employeesData[evaluatorId].name || 'Usuario Desconocido';
 
             // Procesar cada pregunta
             for (const [questionId, score] of Object.entries(evaluationData)) {
                 if (typeof score !== 'number' || !questionCategories.has(questionId)) continue;
 
-                const category = questionCategories.get(questionId)!;
-                const employeeCategories = employeeCategoryTotals.get(evaluatedEmployeeId)!;
-                const departmentCategories = departmentCategoryTotals.get(departmentId)!;
+                const questionData = questionCategories.get(questionId)!;
 
-                // Actualizar totales para empleado
-                if (!employeeCategories.has(category)) {
-                    employeeCategories.set(category, { total: 0, count: 0 });
-                }
-                const employeeStats = employeeCategories.get(category)!;
-                employeeStats.total += score;
-                employeeStats.count++;
+                // Registrar detalles de preguntas
+                processQuestionDetails(
+                    questionDetails,
+                    evaluatedEmployeeId,
+                    questionId,
+                    {
+                        evaluatorId,
+                        evaluatorName,
+                        question: questionData.question,
+                        score: score as number,
+                        relationship,
+                        evaluatorPosition: positionsTitle.get(evaluatorPosition) || evaluatedPosition,
+                        evaluatedPosition: positionsTitle.get(evaluatedPosition) || evaluatedPosition
+                    }
+                );
 
-                // Actualizar totales para departamento
-                if (!departmentCategories.has(category)) {
-                    departmentCategories.set(category, { total: 0, count: 0 });
-                }
-                const departmentStats = departmentCategories.get(category)!;
-                departmentStats.total += score;
-                departmentStats.count++;
+                // Procesar totales por empleado y departamento
+                processEmployeeCategoryTotals(
+                    employeeCategoryTotals,
+                    departmentCategoryTotals,
+                    evaluatedEmployeeId,
+                    employeesData[evaluatedEmployeeId].departmentId,
+                    questionData.category,
+                    score as number
+                );
             }
         }
 
-        const employeeCategoryAverages = Object.fromEntries(
-            Array.from(employeeCategoryTotals.entries()).map(([employeeId, categories]): [string, Record<string, number>] => [
-                employeeId,
-                Object.fromEntries(
-                    Array.from(categories.entries()).map(([category, stats]): [string, number] => [
-                        category,
-                        stats.total / stats.count
-                    ])
-                )
-            ])
-        );
+        // Convertir resultados
+        const employeeCategoryAverages = calculateCategoryAverages(employeeCategoryTotals);
+        const departmentCategoryAverages = calculateCategoryAverages(departmentCategoryTotals);
 
-        const departmentCategoryAverages = Object.fromEntries(
-            Array.from(departmentCategoryTotals.entries()).map(([departmentId, categories]): [string, Record<string, number>] => [
-                departmentId,
-                Object.fromEntries(
-                    Array.from(categories.entries()).map(([category, stats]): [string, number] => [
-                        category,
-                        stats.total / stats.count
-                    ])
-                )
-            ])
-        );
+        const questionDetailsObject = convertQuestionDetailsToObject(questionDetails);
 
         return {
             employeeCategoryAverages,
@@ -598,13 +892,129 @@ export const calculateEvaluationAverages = functions.https.onCall(async (data: {
                 completed: completedEvaluations,
                 inProgress: inProgressEvaluations,
                 total: totalExpectedEvaluations
-            }
+            },
+            questionDetails: questionDetailsObject
         };
-    } catch (error) {
-        console.error("Error al calcular promedios:", error);
-        throw new functions.https.HttpsError('internal', 'Error al calcular los promedios de evaluación');
+
+    } catch (error: any) {
+        // Logging de errores más detallado
+        console.error("Error detallado al calcular promedios:", {
+            message: error.message,
+            stack: error.stack,
+            companyId: data.companyId
+        });
+
+        throw new functions.https.HttpsError(
+            'internal',
+            'Error al procesar los promedios de evaluación',
+            error.message
+        );
     }
 });
+
+// Función auxiliar para determinar la relación
+function determineRelationship(
+    evaluatorId: string,
+    evaluatedEmployeeId: string,
+    evaluatorPosition: string,
+    evaluatedPosition: string,
+    positionsData: Record<string, number>
+): string {
+    if (evaluatorId === evaluatedEmployeeId) return "AutoEval";
+
+    if (evaluatorPosition === evaluatedPosition) return "Compañeros";
+
+    return (positionsData[evaluatorPosition] || 0) > (positionsData[evaluatedPosition] || 0)
+        ? "Jefe"
+        : "Subordinados";
+}
+
+// Función para procesar detalles de preguntas
+function processQuestionDetails(
+    questionDetails: Map<string, Map<string, QuestionDetail[]>>,
+    evaluatedEmployeeId: string,
+    questionId: string,
+    detail: QuestionDetail
+) {
+    if (!questionDetails.has(evaluatedEmployeeId)) {
+        questionDetails.set(evaluatedEmployeeId, new Map());
+    }
+
+    const employeeQuestions = questionDetails.get(evaluatedEmployeeId)!;
+
+    if (!employeeQuestions.has(questionId)) {
+        employeeQuestions.set(questionId, []);
+    }
+
+    employeeQuestions.get(questionId)!.push(detail);
+}
+
+// Función para procesar totales por categoría
+function processEmployeeCategoryTotals(
+    employeeCategoryTotals: Map<string, Map<string, EvaluationStats>>,
+    departmentCategoryTotals: Map<string, Map<string, EvaluationStats>>,
+    evaluatedEmployeeId: string,
+    departmentId: string,
+    category: string,
+    score: number
+) {
+    // Totales por empleado
+    if (!employeeCategoryTotals.has(evaluatedEmployeeId)) {
+        employeeCategoryTotals.set(evaluatedEmployeeId, new Map());
+    }
+    const employeeCategories = employeeCategoryTotals.get(evaluatedEmployeeId)!;
+
+    if (!employeeCategories.has(category)) {
+        employeeCategories.set(category, { total: 0, count: 0 });
+    }
+    const employeeStats = employeeCategories.get(category)!;
+    employeeStats.total += score;
+    employeeStats.count++;
+
+    // Totales por departamento
+    if (!departmentCategoryTotals.has(departmentId)) {
+        departmentCategoryTotals.set(departmentId, new Map());
+    }
+    const departmentCategories = departmentCategoryTotals.get(departmentId)!;
+
+    if (!departmentCategories.has(category)) {
+        departmentCategories.set(category, { total: 0, count: 0 });
+    }
+    const departmentStats = departmentCategories.get(category)!;
+    departmentStats.total += score;
+    departmentStats.count++;
+}
+
+// Función para calcular promedios de categorías
+function calculateCategoryAverages(
+    categoryTotals: Map<string, Map<string, EvaluationStats>>,
+): Record<string, Record<string, number>> {
+    return Object.fromEntries(
+        Array.from(categoryTotals.entries()).map(([id, categories]) => [
+            id,
+            Object.fromEntries(
+                Array.from(categories.entries()).map(([category, stats]) => [
+                    category,
+                    stats.total / stats.count
+                ])
+            ),
+        ])
+    );
+}
+
+// Función para convertir detalles de preguntas
+function convertQuestionDetailsToObject(
+    questionDetails: Map<string, Map<string, QuestionDetail[]>>
+): Record<string, Record<string, QuestionDetail[]>> {
+    return Object.fromEntries(
+        Array.from(questionDetails.entries()).map(([employeeId, questions]) => [
+            employeeId,
+            Object.fromEntries(
+                Array.from(questions.entries())
+            )
+        ])
+    );
+}
 
 export const createNotification = functions.https.onCall(async (data, context) => {
     const { type, title, message, companyId, employeeId } = data;
