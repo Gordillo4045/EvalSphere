@@ -29,6 +29,7 @@ interface EmployeeEvaluation {
     avatar: string;
     averages: EvaluationAverage;
     globalPercentage: number;
+    position: string;
 }
 
 interface EvaluationHistoryTableProps {
@@ -121,8 +122,11 @@ export default function EvaluationHistoryTable({
                     <User
                         avatarProps={{
                             src: item.avatar,
-                            "aria-label": `Avatar de ${item.name}`
+                            "aria-label": `Avatar de ${item.name}`,
+                            className: "!rounded-full aspect-square",
+                            size: "sm"
                         }}
+                        description={item.position}
                         name={item.name}
                     >
                         {item.name}
