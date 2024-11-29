@@ -48,14 +48,20 @@ export default function QuestionDetailsTable({
         return grouped;
     }, [questionDetails]);
 
-    // Filtrar las preguntas
+    // Filtrar las preguntas y ordenarlas por categoría
     const filteredQuestions = useMemo(() => {
-        return Object.entries(groupedQuestions).filter(([key, details]) =>
-            key.toLowerCase().includes(filterValue.toLowerCase()) ||
-            details.some(detail =>
-                detail.evaluatorName.toLowerCase().includes(filterValue.toLowerCase())
+        return Object.entries(groupedQuestions)
+            .filter(([key, details]) =>
+                key.toLowerCase().includes(filterValue.toLowerCase()) ||
+                details.some(detail =>
+                    detail.evaluatorName.toLowerCase().includes(filterValue.toLowerCase())
+                )
             )
-        );
+            .sort((a, b) => {
+                const categoryA = a[0].split('-')[1];
+                const categoryB = b[0].split('-')[1];
+                return categoryA.localeCompare(categoryB);
+            });
     }, [groupedQuestions, filterValue]);
 
     // Paginar las preguntas
@@ -129,10 +135,10 @@ export default function QuestionDetailsTable({
                                 title={
                                     <div className="flex justify-between items-center pr-4">
                                         <span className="text-small">
-                                            <Chip size='sm' variant='faded' startContent={<Layers2 size={10} />}>
+                                            {`${question}`}
+                                            <Chip size='sm' variant='flat' startContent={<Layers2 size={10} />} isDisabled className='ml-2'>
                                                 {category}
                                             </Chip>
-                                            {`- ${question}`}
                                         </span>
                                         <Chip
                                             size="sm"
