@@ -200,7 +200,7 @@ export default function EvaluationHistoryTable({
                             </Button>
                             <Button
                                 color="danger"
-                                variant="bordered"
+                                variant="ghost"
                                 size="sm"
                                 startContent={<IoIosCloseCircleOutline size={20} />}
                                 onPress={clearSelectedEmployee}
