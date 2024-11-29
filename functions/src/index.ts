@@ -28,7 +28,7 @@ interface QuestionDetail {
     relationship: string;
     evaluatorPosition: string;
     evaluatedPosition: string;
-
+    comments?: string;
 }
 export const createAdmin = functions.https.onCall(async (data, context) => {
     const { email, password, displayName, photoURL, puestoTrabajo } = data;
@@ -887,6 +887,9 @@ export const calculateEvaluationAverages = functions.https.onCall(async (
 
         const questionDetailsObject = convertQuestionDetailsToObject(questionDetails);
 
+        // Procesar comentarios
+        const commentsByEmployee = processComments(evaluationsSnapshot, employeesData, positionsData);
+
         return {
             employeeCategoryAverages,
             departmentCategoryAverages,
@@ -895,7 +898,8 @@ export const calculateEvaluationAverages = functions.https.onCall(async (
                 inProgress: inProgressEvaluations,
                 total: totalExpectedEvaluations
             },
-            questionDetails: questionDetailsObject
+            questionDetails: questionDetailsObject,
+            commentsByEmployee
         };
 
     } catch (error: any) {
@@ -1016,6 +1020,45 @@ function convertQuestionDetailsToObject(
             )
         ])
     );
+}
+
+// Función para procesar comentarios
+function processComments(
+    evaluationsSnapshot: FirebaseFirestore.QuerySnapshot,
+    employeesData: Record<string, EmployeeData>,
+    positionsData: Record<string, number>
+): Record<string, Array<{ evaluatorName: string; comment: string; relationship: string }>> {
+    const commentsByEmployee: Record<string, Array<{ evaluatorName: string; comment: string; relationship: string }>> = {};
+
+    evaluationsSnapshot.docs.forEach(doc => {
+        const evaluationData = doc.data();
+        const evaluatedId = evaluationData.evaluatedId;
+        const evaluatorId = evaluationData.evaluatorId;
+        const comments = evaluationData.comments;
+
+        if (comments && typeof comments === 'string' && comments.trim() !== '') {
+            if (!commentsByEmployee[evaluatedId]) {
+                commentsByEmployee[evaluatedId] = [];
+            }
+
+            // Determinar la relación
+            const relationship = determineRelationship(
+                evaluatorId,
+                evaluatedId,
+                employeesData[evaluatorId]?.positionId,
+                employeesData[evaluatedId]?.positionId,
+                positionsData
+            );
+
+            commentsByEmployee[evaluatedId].push({
+                evaluatorName: employeesData[evaluatorId]?.name || 'Usuario Desconocido',
+                comment: comments,
+                relationship
+            });
+        }
+    });
+
+    return commentsByEmployee;
 }
 
 export const createNotification = functions.https.onCall(async (data, context) => {
