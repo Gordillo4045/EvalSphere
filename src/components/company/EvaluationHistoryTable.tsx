@@ -123,8 +123,7 @@ export default function EvaluationHistoryTable({
                         avatarProps={{
                             src: item.avatar,
                             "aria-label": `Avatar de ${item.name}`,
-                            className: "!rounded-full aspect-square",
-                            size: "sm"
+                            className: "rounded-full aspect-square !w-[40px]",
                         }}
                         description={item.position}
                         name={item.name}
@@ -235,6 +234,13 @@ export default function EvaluationHistoryTable({
         );
     }, [filteredItems.length, page, rowsPerPage]);
 
+    const visibleColumns = useMemo(() => {
+        const columns = [...INITIAL_VISIBLE_COLUMNS];
+        if (selectedEmployeeId) {
+            return columns.filter(col => col !== "Ver_Mas");
+        }
+        return columns;
+    }, [selectedEmployeeId]);
 
     if (isLoading) {
         return (
@@ -260,13 +266,12 @@ export default function EvaluationHistoryTable({
                 onSortChange={setSortDescriptor}
                 id="evaluation-scores-table"
             >
-                <TableHeader columns={INITIAL_VISIBLE_COLUMNS.map(col => ({ uid: col, name: COLUMN_NAMES[col] }))}>
+                <TableHeader columns={visibleColumns.map(col => ({ uid: col, name: COLUMN_NAMES[col] }))}>
                     {(column) => (
                         <TableColumn
                             key={column.uid}
                             align={column.uid === "Ver_Mas" ? "center" : "start"}
                             allowsSorting={column.uid !== "Ver_Mas"}
-
                         >
                             {column.name}
                         </TableColumn>
