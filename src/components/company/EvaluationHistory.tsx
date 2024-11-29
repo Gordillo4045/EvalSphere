@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, CardHeader, CardBody, Progress, Spinner, Select, SelectItem, Textarea, DatePicker, Button, SharedSelection, Accordion, AccordionItem, Chip, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
+import { Card, CardHeader, CardBody, Spinner, Select, SelectItem, Textarea, DatePicker, Button, SharedSelection, Accordion, AccordionItem, Chip, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, ScrollShadow } from "@nextui-org/react";
 import { doc, getDoc, collection, getDocs, setDoc } from 'firebase/firestore';
 import { db } from '@/config/config';
 import { Employee, Position } from '@/types/applicaciontypes';
@@ -25,6 +25,7 @@ import html2canvas from 'html2canvas';
 import { createRoot } from 'react-dom/client';
 import { BadgePlus, Notebook } from 'lucide-react';
 import QuestionDetailsTable from './QuestionDetailsTable';
+import { TrendingUp, TrendingDown, ArrowRight, BadgeCheck, Clock, Users, CheckCircle2, AlertCircle } from "lucide-react";
 
 interface EvaluationAverage {
     [category: string]: number;
@@ -71,6 +72,7 @@ interface EvaluationHistoryProps {
             total: number;
         };
         questionDetails: QuestionDetails;
+        commentsByEmployee: Record<string, Comment[]>;
     };
     isLoading: boolean;
     selectedEmployeeId: string | null;
@@ -82,6 +84,12 @@ interface ActionPlan {
     description: string;
     startDate: DateValue | null;
     status: 'pending' | 'in-progress' | 'completed';
+}
+
+interface Comment {
+    evaluatorName: string;
+    comment: string;
+    relationship?: string;
 }
 
 const getActionIcon = (actionType: string) => {
@@ -534,7 +542,6 @@ export default function EvaluationHistory({
             </div>
         );
     }
-    console.log(evaluationData.questionDetails[selectedEmployeeId])
     const averageEvaluation = processedEvaluationData.length > 0
         ? processedEvaluationData.reduce((sum, employee) => sum + employee.globalPercentage, 0) / processedEvaluationData.length
         : 0;
@@ -542,40 +549,145 @@ export default function EvaluationHistory({
     return (
         <div className="container mx-auto p-0 md:p-4 space-y-6" aria-label="Resumen de evaluaciones">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <Card className='flex flex-col justify-between'>
-                    <CardHeader>
-                        Promedio de Evaluación
-                    </CardHeader>
-                    <CardBody className='flex flex-col justify-end'>
-                        <div className='flex items-center gap-x-2'>
-                            <NumberTicker value={averageEvaluation} decimalPlaces={2} className="text-3xl font-bold tabular-nums tracking-tighter" />
-                            <span className="text-xl text-gray-500">%</span>
+                <Card className="border border-transparent dark:border-default-100">
+                    <div className="flex p-4">
+                        <div className="flex flex-col gap-y-2">
+                            <dt className="font-medium">
+                                <div className="flex items-center gap-2">
+                                    <Users className="w-4 h-4" />
+                                    <span>Promedio General</span>
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Calificación promedio de {evaluationData?.evaluationStats?.total || 0} empleados evaluados
+                                </p>
+                            </dt>
+                            <dd className="flex flex-col gap-2">
+                                <div className="flex items-baseline gap-2">
+                                    <NumberTicker
+                                        value={averageEvaluation}
+                                        decimalPlaces={2}
+                                        className="text-2xl font-semibold text-default-700"
+                                    />
+                                    <span className="text-xl text-default-500">puntos</span>
+                                </div>
+                                <p className="text-xs text-gray-500">
+                                    {averageEvaluation >= 80 ? "Desempeño sobresaliente del equipo" :
+                                        averageEvaluation >= 60 ? "Desempeño dentro del promedio" :
+                                            "Se requiere atención y mejora"}
+                                </p>
+                            </dd>
                         </div>
-                        <Progress
-                            value={averageEvaluation}
-                            className="mt-2"
+                        <Chip
+                            className="absolute right-4 bottom-4"
+                            classNames={{
+                                content: "font-medium text-[0.65rem]",
+                                base: "h-6"
+                            }}
+                            color={averageEvaluation >= 80 ? "success" : averageEvaluation >= 60 ? "warning" : "danger"}
+                            radius="sm"
                             size="sm"
-                            aria-label={`Barra de progreso del promedio de evaluación: ${averageEvaluation.toFixed(2)}%`}
-                        />
-                    </CardBody>
+                            startContent={
+                                averageEvaluation >= 80 ? (
+                                    <TrendingUp className="w-3 h-3" />
+                                ) : averageEvaluation >= 60 ? (
+                                    <ArrowRight className="w-3 h-3" />
+                                ) : (
+                                    <TrendingDown className="w-3 h-3" />
+                                )
+                            }
+                            variant="flat"
+                        >
+                            {averageEvaluation >= 80 ? "Excelente" : averageEvaluation >= 60 ? "Regular" : "Bajo"}
+                        </Chip>
+                    </div>
                 </Card>
-                <Card className='flex flex-col justify-between'>
-                    <CardHeader>
-                        Evaluaciones Completadas
-                    </CardHeader>
-                    <CardBody className='flex flex-col justify-end'>
-                        <NumberTicker value={evaluationData?.evaluationStats?.completed || 0} className="text-3xl font-bold" />
-                        <div className="text-sm text-gray-500">de {evaluationData?.evaluationStats?.total || 0}</div>
-                    </CardBody>
+
+                <Card className="border border-transparent dark:border-default-100">
+                    <div className="flex p-4">
+                        <div className="flex flex-col gap-y-2">
+                            <dt className="font-medium">
+                                <div className="flex items-center gap-2">
+                                    <CheckCircle2 className="w-4 h-4" />
+                                    <span>Evaluaciones Finalizadas</span>
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Proceso de evaluación completado
+                                </p>
+                            </dt>
+                            <dd className="flex flex-col gap-2">
+                                <div className="flex items-baseline gap-2">
+                                    <NumberTicker
+                                        value={evaluationData?.evaluationStats?.completed || 0}
+                                        className="text-2xl font-semibold text-default-700"
+                                    />
+                                    <span className="text-sm text-default-500">
+                                        de {evaluationData?.evaluationStats?.total || 0} totales
+                                    </span>
+                                </div>
+                                <p className="text-xs text-gray-500">
+                                    {((evaluationData?.evaluationStats?.completed || 0) / (evaluationData?.evaluationStats?.total || 1) * 100).toFixed(0)}% del proceso completado
+                                </p>
+                            </dd>
+                        </div>
+                        <Chip
+                            className="absolute right-4 bottom-4"
+                            classNames={{
+                                content: "font-medium text-[0.65rem]",
+                                base: "h-6"
+                            }}
+                            color="success"
+                            radius="sm"
+                            size="sm"
+                            startContent={<BadgeCheck className="w-3 h-3" />}
+                            variant="flat"
+                        >
+                            Completadas
+                        </Chip>
+                    </div>
                 </Card>
-                <Card className='flex flex-col justify-between'>
-                    <CardHeader>
-                        Evaluaciones en Proceso
-                    </CardHeader>
-                    <CardBody className='flex flex-col justify-end'>
-                        <NumberTicker value={evaluationData?.evaluationStats?.inProgress || 0} className="text-3xl font-bold" />
-                        <div className="text-sm text-gray-500">de {evaluationData?.evaluationStats?.total || 0}</div>
-                    </CardBody>
+
+                <Card className="border border-transparent dark:border-default-100">
+                    <div className="flex p-4">
+                        <div className="flex flex-col gap-y-2">
+                            <dt className="font-medium">
+                                <div className="flex items-center gap-2">
+                                    <AlertCircle className="w-4 h-4" />
+                                    <span>Evaluaciones Pendientes</span>
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">
+                                    En proceso de evaluación
+                                </p>
+                            </dt>
+                            <dd className="flex flex-col gap-2">
+                                <div className="flex items-baseline gap-2">
+                                    <NumberTicker
+                                        value={evaluationData?.evaluationStats?.inProgress || 0}
+                                        className="text-2xl font-semibold text-default-700"
+                                    />
+                                    <span className="text-sm text-default-500">
+                                        de {evaluationData?.evaluationStats?.total || 0} totales
+                                    </span>
+                                </div>
+                                <p className="text-xs text-gray-500">
+                                    {((evaluationData?.evaluationStats?.inProgress || 0) / (evaluationData?.evaluationStats?.total || 1) * 100).toFixed(0)}% aún en proceso
+                                </p>
+                            </dd>
+                        </div>
+                        <Chip
+                            className="absolute right-4 bottom-4"
+                            classNames={{
+                                content: "font-medium text-[0.65rem]",
+                                base: "h-6"
+                            }}
+                            color="warning"
+                            radius="sm"
+                            size="sm"
+                            startContent={<Clock className="w-3 h-3" />}
+                            variant="flat"
+                        >
+                            En Proceso
+                        </Chip>
+                    </div>
                 </Card>
             </div>
 
@@ -600,8 +712,8 @@ export default function EvaluationHistory({
 
             {selectedEmployeeId && chartData && (
                 <>
-                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                        <Card>
+                    <div className='grid grid-cols-1 md:grid-cols-4 gap-2'>
+                        <Card className='md:col-span-2 col-span-4'>
                             <CardHeader className='pb-0'>
                                 <div className='flex flex-col gap-y-2'>
                                     <p>Plan de acción para {processedEvaluationData.find(e => e.id === selectedEmployeeId)?.name || ''}</p>
@@ -712,7 +824,7 @@ export default function EvaluationHistory({
                                 </Accordion>
                             </CardBody>
                         </Card>
-                        <Card>
+                        <Card className='md:col-span-2 col-span-4'>
                             <CardHeader>
                                 <div className='flex flex-col gap-y-2'>
                                     <p>Gráfico de Evaluación de {processedEvaluationData.find(e => e.id === selectedEmployeeId)?.name || ''}</p>
@@ -725,10 +837,10 @@ export default function EvaluationHistory({
                                 />
                             </CardBody>
                         </Card>
-                        <Card className='md:col-span-2'>
+                        <Card className='md:col-span-3 col-span-4'>
                             <CardHeader>
                                 <div className='flex flex-col gap-y-2'>
-                                    <p>Detalles de la evaluación para {processedEvaluationData.find(e => e.id === selectedEmployeeId)?.name || ''}</p>
+                                    <p>Detalles de la evaluación de {processedEvaluationData.find(e => e.id === selectedEmployeeId)?.name || ''}</p>
                                     <p className='text-sm text-gray-500'>Resultados por pregunta y evaluador</p>
                                 </div>
                             </CardHeader>
@@ -736,6 +848,50 @@ export default function EvaluationHistory({
                                 <QuestionDetailsTable
                                     questionDetails={evaluationData.questionDetails[selectedEmployeeId]}
                                 />
+                            </CardBody>
+                        </Card>
+                        <Card className='md:col-span-1 col-span-4'>
+                            <CardHeader>
+                                <div className='flex flex-col gap-y-2'>
+                                    <p>Comentarios para {processedEvaluationData.find(e => e.id === selectedEmployeeId)?.name || ''}</p>
+                                    <p className='text-sm text-gray-500'>Comentarios de evaluadores</p>
+                                </div>
+                            </CardHeader>
+                            <CardBody>
+                                <ScrollShadow className='w-full max-h-[400px] space-y-4 p-2'>
+                                    {selectedEmployeeId && evaluationData.commentsByEmployee[selectedEmployeeId]?.length > 0 ? (
+                                        evaluationData.commentsByEmployee[selectedEmployeeId].map((comment, index) => (
+                                            <Card key={index} className="w-full">
+                                                <CardBody className="p-3">
+                                                    <div className="space-y-2">
+                                                        <div className="flex items-center justify-between">
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="flex-shrink-0">
+                                                                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                                                        <span className="text-sm font-medium text-primary">
+                                                                            {comment.evaluatorName.charAt(0).toUpperCase()}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div className='flex items-center w-full gap-1'>
+                                                                    <p className="text-sm font-medium">{comment.evaluatorName}</p> ·
+                                                                    <span className="text-xs text-gray-500">{comment.relationship}</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                                                            {comment.comment}
+                                                        </p>
+                                                    </div>
+                                                </CardBody>
+                                            </Card>
+                                        ))
+                                    ) : (
+                                        <div className="text-center p-4 text-gray-500 dark:text-gray-400">
+                                            No hay comentarios disponibles para este empleado
+                                        </div>
+                                    )}
+                                </ScrollShadow>
                             </CardBody>
                         </Card>
                     </div>
@@ -754,7 +910,8 @@ export default function EvaluationHistory({
                         />
                     </div>
                 </>
-            )}
+            )
+            }
 
             <Modal
                 isOpen={isModalOpen}
@@ -792,6 +949,8 @@ export default function EvaluationHistory({
                     </ModalFooter>
                 </ModalContent>
             </Modal>
-        </div>
+        </div >
     )
 }
+
+
