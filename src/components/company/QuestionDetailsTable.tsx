@@ -33,7 +33,6 @@ export default function QuestionDetailsTable({
     const [page, setPage] = useState(1);
     const rowsPerPage = 5;
 
-    // Agrupar las preguntas por pregunta y categoría
     const groupedQuestions = useMemo(() => {
         const grouped: { [key: string]: QuestionDetail[] } = {};
         Object.values(questionDetails).forEach(details => {
@@ -48,7 +47,6 @@ export default function QuestionDetailsTable({
         return grouped;
     }, [questionDetails]);
 
-    // Filtrar las preguntas y ordenarlas por categoría
     const filteredQuestions = useMemo(() => {
         return Object.entries(groupedQuestions)
             .filter(([key, details]) =>
@@ -64,7 +62,6 @@ export default function QuestionDetailsTable({
             });
     }, [groupedQuestions, filterValue]);
 
-    // Paginar las preguntas
     const paginatedQuestions = useMemo(() => {
         const start = (page - 1) * rowsPerPage;
         const end = start + rowsPerPage;
@@ -86,7 +83,7 @@ export default function QuestionDetailsTable({
                             base: "w-full sm:max-w-[44%]",
                             inputWrapper: "border-1",
                         }}
-                        placeholder="Buscar por pregunta o evaluador"
+                        placeholder="Buscar por pregunta"
                         size="sm"
                         startContent={<IoIosSearch className="text-default-300" />}
                         value={filterValue}
@@ -153,7 +150,7 @@ export default function QuestionDetailsTable({
                                     </div>
                                 }
                             >
-                                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-2">
+                                <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-2">
                                     {details.map((detail: QuestionDetail, idx: number) => (
                                         <Card key={`${detail.evaluatorId}-${idx}`} className="py-2">
                                             <div className="flex justify-evenly items-center flex-col gap-2 w-full">
