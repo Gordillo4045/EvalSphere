@@ -23,6 +23,7 @@ interface QuestionDetail {
     evaluatorId: string;
     evaluatorName: string;
     question: string;
+    category: string;
     score: number;
     relationship: string;
     evaluatorPosition: string;
@@ -860,6 +861,7 @@ export const calculateEvaluationAverages = functions.https.onCall(async (
                         evaluatorId,
                         evaluatorName,
                         question: questionData.question,
+                        category: questionData.category,
                         score: score as number,
                         relationship,
                         evaluatorPosition: positionsTitle.get(evaluatorPosition) || evaluatedPosition,
