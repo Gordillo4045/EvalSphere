@@ -23,6 +23,7 @@ import { RadarCharts } from './RadarCharts';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { createRoot } from 'react-dom/client';
+import { BadgePlus, Notebook } from 'lucide-react';
 
 interface EvaluationAverage {
     [category: string]: number;
@@ -607,7 +608,7 @@ export default function EvaluationHistory({
                                 </div>
                             </CardHeader>
                             <CardBody>
-                                <Accordion defaultExpandedKeys={['recomendacion']} className='pt-0 mt-0'>
+                                <Accordion defaultExpandedKeys={['actionPlans']} className='pt-0 mt-0'>
                                     <AccordionItem
                                         key="recomendacion"
                                         aria-label="Recomendación"
@@ -617,7 +618,9 @@ export default function EvaluationHistory({
                                             processedEvaluationData.find(e => e.id === selectedEmployeeId)?.globalPercentage >= 90 ? "Considerar para promoción o bonificación" :
                                                 processedEvaluationData.find(e => e.id === selectedEmployeeId)?.globalPercentage >= 75 ? "Buen desempeño, ofrecer oportunidades de desarrollo" :
                                                     "Necesita mejora, considerar capacitación adicional"
-                                        }</p>} >
+                                        }</p>}
+                                        startContent={<BadgePlus size={20} />}
+                                    >
                                         <div className='mb-2 space-y-3'>
                                             <Select
                                                 required
@@ -660,10 +663,11 @@ export default function EvaluationHistory({
                                             </Button>
                                         </div>
                                     </AccordionItem>
-                                    <AccordionItem key="actionPlans" aria-label="Planes de Acción" title={<p className='text-sm '>Planes de Acción</p>} indicator={<GiExtractionOrb />}>
+                                    <AccordionItem key="actionPlans" aria-label="Planes de Acción" title={<p className='text-sm '>Planes de Acción</p>} indicator={<GiExtractionOrb />} startContent={<Notebook size={20} />
+                                    }>
                                         <div className="space-y-2">
                                             {actionPlans.length === 0 ? (
-                                                <p className="text-sm text-gray-500">No hay planes de acción registrados</p>
+                                                <p className="text-sm text-gray-500">No hay planes de acción registrados </p>
                                             ) : (
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                     {actionPlans.map((plan) => (
@@ -772,8 +776,8 @@ export default function EvaluationHistory({
                                                             <div className=" grid grid-cols-1 lg:grid-cols-3 gap-2">
                                                                 {details.map((detail: QuestionDetail, idx: number) => (
                                                                     <Card key={`${detail.evaluatorId}-${idx}`} className="py-2">
-                                                                        <div className="flex justify-evenly items-center flex-col gap-2">
-                                                                            <div className="flex flex-col px-2">
+                                                                        <div className="flex justify-evenly items-center flex-col gap-2 w-full">
+                                                                            <div className="flex flex-col px-2 w-full">
                                                                                 <div className="flex gap-1 items-center flex-row ">
                                                                                     <span className="text-sm font-medium">{detail.evaluatorName}</span> ·
                                                                                     <span className="text-xs text-gray-500">{detail.relationship}</span>
@@ -836,8 +840,8 @@ export default function EvaluationHistory({
                                                             <div className=" grid grid-cols-1 lg:grid-cols-3 gap-2">
                                                                 {details.map((detail: QuestionDetail, idx: number) => (
                                                                     <Card key={`${detail.evaluatorId}-${idx}`} className="py-2">
-                                                                        <div className="flex justify-evenly items-center flex-col gap-2">
-                                                                            <div className="flex flex-col px-2">
+                                                                        <div className="flex justify-evenly items-center flex-col gap-2 w-full">
+                                                                            <div className="flex flex-col px-2 w-full">
                                                                                 <div className="flex gap-1 items-center flex-row ">
                                                                                     <span className="text-sm font-medium">{detail.evaluatorName}</span> ·
                                                                                     <span className="text-xs text-gray-500">{detail.relationship}</span>
