@@ -24,6 +24,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { createRoot } from 'react-dom/client';
 import { BadgePlus, Notebook } from 'lucide-react';
+import QuestionDetailsTable from './QuestionDetailsTable';
 
 interface EvaluationAverage {
     [category: string]: number;
@@ -46,6 +47,7 @@ interface QuestionDetail {
     evaluatorId: string;
     evaluatorName: string;
     question: string;
+    category: string;
     relationship: string;
     score: number;
     evaluatorPosition: string;
@@ -532,7 +534,7 @@ export default function EvaluationHistory({
             </div>
         );
     }
-
+    console.log(evaluationData.questionDetails[selectedEmployeeId])
     const averageEvaluation = processedEvaluationData.length > 0
         ? processedEvaluationData.reduce((sum, employee) => sum + employee.globalPercentage, 0) / processedEvaluationData.length
         : 0;
@@ -687,6 +689,7 @@ export default function EvaluationHistory({
                                                                         </div>
                                                                         <Chip
                                                                             className="capitalize"
+                                                                            variant='dot'
                                                                             size='sm'
                                                                             color={
                                                                                 plan.status === 'completed' ? 'success' :
@@ -730,137 +733,9 @@ export default function EvaluationHistory({
                                 </div>
                             </CardHeader>
                             <CardBody>
-                                {selectedEmployeeId && evaluationData?.questionDetails?.[selectedEmployeeId] && (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {/* Columna izquierda */}
-                                        <div className="space-y-4">
-                                            {Object.entries(evaluationData.questionDetails[selectedEmployeeId])
-                                                .filter((_, index) => index % 2 === 0)
-                                                .map(([questionId, details], index) => (
-                                                    <Accordion
-                                                        key={questionId}
-                                                        className="w-full"
-                                                        selectionMode="multiple"
-                                                        variant="splitted"
-                                                    >
-                                                        <AccordionItem
-                                                            key={questionId}
-                                                            aria-label={details[0]?.question}
-                                                            title={
-                                                                <div className="flex flex-col gap-2">
-                                                                    <div className="flex items-center gap-2">
-                                                                        <span className="font-medium text-sm text-primary">
-                                                                            {index * 2 + 1}.
-                                                                        </span>
-                                                                        <p className="text-sm font-medium">{details[0]?.question}</p>
-                                                                    </div>
-                                                                    <div className="flex gap-2 ml-5">
-                                                                        {Array.from(new Set(details.map(d => d.relationship))).map(rel => (
-                                                                            <Chip
-                                                                                key={rel}
-                                                                                size="sm"
-                                                                                variant="flat"
-                                                                                color={
-                                                                                    rel === 'Jefe' ? 'primary' :
-                                                                                        rel === 'Subordinados' ? 'secondary' :
-                                                                                            rel === 'Companeros' ? 'success' : 'warning'
-                                                                                }
-                                                                            >
-                                                                                {rel}
-                                                                            </Chip>
-                                                                        ))}
-                                                                    </div>
-                                                                </div>
-                                                            }
-                                                        >
-                                                            <div className=" grid grid-cols-1 lg:grid-cols-3 gap-2">
-                                                                {details.map((detail: QuestionDetail, idx: number) => (
-                                                                    <Card key={`${detail.evaluatorId}-${idx}`} className="py-2">
-                                                                        <div className="flex justify-evenly items-center flex-col gap-2 w-full">
-                                                                            <div className="flex flex-col px-2 w-full">
-                                                                                <div className="flex gap-1 items-center flex-row ">
-                                                                                    <span className="text-sm font-medium">{detail.evaluatorName}</span> ·
-                                                                                    <span className="text-xs text-gray-500">{detail.relationship}</span>
-                                                                                </div>
-                                                                                <span className="text-xs text-gray-500">{detail.evaluatorPosition}</span>
-                                                                            </div>
-                                                                            <div className="flex items-center gap-2 text-sm">
-                                                                                <span className='text-gray-600 font-medium'>Calificación:</span> {detail.score}
-                                                                            </div>
-                                                                        </div>
-                                                                    </Card>
-                                                                ))}
-                                                            </div>
-                                                        </AccordionItem>
-                                                    </Accordion>
-                                                ))}
-                                        </div>
-
-                                        {/* Columna derecha */}
-                                        <div className="space-y-4">
-                                            {Object.entries(evaluationData.questionDetails[selectedEmployeeId])
-                                                .filter((_, index) => index % 2 === 1)
-                                                .map(([questionId, details], index) => (
-                                                    <Accordion
-                                                        key={questionId}
-                                                        className="w-full"
-                                                        selectionMode="multiple"
-                                                        variant="splitted"
-                                                    >
-                                                        <AccordionItem
-                                                            key={questionId}
-                                                            aria-label={details[0]?.question}
-                                                            title={
-                                                                <div className="flex flex-col gap-2">
-                                                                    <div className="flex items-center gap-2">
-                                                                        <span className="font-medium text-sm text-primary">
-                                                                            {index * 2 + 2}.
-                                                                        </span>
-                                                                        <p className="text-sm font-medium">{details[0]?.question}</p>
-                                                                    </div>
-                                                                    <div className="flex gap-2 ml-5">
-                                                                        {Array.from(new Set(details.map(d => d.relationship))).map(rel => (
-                                                                            <Chip
-                                                                                key={rel}
-                                                                                size="sm"
-                                                                                variant="flat"
-                                                                                color={
-                                                                                    rel === 'Jefe' ? 'primary' :
-                                                                                        rel === 'Subordinados' ? 'secondary' :
-                                                                                            rel === 'Companeros' ? 'success' : 'warning'
-                                                                                }
-                                                                            >
-                                                                                {rel}
-                                                                            </Chip>
-                                                                        ))}
-                                                                    </div>
-                                                                </div>
-                                                            }
-                                                        >
-                                                            <div className=" grid grid-cols-1 lg:grid-cols-3 gap-2">
-                                                                {details.map((detail: QuestionDetail, idx: number) => (
-                                                                    <Card key={`${detail.evaluatorId}-${idx}`} className="py-2">
-                                                                        <div className="flex justify-evenly items-center flex-col gap-2 w-full">
-                                                                            <div className="flex flex-col px-2 w-full">
-                                                                                <div className="flex gap-1 items-center flex-row ">
-                                                                                    <span className="text-sm font-medium">{detail.evaluatorName}</span> ·
-                                                                                    <span className="text-xs text-gray-500">{detail.relationship}</span>
-                                                                                </div>
-                                                                                <span className="text-xs text-gray-500">{detail.evaluatorPosition}</span>
-                                                                            </div>
-                                                                            <div className="flex items-center gap-2 text-sm">
-                                                                                <span className='text-gray-600 font-medium'>Calificación:</span> {detail.score}
-                                                                            </div>
-                                                                        </div>
-                                                                    </Card>
-                                                                ))}
-                                                            </div>
-                                                        </AccordionItem>
-                                                    </Accordion>
-                                                ))}
-                                        </div>
-                                    </div>
-                                )}
+                                <QuestionDetailsTable
+                                    questionDetails={evaluationData.questionDetails[selectedEmployeeId]}
+                                />
                             </CardBody>
                         </Card>
                     </div>
