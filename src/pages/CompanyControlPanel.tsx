@@ -528,11 +528,9 @@ function CompanyControlPanel() {
                                 <span className="hidden md:block">Volver</span>
                             </Button>
                         )}
-                        <div className="">
-                            <div className="flex items-end justify-between">
-                                <BlurIn word={`Panel de Control de ${company.name}`} className="text-lg md:text-xl font-semibold text-center flex-grow" />
-                                <span className="pl-1 text-default-400 text-sm">RH</span>
-                            </div>
+                        <div className="flex items-end flex-grow justify-center">
+                            <BlurIn word={`Panel de Control de ${company.name}`} className="text-lg md:text-xl font-semibold text-center" />
+                            <span className="pl-1 text-default-400 text-sm">RH</span>
                         </div>
                         <Dropdown
                             classNames={{
