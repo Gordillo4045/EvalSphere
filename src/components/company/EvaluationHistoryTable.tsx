@@ -123,7 +123,7 @@ export default function EvaluationHistoryTable({
                         avatarProps={{
                             src: item.avatar,
                             "aria-label": `Avatar de ${item.name}`,
-                            className: "rounded-full aspect-square !w-[40px]",
+                            className: "rounded-full aspect-square !min-w-[40px] ",
                         }}
                         description={item.position}
                         name={item.name}
