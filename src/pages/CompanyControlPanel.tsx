@@ -3,7 +3,7 @@ import { Button, Card, CardBody, CardHeader, Select, SelectItem, Spinner, Input,
 import { collection, doc, getDoc, onSnapshot, orderBy, query, updateDoc } from 'firebase/firestore';
 import { db } from '@/config/config';
 import { useAuth } from '@/hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Company, Department, Notification } from '@/types/applicaciontypes';
 import Sidebar from '@/components/Sidebar';
 import { toast } from 'sonner';
@@ -33,7 +33,10 @@ function CompanyControlPanel() {
     const [company, setCompany] = useState<Company | null>(null);
     const { user, isCompany, loading } = useAuth();
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState<string>('home');
+    const location = useLocation();
+    const [activeTab, setActiveTab] = useState<string>(
+        location.state?.initialTab || 'home'
+    );
     const [departments, setDepartments] = useState<Department[]>([]);
     const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null);
     const [invitationCode, setInvitationCode] = useState<string>('');
