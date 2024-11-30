@@ -14,6 +14,7 @@ import Home from "./pages/Home";
 import ProtectedUserRoute from "./components/ProtectedUserRoute";
 import EmployeeSupport from "./pages/EmployeeSupport";
 import { useAuth } from "@/hooks/useAuth";
+import EmployeeEvaluationResults from "./components/company/EmployeeEvaluationResults";
 function AppContent() {
   const location = useLocation();
   const isCompanyControlPanel = location.pathname === "/company/controlpanel";
@@ -45,6 +46,14 @@ function AppContent() {
               <EmployeeSupport employeeId={isEmployee ? user?.uid : ''} />
             </ProtectedUserRoute>
           } />
+          <Route path="/employee/feedback" element={
+            <ProtectedUserRoute>
+              <EmployeeEvaluationResults
+                employeeId={isEmployee ? user?.uid : ''}
+              />
+            </ProtectedUserRoute>
+          } />
+
         </Routes>
       </div>
       <FooterCustom />
