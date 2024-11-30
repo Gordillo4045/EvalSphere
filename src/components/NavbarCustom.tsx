@@ -8,9 +8,9 @@ import { auth } from "@/config/config";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { MdOutlineLogin, MdOutlineLogout } from "react-icons/md";
-import { FaUsersGear } from "react-icons/fa6";
+import { FaUsersGear, FaWpforms } from "react-icons/fa6";
 import EmployeeSignUpForm from "@/components/company/EmployeeSignUpForm";
-import { FaUserPlus } from "react-icons/fa";
+import { FaHome, FaQuestionCircle, FaUserPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import CompanySignUpForm from "./company/CompanySignUpForm";
 
@@ -54,7 +54,7 @@ export default function NavbarCustom() {
                 className="bg-transparent py-2"
                 classNames={{
                     wrapper: "px-0 w-full justify-center bg-transparent h-fit",
-                    menu: "mx-auto mt-3 max-h-[40vh] max-w-[80vw] rounded-large border-small border-default-200/20 bg-background/60 py-6 shadow-medium backdrop-blur-sm backdrop-saturate-150 dark:bg-default-100/50",
+                    menu: "mx-auto mt-3 max-h-[20vh] max-w-[80vw] rounded-large border-small border-default-200/20 bg-background/60 py-6 shadow-medium backdrop-blur-sm backdrop-saturate-150 dark:bg-default-100/50",
                 }}
                 isMenuOpen={isMenuOpen}
                 onMenuOpenChange={setIsMenuOpen}
@@ -110,7 +110,12 @@ export default function NavbarCustom() {
                                         </DropdownItem>
                                     )}
                                     {isCompany && (
-                                        <DropdownItem key="controlpanel" href="/company/controlpanel" startContent={<FaUsersGear />} textValue="panel de control">
+                                        <DropdownItem
+                                            key="controlpanel"
+                                            onPress={() => navigate('/company/controlpanel', { state: { initialTab: 'home' } })}
+                                            startContent={<FaUsersGear />}
+                                            textValue="panel de control"
+                                        >
                                             Panel de Control Compañía
                                         </DropdownItem>
                                     )}
@@ -199,9 +204,43 @@ export default function NavbarCustom() {
                             </Button>
                         </NavbarMenuItem>
                     ) : (
-                        <NavbarMenuItem>
-                            <Link href="/employee/formulario" color="foreground">Formulario</Link>
-                        </NavbarMenuItem>
+                        <>
+                            <NavbarMenuItem>
+                                <Button
+                                    as={Link}
+                                    href="/"
+                                    variant="light"
+                                    startContent={<FaHome size={15} />}
+                                    className="p-0 w-full flex justify-start"
+                                >
+                                    Inicio
+                                </Button>
+                                {isEmployee && (
+                                    <Button
+                                        as={Link}
+                                        href="/employee/formulario"
+                                        variant="light"
+                                        startContent={<FaWpforms size={15} />}
+                                        className="p-0 w-full flex justify-start"
+                                    >
+                                        Formulario
+                                    </Button>
+                                )}
+                                {isCompany && (
+                                    <Button
+                                        as={Link}
+                                        onPress={() => navigate('/company/controlpanel', { state: { initialTab: 'support' } })}
+                                        href="#"
+                                        variant="light"
+                                        startContent={<FaQuestionCircle size={15} />}
+                                        className="p-0 w-full flex justify-start"
+                                    >
+                                        Soporte Compañía
+                                    </Button>
+                                )}
+                            </NavbarMenuItem>
+
+                        </>
                     )}
                 </NavbarMenu>
 
