@@ -13,6 +13,7 @@ import EmployeeSignUpForm from "@/components/company/EmployeeSignUpForm";
 import { FaHome, FaQuestionCircle, FaUserPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import CompanySignUpForm from "./company/CompanySignUpForm";
+import { VscFeedback } from "react-icons/vsc";
 
 
 export default function NavbarCustom() {
@@ -75,8 +76,25 @@ export default function NavbarCustom() {
                     {user && (
                         <>
                             {isEmployee && (
-                                <div className="hidden md:flex items-center justify-center mx-48">
-                                    <Link href="/employee/formulario" color="foreground" >Formulario</Link>
+                                <div className="hidden md:flex items-center justify-center mx-28 gap-2">
+                                    <Button
+                                        as={Link}
+                                        href="/employee/formulario"
+                                        variant="light"
+                                        startContent={<FaWpforms size={15} />}
+                                        className=" w-full flex justify-start"
+                                    >
+                                        Formulario
+                                    </Button>
+                                    <Button
+                                        as={Link}
+                                        href="/employee/feedback"
+                                        variant="light"
+                                        startContent={<VscFeedback size={15} />}
+                                        className=" w-full flex justify-start"
+                                    >
+                                        Resultados
+                                    </Button>
                                 </div>
                             )}
                             <Dropdown placement="bottom-end" >
@@ -216,15 +234,26 @@ export default function NavbarCustom() {
                                     Inicio
                                 </Button>
                                 {isEmployee && (
-                                    <Button
-                                        as={Link}
-                                        href="/employee/formulario"
-                                        variant="light"
-                                        startContent={<FaWpforms size={15} />}
-                                        className="p-0 w-full flex justify-start"
-                                    >
-                                        Formulario
-                                    </Button>
+                                    <>
+                                        <Button
+                                            as={Link}
+                                            href="/employee/formulario"
+                                            variant="light"
+                                            startContent={<FaWpforms size={15} />}
+                                            className="p-0 w-full flex justify-start"
+                                        >
+                                            Formulario
+                                        </Button>
+                                        <Button
+                                            as={Link}
+                                            href="/employee/feedback"
+                                            variant="light"
+                                            startContent={<VscFeedback size={15} />}
+                                            className="p-0 w-full flex justify-start"
+                                        >
+                                            Resultados
+                                        </Button>
+                                    </>
                                 )}
                                 {isCompany && (
                                     <Button
