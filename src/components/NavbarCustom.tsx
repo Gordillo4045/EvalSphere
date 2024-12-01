@@ -76,7 +76,7 @@ export default function NavbarCustom() {
                     {user && (
                         <>
                             {isEmployee && (
-                                <div className="hidden md:flex items-center justify-center mx-28 gap-2">
+                                <div className="hidden md:flex items-center justify-center mx-20 gap-2">
                                     <Button
                                         as={Link}
                                         href="/employee/formulario"
