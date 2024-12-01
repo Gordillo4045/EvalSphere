@@ -25,7 +25,7 @@ import html2canvas from 'html2canvas';
 import { createRoot } from 'react-dom/client';
 import { BadgePlus, Notebook } from 'lucide-react';
 import QuestionDetailsTable from './QuestionDetailsTable';
-import { TrendingUp, TrendingDown, ArrowRight, BadgeCheck, Clock, Users, CheckCircle2, AlertCircle } from "lucide-react";
+import { TrendingUp, TrendingDown, ArrowRight, Clock, Users, CheckCircle2, AlertCircle } from "lucide-react";
 
 interface EvaluationAverage {
     [category: string]: number;
@@ -547,8 +547,8 @@ export default function EvaluationHistory({
         : 0;
 
     return (
-        <div className="container mx-auto p-0 md:p-4 space-y-6" aria-label="Resumen de evaluaciones">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="container mx-auto p-0 md:p-4 space-y-2" aria-label="Resumen de evaluaciones">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 ">
                 <Card className="border border-transparent dark:border-default-100">
                     <div className="flex p-4">
                         <div className="flex flex-col gap-y-2">
@@ -570,7 +570,7 @@ export default function EvaluationHistory({
                                     />
                                     <span className="text-xl text-default-500">puntos</span>
                                 </div>
-                                <p className="text-xs text-gray-500">
+                                <p className="text-xs text-pretty text-gray-500">
                                     {averageEvaluation >= 80 ? "Desempeño sobresaliente del equipo" :
                                         averageEvaluation >= 60 ? "Desempeño dentro del promedio" :
                                             "Se requiere atención y mejora"}
@@ -629,20 +629,7 @@ export default function EvaluationHistory({
                                 </p>
                             </dd>
                         </div>
-                        <Chip
-                            className="absolute right-4 bottom-4"
-                            classNames={{
-                                content: "font-medium text-[0.65rem]",
-                                base: "h-6"
-                            }}
-                            color="success"
-                            radius="sm"
-                            size="sm"
-                            startContent={<BadgeCheck className="w-3 h-3" />}
-                            variant="flat"
-                        >
-                            Completadas
-                        </Chip>
+
                     </div>
                 </Card>
 
@@ -691,7 +678,7 @@ export default function EvaluationHistory({
                 </Card>
             </div>
 
-            <Card>
+            <Card className='my-0'>
                 <CardHeader>Detalles de Evaluación</CardHeader>
                 <CardBody>
                     <EvaluationHistoryTable
@@ -794,7 +781,7 @@ export default function EvaluationHistory({
                                                         >
                                                             <CardBody className="p-3">
                                                                 <div className="space-y-1">
-                                                                    <div className="flex justify-between items-center text-sm">
+                                                                    <div className="flex flex-col xl:flex-row justify-between items-center text-sm">
                                                                         <div className="flex items-center gap-2">
                                                                             {getActionIcon(plan.actionType)}
                                                                             <p className="font-medium">{formatActionType(plan.actionType)}</p>

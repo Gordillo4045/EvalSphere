@@ -10,12 +10,11 @@ import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, ArrowRight, Notebook, BriefcaseIcon, StarIcon, TrophyIcon, BookOpenIcon } from "lucide-react";
 import { BanknotesIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 import { Employee } from '@/types/applicaciontypes';
-import { MdFeedback } from 'react-icons/md';
 import { FaChartLine } from 'react-icons/fa';
 import { GrScorecard } from 'react-icons/gr';
-import NumberTicker from '../ui/number-ticker';
-import { BarCharts } from './BarCharts';
-import BlurIn from '../ui/blur-in';
+import NumberTicker from '@/components/ui/number-ticker';
+import { BarCharts } from '@/components/company/BarCharts';
+import BlurIn from '@/components/ui/blur-in';
 
 interface EvaluationResultsProps {
     employeeId: string;
@@ -73,10 +72,13 @@ export default function EmployeeEvaluationResults({ employeeId }: EvaluationResu
                 const plansSnapshot = await getDocs(
                     collection(db, `companies/${fetchedCompanyId}/employees/${employeeId}/actionPlans`)
                 );
-                const plansData = plansSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                })) as ActionPlan[];
+                const plansData = plansSnapshot.docs.map(doc => {
+                    const planData = doc.data();
+                    return {
+                        id: doc.id,
+                        ...planData,
+                    };
+                }) as ActionPlan[];
                 setActionPlans(plansData);
 
                 const chartData = await generateChartData(fetchedCompanyId, employeeId);
@@ -222,39 +224,37 @@ export default function EmployeeEvaluationResults({ employeeId }: EvaluationResu
                     </CardBody>
                 </Card>
 
-                <Card className="col-span-2">
-                    <CardBody className='flex flex-col md:flex-row gap-2'>
-                        <div className='w-full md:w-1/2'>
-                            <RadarCharts data={employeeAverages} />
-                        </div>
-                        <div className='w-full md:w-1/2'>
-                            <BarCharts data={employeeAverages} />
-                        </div>
-                    </CardBody>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <Card className=''>
+                    <RadarCharts data={employeeAverages} />
+                </Card>
+                <Card className=''>
+                    <BarCharts data={employeeAverages} />
                 </Card>
             </div>
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-2">
 
-            {chartData && (
-                <Card>
-                    <CardHeader>
-                        <div className='flex flex-col gap-y-2'>
-                            <p className='flex items-center gap-2'><FaChartLine size={20} />Gráfico de Evaluación de {employee?.name || ''}</p>
-                            <p className='text-sm text-gray-500'>Resultados por categoría y tipo de evaluador</p>
-                        </div>
-                    </CardHeader>
-                    <CardBody>
-                        <EmployeeEvaluationChart data={chartData} />
-                    </CardBody>
-                </Card>
-            )}
+                {chartData && (
+                    <Card className='col-span-4'>
+                        <CardHeader>
+                            <div className='flex flex-col gap-y-2'>
+                                <p className='flex items-center gap-2'><FaChartLine size={20} />Gráfico de Evaluación de {employee?.name || ''}</p>
+                                <p className='text-sm text-gray-500'>Resultados por categoría y tipo de evaluador</p>
+                            </div>
+                        </CardHeader>
+                        <CardBody>
+                            <EmployeeEvaluationChart data={chartData} />
+                        </CardBody>
+                    </Card>
+                )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                <Card>
+                <Card className='col-span-2'>
                     <CardHeader className="flex gap-2 items-center">
                         <Notebook className="w-5 h-5" />
                         Planes de Acción Asignados
                     </CardHeader>
-                    <CardBody>
+                    <CardBody className='max-h-[380px] overflow-auto'>
                         <div className="space-y-2">
                             {actionPlans.length === 0 ? (
                                 <p className="text-sm text-gray-500">No hay planes de acción registrados </p>
@@ -267,26 +267,29 @@ export default function EmployeeEvaluationResults({ employeeId }: EvaluationResu
                                             isHoverable
                                         >
                                             <CardBody className="p-3">
-                                                <div className="space-y-1">
+                                                <div className="space-y-2">
                                                     <div className="flex justify-between items-center text-sm">
                                                         <div className="flex items-center gap-2">
                                                             {getActionIcon(plan.actionType)}
                                                             <p className="font-medium">{formatActionType(plan.actionType)}</p>
                                                         </div>
-                                                        <Chip
-                                                            className="capitalize"
-                                                            variant='dot'
-                                                            size='sm'
-                                                            color={
-                                                                plan.status === 'completed' ? 'success' :
-                                                                    plan.status === 'in-progress' ? 'warning' :
-                                                                        'danger'
-                                                            }
-                                                        >
-                                                            {plan.status === 'completed' ? 'Completado' : plan.status === 'in-progress' ? 'En Progreso' : 'Pendiente'}
-                                                        </Chip>
                                                     </div>
                                                     <p className="text-xs">{plan.description}</p>
+
+                                                    <Chip
+                                                        className="capitalize"
+                                                        variant='dot'
+                                                        size='sm'
+                                                        color={
+                                                            plan.status === 'completed' ? 'success' :
+                                                                plan.status === 'in-progress' ? 'warning' :
+                                                                    'danger'
+                                                        }
+                                                    >
+                                                        {plan.status === 'completed' ? 'Completado' :
+                                                            plan.status === 'in-progress' ? 'En Progreso' :
+                                                                'Pendiente'}
+                                                    </Chip>
                                                 </div>
                                             </CardBody>
                                         </Card>
@@ -296,44 +299,8 @@ export default function EmployeeEvaluationResults({ employeeId }: EvaluationResu
                         </div>
                     </CardBody>
                 </Card>
-
-                <Card className='overflow-y-auto h-80'>
-                    <CardHeader>
-                        <div className='flex flex-col gap-y-2'>
-                            <p className='flex items-center gap-2'><MdFeedback size={20} />Comentarios para {employee?.name || ''}</p>
-                            <p className='text-sm text-gray-500'>Comentarios de evaluadores</p>
-                        </div>
-                    </CardHeader>
-                    <CardBody>
-                        {evaluationData.commentsByEmployee[employeeId]?.map((comment: any, index: number) => (
-                            <Card key={index} className="mb-4" isHoverable>
-                                <CardBody className="p-3">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                                            <span className="text-sm font-medium text-primary">
-                                                {comment.evaluatorName.charAt(0).toUpperCase()}
-                                            </span>
-                                        </div>
-                                        <div className='flex items-center gap-1 w-full'>
-                                            <p className="text-sm font-medium">{comment.evaluatorName}</p> ·
-                                            <p className="text-xs text-gray-500">{comment.relationship}</p>
-                                        </div>
-                                    </div>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                                        {comment.comment}
-                                    </p>
-                                </CardBody>
-                            </Card>
-                        ))}
-                        {(!evaluationData.commentsByEmployee[employeeId] ||
-                            evaluationData.commentsByEmployee[employeeId].length === 0) && (
-                                <p className="text-center text-gray-500">
-                                    No hay comentarios disponibles
-                                </p>
-                            )}
-                    </CardBody>
-                </Card>
             </div>
+
         </div>
     );
 }
