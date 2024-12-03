@@ -328,10 +328,12 @@ export default function EvaluationHistory({
         try {
             const loadingToast = toast.loading('Generando PDF...');
 
-            // Crear un contenedor temporal para el reporte
+
+
+            // Crear un contenedor temporal para el reporte con mejor formato
             const reportContainer = document.createElement('div');
             reportContainer.style.width = '800px';
-            reportContainer.style.padding = '20px';
+            reportContainer.style.padding = '40px';
             reportContainer.style.backgroundColor = 'white';
             reportContainer.style.color = 'black';
 
@@ -368,96 +370,104 @@ export default function EvaluationHistory({
                 backgroundColor: 'white'
             });
 
-            // Crear el contenido del reporte
             reportContainer.innerHTML = `
                 <div style="font-family: Arial, sans-serif; color: black;">
-                    <!-- Primera página -->
-                    <div style="page-break-after: always;">
-                        <h1 style="text-align: center; margin-bottom: 20px; color: black;">Reporte de Evaluación</h1>
-                        <div style="margin-bottom: 10px;">
-                            <p style="margin: 5px 0; color: black;">Empleado: ${processedEvaluationData.find(e => e.id === selectedEmployeeId)?.name}</p>
-                            <p style="margin: 5px 0; color: black;">Puntuación Global: ${processedEvaluationData.find(e => e.id === selectedEmployeeId)?.globalPercentage.toFixed(2)}%</p>
+                    <!-- Portada -->
+                    <div style="page-break-after: always; text-align: center; padding: 40px 20px;">
+                        <h1 style="font-size: 28px; color: #2980b9; margin-bottom: 30px;">Reporte de Evaluación de Desempeño</h1>
+                        <div style="margin: 40px 0; padding: 20px; border: 2px solid #2980b9; border-radius: 8px;">
+                            <p style="font-size: 20px; margin: 10px 0;">Empleado: ${processedEvaluationData.find(e => e.id === selectedEmployeeId)?.name}</p>
+                            <p style="font-size: 18px; color: #666;">Posición: ${processedEvaluationData.find(e => e.id === selectedEmployeeId)?.position}</p>
+                            <p style="font-size: 24px; margin-top: 20px; color: #2980b9;">
+                                Puntuación Global: ${processedEvaluationData.find(e => e.id === selectedEmployeeId)?.globalPercentage.toFixed(2)}%
+                            </p>
                         </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
-                            <table style="width: 100%; border-collapse: collapse;">
-                                <thead>
-                                    <tr style="background-color: #2980b9; color: white;">
-                                        <th style="padding: 8px; text-align: left;">Categoría</th>
-                                        <th style="padding: 8px; text-align: left;">Puntuación</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${Object.entries(radarData)
+                        <p style="color: #666; font-style: italic; margin-top: 40px;">
+                            Fecha de generación: ${new Date().toLocaleDateString()}
+                        </p>
+                    </div>
+
+                    <!-- Resumen de Evaluación -->
+                    <div style="page-break-after: always;">
+                        <h2 style="color: #2980b9; border-bottom: 2px solid #2980b9; padding-bottom: 10px; margin-bottom: 20px;">
+                            Resumen de Evaluación
+                        </h2>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start;">
+                            <div>
+                                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                                    <thead>
+                                        <tr style="background-color: #2980b9;">
+                                            <th style="padding: 12px; text-align: left; color: white; font-size: 14px;">Categoría</th>
+                                            <th style="padding: 12px; text-align: center; color: white; font-size: 14px;">Puntuación</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${Object.entries(radarData)
                     .map(([category, score]) => `
-                                            <tr style="border-bottom: 1px solid #ddd;">
-                                                <td style="padding: 8px; color: black;">${category}</td>
-                                                <td style="padding: 8px; color: black;">${score.toFixed(2)}</td>
-                                            </tr>
-                                        `).join('')}
-                                </tbody>
-                            </table>
+                                                <tr style="border-bottom: 1px solid #eee;">
+                                                    <td style="padding: 12px; color: #444; font-size: 14px;">${category}</td>
+                                                    <td style="padding: 12px; text-align: center; color: #444; font-size: 14px;">
+                                                        <span style="
+                                                            color: #1e293b;
+                                                            border-radius: 4px;
+                                                            display: inline-flex;
+                                                            align-items: center;
+                                                            justify-content: center;
+                                                            min-width: 45px;
+                                                            text-align: center;
+                                                        ">
+                                                            ${score.toFixed(2)}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
                             <img src="${radarCanvas.toDataURL()}" style="width: 100%; height: auto;" />
                         </div>
-                        <h2 style="margin: 20px 0 10px; color: black;">Gráfico de evaluación por categoría y tipo de evaluador</h2>
-                        <div id="lineChartContainer" style="margin: 20px 0;"></div>
+                    </div>
 
-                        <h2 style="margin-bottom: 10px; color: black;">Planes de Acción</h2>
-                        <table style="width: 100%; border-collapse: collapse;">
+                    <!-- Planes de Acción -->
+                    <div style="page-break-after: always;">
+                        <h2 style="color: #2980b9; border-bottom: 2px solid #2980b9; padding-bottom: 10px; margin-bottom: 20px;">
+                            Planes de Acción
+                        </h2>
+                        <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
                             <thead>
-                                <tr style="background-color: #2980b9; color: white;">
-                                    <th style="padding: 8px; text-align: left;">Tipo</th>
-                                    <th style="padding: 8px; text-align: left;">Descripción</th>
-                                    <th style="padding: 8px; text-align: left;">Estado</th>
+                                <tr style="background-color: #2980b9;">
+                                    <th style="padding: 12px; text-align: left; color: white; width: 20%;">Tipo</th>
+                                    <th style="padding: 12px; text-align: left; color: white;">Descripción</th>
+                                    <th style="padding: 12px; text-align: center; color: white; width: 15%;">Estado</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 ${actionPlans.map(plan => `
-                                    <tr style="border-bottom: 1px solid #ddd;">
-                                        <td style="padding: 8px; color: black;">${formatActionType(plan.actionType)}</td>
-                                        <td style="padding: 8px; color: black;">${plan.description}</td>
-                                        <td style="padding: 8px; color: black;">${plan.status === 'completed' ? 'Completado' :
-                            plan.status === 'in-progress' ? 'En Progreso' : 'Pendiente'
-                        }</td>
+                                    <tr style="border-bottom: 1px solid #eee;">
+                                        <td style="padding: 12px; color: #444;">${formatActionType(plan.actionType)}</td>
+                                        <td style="padding: 12px; color: #444;">${plan.description}</td>
+                                        <td style="padding: 12px; text-align: center;">
+                                            <span style="
+                                                color: #1e293b;
+                                                border-radius: 4px;
+                                                font-size: 12px;
+                                                display: inline-flex;
+                                                align-items: center;
+                                                justify-content: center;
+                                                min-width: 45px;
+                                                text-align: center;
+                                            ">
+                                                ${plan.status === 'completed' ? 'Completado' :
+                            plan.status === 'in-progress' ? 'En Progreso' : 'Pendiente'}
+                                            </span>
+                                        </td>
                                     </tr>
                                 `).join('')}
                             </tbody>
                         </table>
                     </div>
-
-                    <!-- Segunda página -->
-                    <div>
-                        <h2 style="margin: 20px 0 10px; color: black; text-align: center;">Detalle de Calificaciones por Pregunta</h2>
-                        <div style="margin-bottom: 20px;">
-                            ${Object.entries(evaluationData.questionDetails[selectedEmployeeId] || {})
-                    .map(([, details], index) => `
-                                    <div style="margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
-                                        <p style="margin: 5px 0; color: black; font-weight: bold; background-color: #f8f9fa; padding: 8px;">
-                                            ${index + 1}. ${details[0]?.question}
-                                        </p>
-                                        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-                                            <thead>
-                                                <tr style="background-color: #f8f9fa;">
-                                                    <th style="padding: 8px; text-align: left; color: black; border: 1px solid #ddd;">Evaluador</th>
-                                                    <th style="padding: 8px; text-align: left; color: black; border: 1px solid #ddd;">Posición</th>
-                                                    <th style="padding: 8px; text-align: left; color: black; border: 1px solid #ddd;">Relación</th>
-                                                    <th style="padding: 8px; text-align: center; color: black; border: 1px solid #ddd;">Calificación</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                ${details.map(detail => `
-                                                    <tr>
-                                                        <td style="padding: 8px; color: black; border: 1px solid #ddd;">${detail.evaluatorName}</td>
-                                                        <td style="padding: 8px; color: black; border: 1px solid #ddd;">${detail.evaluatorPosition}</td>
-                                                        <td style="padding: 8px; color: black; border: 1px solid #ddd;">${detail.relationship}</td>
-                                                        <td style="padding: 8px; text-align: center; color: black; border: 1px solid #ddd;">${detail.score}</td>
-                                                    </tr>
-                                                `).join('')}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                `).join('')}
-                        </div>
-                    </div>
+                    
+                    
                 </div>
             `;
 
@@ -493,12 +503,165 @@ export default function EvaluationHistory({
                 backgroundColor: 'white'
             });
 
-            // Crear el PDF
+            // Crear el PDF con orientación vertical y tamaño A4
             const pdf = new jsPDF({
                 orientation: 'portrait',
                 unit: 'px',
                 format: [canvas.width, canvas.height]
             });
+
+            // Configurar fuentes y estilos base
+            pdf.setFont('helvetica');
+            pdf.setFontSize(12);
+            pdf.setTextColor(0, 0, 0);
+
+            const addQuestionDetailsPages = async () => {
+                const questionDetails = evaluationData.questionDetails[selectedEmployeeId] || {};
+                const questionsPerPage = 3;
+                const questions = Object.entries(questionDetails);
+                const totalPages = Math.ceil(questions.length / questionsPerPage);
+
+                // Definir márgenes de página
+                const margin = {
+                    top: 80,
+                    right: 80,
+                    bottom: 80,
+                    left: 80
+                };
+
+                // Calcular el ancho útil de la página
+                const pageWidth = pdf.internal.pageSize.width;
+                const pageHeight = pdf.internal.pageSize.height;
+                const contentWidth = pageWidth - margin.left - margin.right;
+
+                for (let pageNum = 0; pageNum < totalPages; pageNum++) {
+                    pdf.addPage();
+
+                    // Título principal (ajustado con margen)
+                    pdf.setFontSize(45);
+                    pdf.setTextColor(0, 136, 204);
+                    pdf.text('Detalle de Evaluación por Pregunta', margin.left, margin.top);
+
+                    // Información de página
+                    pdf.setFontSize(25);
+                    pdf.setTextColor(102, 102, 102);
+                    pdf.text(`Página ${pageNum + 1} de ${totalPages}`, margin.left, margin.top + 20);
+
+                    const pageQuestions = questions.slice(
+                        pageNum * questionsPerPage,
+                        (pageNum + 1) * questionsPerPage
+                    );
+
+                    let yPosition = margin.top + 35;
+
+                    for (const [, details] of pageQuestions) {
+                        // Contenedor de la pregunta con fondo (ajustado con márgenes)
+                        pdf.setFillColor(247, 248, 249);
+                        pdf.roundedRect(
+                            margin.left,
+                            yPosition - 5,
+                            contentWidth,
+                            35,
+                            3,
+                            3,
+                            'F'
+                        );
+
+                        // Número de pregunta con círculo (ajustado con margen)
+                        pdf.setFillColor(0, 136, 204);
+                        pdf.circle(margin.left + 15, yPosition + 12, 12, 'F');
+                        pdf.setTextColor(255, 255, 255);
+                        pdf.setFontSize(16);
+                        pdf.text('P', margin.left + 11, yPosition + 17);
+
+                        // Texto de la pregunta (ajustado con margen)
+                        pdf.setTextColor(68, 68, 68);
+                        pdf.setFontSize(40);
+                        pdf.setFont('helvetica', 'bold');
+
+                        const questionText = details[0]?.question || '';
+                        const maxWidth = contentWidth - 60; // Ancho máximo ajustado
+                        const lines = pdf.splitTextToSize(questionText, maxWidth);
+                        pdf.text(lines, margin.left + 35, yPosition + 15);
+
+                        const lineHeight = 10;
+                        yPosition += Math.max(40, lines.length * lineHeight);
+
+                        // Tabla ajustada con márgenes
+                        const headers = ['Evaluador', 'Posición', 'Relación', 'Calificación'];
+                        const tableWidth = contentWidth - 100; // Ancho total de la tabla
+                        const columnWidths = [
+                            tableWidth * 0.25, // 25% para Evaluador
+                            tableWidth * 0.35, // 35% para Posición
+                            tableWidth * 0.25, // 25% para Relación
+                            tableWidth * 0.15  // 15% para Calificación
+                        ];
+                        const startX = margin.left + 50; // Inicio de la tabla con margen
+                        const rowHeight = 70;
+
+                        // Encabezados
+                        headers.forEach((header, index) => {
+                            let x = startX;
+                            for (let i = 0; i < index; i++) {
+                                x += columnWidths[i];
+                            }
+                            pdf.setFillColor(0, 136, 204);
+                            pdf.setTextColor(255, 255, 255);
+                            pdf.rect(x, yPosition, columnWidths[index], rowHeight, 'F');
+
+                            pdf.setFontSize(31);
+                            pdf.setFont('helvetica', 'bold');
+                            const textWidth = pdf.getStringUnitWidth(header) * 26 / pdf.internal.scaleFactor;
+                            const xOffset = (columnWidths[index] - textWidth) / 2;
+                            pdf.text(header, x + xOffset, yPosition + (rowHeight / 2) + 3);
+                        });
+                        yPosition += rowHeight;
+
+                        // Filas de datos
+                        details.forEach((detail, idx) => {
+                            pdf.setTextColor(68, 68, 68);
+                            let x = startX;
+
+                            if (idx % 2 === 0) {
+                                pdf.setFillColor(245, 245, 245);
+                                pdf.rect(x, yPosition, columnWidths.reduce((a, b) => a + b, 0), rowHeight, 'F');
+                            }
+
+                            pdf.setFontSize(35);
+                            pdf.setFont('helvetica', 'normal');
+
+                            const centerTextInCell = (text: string, cellX: number, cellWidth: number) => {
+                                const textWidth = pdf.getStringUnitWidth(text) * 30 / pdf.internal.scaleFactor;
+                                const xOffset = (cellWidth - textWidth) / 2;
+                                return cellX + xOffset;
+                            };
+
+                            const evaluatorName = detail.evaluatorName.substring(0, 30);
+                            pdf.text(evaluatorName, centerTextInCell(evaluatorName, x, columnWidths[0]), yPosition + (rowHeight / 2) + 3);
+                            x += columnWidths[0];
+
+                            const position = detail.evaluatorPosition.substring(0, 30);
+                            pdf.text(position, centerTextInCell(position, x, columnWidths[1]), yPosition + (rowHeight / 2) + 3);
+                            x += columnWidths[1];
+
+                            pdf.text(detail.relationship, centerTextInCell(detail.relationship, x, columnWidths[2]), yPosition + (rowHeight / 2) + 3);
+                            x += columnWidths[2];
+
+                            pdf.text(detail.score.toString(), centerTextInCell(detail.score.toString(), x, columnWidths[3]), yPosition + (rowHeight / 2) + 3);
+
+                            yPosition += rowHeight;
+                        });
+
+                        // Verificar si queda espacio suficiente para la siguiente pregunta
+                        if (yPosition + 200 > pageHeight - margin.bottom) {
+                            pdf.addPage();
+                            yPosition = margin.top;
+                        } else {
+                            yPosition += 50;
+                        }
+                    }
+                }
+            };
 
             // Añadir la imagen al PDF
             pdf.addImage(
@@ -510,6 +673,7 @@ export default function EvaluationHistory({
                 canvas.height
             );
 
+            await addQuestionDetailsPages();
             // Descargar el PDF directamente
             const employeeName = processedEvaluationData.find(e => e.id === selectedEmployeeId)?.name.replace(/\s+/g, '_');
             pdf.save(`evaluacion_${employeeName}.pdf`);
@@ -526,6 +690,8 @@ export default function EvaluationHistory({
             toast.error('Error al generar el PDF');
         }
     };
+
+
 
     if (isLoading) {
         return (
