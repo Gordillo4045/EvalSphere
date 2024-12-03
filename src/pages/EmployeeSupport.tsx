@@ -80,7 +80,7 @@ export default function EmployeeSupport({ employeeId }: { employeeId: string }) 
                 <Button size="md" onPress={() => setIsNewTicketOpen(true)} variant='flat' color='secondary'>
                     Crear Nueva Solicitud de Soporte
                 </Button>
-                <Modal isOpen={isNewTicketOpen} onClose={() => setIsNewTicketOpen(false)}>
+                <Modal isOpen={isNewTicketOpen} onClose={() => setIsNewTicketOpen(false)} placement='top-center'>
                     <ModalContent>
                         <ModalHeader>Nueva Solicitud de Soporte</ModalHeader>
                         <ModalBody>
@@ -196,7 +196,7 @@ function TicketCard({ ticket }: { ticket: Ticket }) {
                 </CardBody>
             </Card>
 
-            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} size="2xl">
+            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} size="2xl" placement='top-center' scrollBehavior='outside'>
                 <ModalContent>
                     <ModalHeader className="flex flex-col gap-1">
                         {ticket.title}

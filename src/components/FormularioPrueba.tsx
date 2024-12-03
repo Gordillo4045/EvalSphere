@@ -433,6 +433,7 @@ const FormularioPrueba = () => {
           setShowConfirmModal(open);
           if (!open) setPendingSubmission(null);
         }}
+        placement='top-center'
       >
         <ModalContent>
           {(onClose) => (

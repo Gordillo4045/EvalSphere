@@ -11,7 +11,7 @@ interface DeleteConfirmationModalProps {
 
 export default function DeleteConfirmationModal({ isOpen, onConfirm, onCancel, title, content, isDeleting }: DeleteConfirmationModalProps) {
     return (
-        <Modal isOpen={isOpen} onClose={onCancel} placement="center">
+        <Modal isOpen={isOpen} onClose={onCancel} placement="top-center">
             <ModalContent>
                 <ModalHeader>{title}</ModalHeader>
                 <ModalBody>

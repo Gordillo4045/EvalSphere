@@ -130,8 +130,8 @@ export default function QuestionDetailsTable({
                                 key={index}
                                 aria-label={question}
                                 title={
-                                    <div className="flex justify-between items-center pr-4">
-                                        <span className="text-small">
+                                    <div className="flex flex-col md:flex-row justify-between items-center md:pr-4 gap-2">
+                                        <span className="text-small text-balance">
                                             {`${question}`}
                                             <Chip size='sm' variant='flat' startContent={<Layers2 size={10} />} isDisabled className='ml-2'>
                                                 {category}
