@@ -559,7 +559,7 @@ function CompanyControlPanel() {
                                 className="max-h-[400px] overflow-auto"
                             >
                                 {notifications.length === 0 ? (
-                                    <DropdownItem>No hay notificaciones</DropdownItem>
+                                    <DropdownItem key="no-notifications">No hay notificaciones</DropdownItem>
                                 ) : (
                                     notifications.map((notification) => (
                                         <DropdownItem
