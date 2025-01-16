@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { Spinner } from '@nextui-org/react';
+import { Spinner } from "@heroui/react";
 
 interface ProtectedAdminRouteProps {
     children: React.ReactNode;

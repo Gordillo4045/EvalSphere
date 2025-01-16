@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Slider, Textarea, Button, Spinner, Card, CardHeader, CardBody, Autocomplete, AutocompleteItem, AutocompleteSection, Avatar, Divider, Chip, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@nextui-org/react';
+import { Slider, Textarea, Button, Spinner, Card, CardHeader, CardBody, Autocomplete, AutocompleteItem, AutocompleteSection, Avatar, Divider, Chip, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/react";
 import { db, auth } from "@/config/config";
 import { addDoc, collection, getDocs, doc, getDoc, query, where } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';

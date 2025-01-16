@@ -1,9 +1,9 @@
-import { Accordion, AccordionItem, Button, Kbd, Link, Popover, PopoverContent, PopoverTrigger, Tooltip, User } from "@nextui-org/react"
+import { Accordion, AccordionItem, Button, Kbd, Link, Popover, PopoverContent, PopoverTrigger, Tooltip, User } from "@heroui/react"
 import { motion, useAnimationControls } from "framer-motion"
 import { useState, useEffect, useRef } from "react"
 import { useAuth } from "@/hooks/useAuth"
 import ThemeToggleSlide from "@/components/ThemeToggleSlide"
-import type { Selection } from "@nextui-org/react";
+import type { Selection } from "@heroui/react";
 import { AiFillSetting } from "react-icons/ai";
 import { signOut } from "firebase/auth"
 import { toast } from "sonner"

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, CardHeader, CardBody, Spinner, Select, SelectItem, Textarea, DatePicker, Button, SharedSelection, Accordion, AccordionItem, Chip, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, ScrollShadow } from "@nextui-org/react";
+import { Card, CardHeader, CardBody, Spinner, Select, SelectItem, Textarea, DatePicker, Button, SharedSelection, Accordion, AccordionItem, Chip, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, ScrollShadow } from "@heroui/react";
 import { doc, getDoc, collection, getDocs, setDoc } from 'firebase/firestore';
 import { db } from '@/config/config';
 import { Employee, Position } from '@/types/applicaciontypes';

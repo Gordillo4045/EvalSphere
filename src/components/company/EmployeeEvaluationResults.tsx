@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, CardHeader, CardBody, Spinner, Chip } from "@nextui-org/react";
+import { Card, CardHeader, CardBody, Spinner, Chip } from "@heroui/react";
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db } from '@/config/config';
 import { collection, getDocs, doc, getDoc, query, where } from 'firebase/firestore';

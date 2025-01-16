@@ -1,4 +1,4 @@
-import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Tooltip, Image } from "@nextui-org/react"
+import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Tooltip, Image } from "@heroui/react"
 import { AnimatePresence, motion } from "framer-motion"
 import { Fragment, useMemo, useState } from "react"
 import { FaApplePay, FaCreditCard, FaGooglePay, FaPaypal } from "react-icons/fa";

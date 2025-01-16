@@ -14,7 +14,7 @@ import {
     useDisclosure,
     User,
     Spinner
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { IoIosSearch } from "react-icons/io";
 import { FaPlus } from "react-icons/fa6";
 import { AiOutlineEdit } from "react-icons/ai";

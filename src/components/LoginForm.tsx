@@ -7,7 +7,7 @@ import {
     ModalFooter,
     Input,
     Button
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/config/config";
 import { toast } from 'sonner';

@@ -21,7 +21,7 @@ import {
     Textarea,
     Chip,
     ScrollShadow,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { IoIosEye, IoIosSearch } from "react-icons/io";
 import { IoReload } from "react-icons/io5";
 import { Ticket } from '@/types/tickets';

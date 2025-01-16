@@ -6,7 +6,7 @@ import {
     Accordion,
     AccordionItem,
     Card,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { IoIosSearch } from "react-icons/io";
 import { Layers2 } from 'lucide-react';
 

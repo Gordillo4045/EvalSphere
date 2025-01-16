@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Image, Tooltip, Select, SelectItem } from "@nextui-org/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Image, Tooltip, Select, SelectItem } from "@heroui/react";
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage, httpsCallable, db } from '@/config/config';
 import { toast } from 'sonner';

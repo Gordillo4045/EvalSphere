@@ -12,7 +12,7 @@ import {
     SortDescriptor,
     User,
     Spinner,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { IoIosCloseCircleOutline, IoIosSearch } from "react-icons/io";
 import { toast } from 'sonner';
 import { generateChartData } from '@/utils/chartUtils';

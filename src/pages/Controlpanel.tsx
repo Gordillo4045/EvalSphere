@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { collection, getDocs, updateDoc, doc, addDoc, serverTimestamp } from "firebase/firestore";
 import { toast } from 'sonner';
 import { db, httpsCallable } from '@/config/config';
-import { Tabs, Tab } from "@nextui-org/react";
+import { Tabs, Tab } from "@heroui/react";
 
 import UserForm from '@/components/UserForm';
 import UserTable from '@/components/UsersTable';

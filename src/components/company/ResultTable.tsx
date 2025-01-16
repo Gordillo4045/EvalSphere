@@ -17,7 +17,7 @@ import {
     DropdownMenu,
     DropdownItem,
     Selection,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { BiSearch } from "react-icons/bi";
 import { FiChevronDown } from "react-icons/fi";
 import { collection, onSnapshot } from 'firebase/firestore';

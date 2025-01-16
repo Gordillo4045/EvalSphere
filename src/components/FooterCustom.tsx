@@ -1,4 +1,4 @@
-import { Card, CardBody, Link } from "@nextui-org/react";
+import { Card, CardBody, Link } from "@heroui/react";
 import { FaFacebook, FaTwitter, FaLinkedin, FaHome } from "react-icons/fa";
 
 export default function FooterCustom() {

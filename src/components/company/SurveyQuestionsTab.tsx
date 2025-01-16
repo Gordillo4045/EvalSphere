@@ -17,7 +17,7 @@ import {
     Tooltip,
     Select,
     SelectItem
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query } from 'firebase/firestore';
 import { db } from '@/config/config';
 import { toast } from 'sonner';

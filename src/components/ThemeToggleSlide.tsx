@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useTheme } from '@/components/ThemeProvider';
-import { Tooltip } from "@nextui-org/react";
+import { Tooltip } from "@heroui/react";
 import { useState, useEffect } from 'react';
 
 interface ThemeToggleSlideProps {

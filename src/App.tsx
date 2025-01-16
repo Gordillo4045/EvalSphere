@@ -1,4 +1,4 @@
-import { NextUIProvider } from "@nextui-org/react";
+import { HeroUIProvider } from "@heroui/react";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import NavbarCustom from "@/components/NavbarCustom";
@@ -65,10 +65,10 @@ function App() {
   const navigate = useNavigate();
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <NextUIProvider navigate={navigate}>
+      <HeroUIProvider navigate={navigate}>
         <AppContent />
         <Toaster richColors position="top-left" />
-      </NextUIProvider>
+      </HeroUIProvider>
     </ThemeProvider>
   );
 }

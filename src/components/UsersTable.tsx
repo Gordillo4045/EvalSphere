@@ -12,7 +12,7 @@ import {
     SortDescriptor,
     Tooltip,
     User,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { IoIosSearch } from "react-icons/io";
 import { IoReload } from "react-icons/io5";
 import { FaPlus } from "react-icons/fa6";

@@ -11,7 +11,7 @@ import {
     Tooltip,
     Select,
     SelectItem
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { storage, httpsCallable } from "@/config/config";
 import { toast } from 'sonner';

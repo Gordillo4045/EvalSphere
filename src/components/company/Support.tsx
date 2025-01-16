@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Button, Input, Textarea, Card, CardBody, CardHeader, Modal, ModalContent, ModalHeader, ModalBody, Chip } from "@nextui-org/react"
+import { Button, Input, Textarea, Card, CardBody, CardHeader, Modal, ModalContent, ModalHeader, ModalBody, Chip } from "@heroui/react"
 import { collection, addDoc, query, getDocs } from 'firebase/firestore';
 import { db } from '../../config/config';
 import { toast } from 'sonner';
