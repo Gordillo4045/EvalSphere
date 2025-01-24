@@ -194,6 +194,7 @@ export default function ResultTable({ data, companyId, setActiveTab, setSelected
                         size="sm"
                         variant="light"
                         color="primary"
+                        isDisabled={item.average === 'N/A'}
                         onPress={() => {
                             setSelectedEmployeeId(item.id);
                             setActiveTab('evaluationHistory');
