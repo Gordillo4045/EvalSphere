@@ -163,7 +163,7 @@ export function BenefitsSection() {
           Beneficios
         </h2>
         <p className="text-neutral-500 text-lg text-pretty whitespace-pre-line dark:text-neutral-400">
-          La evaluación 360° es una herramienta poderosaque aporta
+          La evaluación 360° es una herramienta poderosa que aporta
           múltiples beneficios.
         </p>
       </motion.div>
