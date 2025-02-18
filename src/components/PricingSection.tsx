@@ -58,7 +58,8 @@ const demoPlans = [
 
 const PricingSection: React.FC = () => {
   return (
-    <div className="rounded-2xl items-center bg-background/60 shadow-medium backdrop-blur-sm backdrop-saturate-150 dark:bg-default-100/50 ">
+    // <div className="rounded-2xl items-center bg-background/60 shadow-medium backdrop-blur-sm backdrop-saturate-150 dark:bg-default-100/50 ">
+    <div>
       <Pricing
         plans={demoPlans}
       />

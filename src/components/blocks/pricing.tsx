@@ -44,15 +44,21 @@ export function Pricing({
 
   return (
     <div className="container py-20">
-      <div className="text-center space-y-4 mb-12">
-        <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">
-          {title}
-        </h2>
-        <p className="text-neutral-500 text-lg whitespace-pre-line dark:text-neutral-400">
-          {description}
-        </p>
-      </div>
-
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1.5 }}
+        viewport={{ once: true }}
+      >
+        <div className="text-center space-y-4 mb-12">
+          <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">
+            {title}
+          </h2>
+          <p className="text-neutral-500 text-lg whitespace-pre-line dark:text-neutral-400">
+            {description}
+          </p>
+        </div>
+      </motion.div>
       <div className="flex justify-center mb-10">
         <label className="relative inline-flex items-center cursor-pointer">
           <Label>
