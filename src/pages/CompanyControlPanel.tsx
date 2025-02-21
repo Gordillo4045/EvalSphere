@@ -112,13 +112,13 @@ function CompanyControlPanel() {
         } finally {
             setIsLoading(false);
         }
-    }, [company?.id]);
+    }, [company?.id, evaluationResults]);
 
     useEffect(() => {
-        if (company?.id) {
+        if (company?.id && !evaluationResults) {
             fetchEvaluationResults();
         }
-    }, [fetchEvaluationResults]);
+    }, [company?.id]);
 
     useEffect(() => {
         if (evaluationResults && selectedDepartment) {
@@ -512,7 +512,6 @@ function CompanyControlPanel() {
             <Spinner color="primary" label="Cargando datos..." />
         </div>;
     }
-    console.log(evaluationResults);
     return (
         <div className="flex min-h-dvh">
             <Sidebar setActiveTab={handleSetActiveTab} />
