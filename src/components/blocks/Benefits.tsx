@@ -151,7 +151,7 @@ export function BenefitsSection() {
   ];
 
   return (
-    <div className="mx-4 my-10 container">
+    <div className="px-4 my-10 container">
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
