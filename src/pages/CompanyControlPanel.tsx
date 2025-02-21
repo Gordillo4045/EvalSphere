@@ -479,10 +479,10 @@ function CompanyControlPanel() {
                                         />
                                         <div className="flex justify-end gap-2">
                                             <ButtonGroup>
-                                                <Button color="primary" onClick={handleChangeInvitationCode}>
+                                                <Button color="primary" onPress={handleChangeInvitationCode}>
                                                     Guardar
                                                 </Button>
-                                                <Button color="danger" variant="light" onClick={() => setIsEditingCode(false)}>
+                                                <Button color="danger" variant="light" onPress={() => setIsEditingCode(false)}>
                                                     Cancelar
                                                 </Button>
                                             </ButtonGroup>
@@ -493,7 +493,7 @@ function CompanyControlPanel() {
                                         <Snippet symbol="" size='md' className='min-w-[80%] md:min-w-[83%] lg:min-w-[90%]' >
                                             {invitationCode}
                                         </Snippet>
-                                        <Button isIconOnly color="default" variant="light" size='md' onClick={() => setIsEditingCode(true)}>
+                                        <Button isIconOnly color="default" variant="light" size='md' onPress={() => setIsEditingCode(true)}>
                                             <MdEdit size={20} />
                                         </Button>
                                     </div>
@@ -512,6 +512,7 @@ function CompanyControlPanel() {
             <Spinner color="primary" label="Cargando datos..." />
         </div>;
     }
+    console.log(evaluationResults);
     return (
         <div className="flex min-h-dvh">
             <Sidebar setActiveTab={handleSetActiveTab} />
@@ -564,7 +565,7 @@ function CompanyControlPanel() {
                                     notifications.map((notification) => (
                                         <DropdownItem
                                             key={notification.id}
-                                            onClick={() => markAsRead(notification.id)}
+                                            onPress={() => markAsRead(notification.id)}
                                             className={`${!notification.read ? 'bg-default-100' : ''} border-b last:border-b-0 border-default-100 mb-2`}
                                             description={notification.createdAt instanceof Date
                                                 ? notification.createdAt.toLocaleString()

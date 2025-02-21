@@ -281,7 +281,7 @@ export default function EmployeeModal({ isOpen, onClose, onUpdate, mode, company
                                         size='sm'
                                         variant='shadow'
                                         className="absolute z-10 top-0 right-0 "
-                                        onClick={handleRemoveImage}
+                                        onPress={handleRemoveImage}
                                     >
                                         X
                                     </Button>

@@ -292,7 +292,7 @@ export default function EmployeeSignUpForm({ isOpen, onClose }: EmployeeSignUpFo
                                             size='sm'
                                             variant='shadow'
                                             className="absolute z-10 top-0 right-0 "
-                                            onClick={handleRemoveImage}
+                                            onPress={handleRemoveImage}
                                         >
                                             X
                                         </Button>

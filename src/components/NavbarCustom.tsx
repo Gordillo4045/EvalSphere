@@ -114,7 +114,7 @@ export default function NavbarCustom() {
                                         <p className="font-semibold">{user.displayName}</p>
                                         <p className="font-semibold">{user.email}</p>
                                     </DropdownItem>
-                                    <DropdownItem key="theme" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} textValue='tema' startContent={<ThemeToggle />} className="pl-2 ">
+                                    <DropdownItem key="theme" onPress={() => setTheme(theme === 'light' ? 'dark' : 'light')} textValue='tema' startContent={<ThemeToggle />} className="pl-2 ">
                                         Tema
                                     </DropdownItem>
                                     {isEmployee && (
@@ -137,7 +137,7 @@ export default function NavbarCustom() {
                                             Panel de Control Compañía
                                         </DropdownItem>
                                     )}
-                                    <DropdownItem key="logout" color="danger" onClick={handleLogout} startContent={<MdOutlineLogout />} textValue="cerrar sesión">
+                                    <DropdownItem key="logout" color="danger" onPress={handleLogout} startContent={<MdOutlineLogout />} textValue="cerrar sesión">
                                         Cerrar Sesión
                                     </DropdownItem>
                                 </DropdownMenu>
@@ -154,7 +154,7 @@ export default function NavbarCustom() {
                         <div className="flex items-center justify-center gap-2 size-10 md:h-fit md:w-fit">
                             <Button
                                 variant="light"
-                                onClick={() => setIsLoginOpen(true)}
+                                onPress={() => setIsLoginOpen(true)}
                                 startContent={<MdOutlineLogin />}
                                 className="hidden md:flex "
                                 size="md"
@@ -173,10 +173,10 @@ export default function NavbarCustom() {
                                     </Button>
                                 </DropdownTrigger>
                                 <DropdownMenu aria-label="Opciones de registro" variant="flat">
-                                    <DropdownItem key="employee" onClick={handleEmployeeSignUp}>
+                                    <DropdownItem key="employee" onPress={handleEmployeeSignUp}>
                                         Como Empleado
                                     </DropdownItem>
-                                    <DropdownItem key="company" onClick={handleCompanySignUp}>
+                                    <DropdownItem key="company" onPress={handleCompanySignUp}>
                                         Como Compañía
                                     </DropdownItem>
                                 </DropdownMenu>

@@ -921,7 +921,7 @@ export default function EvaluationHistory({
                                                 variant='underlined'
                                             />
                                             <Button
-                                                onClick={handleSaveAction}
+                                                onPress={handleSaveAction}
                                                 color="primary"
                                                 variant="shadow"
                                                 size='sm'
