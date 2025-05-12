@@ -1,6 +1,6 @@
-// src/components/PricingSection.tsx
-import React from "react";
+import React, { useState } from "react";
 import { Pricing } from "@/components/blocks/pricing";
+import CompanySignUpForm from "@/components/company/CompanySignUpForm";
 
 const demoPlans = [
   {
@@ -16,7 +16,7 @@ const demoPlans = [
     ],
     description: "Ideal para equipos pequeños que inician con la evaluación 360°.",
     buttonText: "Comprar",
-    href: "/sign-up",
+    href: "#",
     isPopular: false,
   },
   {
@@ -34,7 +34,7 @@ const demoPlans = [
     ],
     description: "Diseñado para equipos en crecimiento que buscan mayor personalización y análisis.",
     buttonText: "Comprar",
-    href: "/sign-up",
+    href: "#",
     isPopular: true,
   },
   {
@@ -51,19 +51,31 @@ const demoPlans = [
     ],
     description: "Perfecto para grandes empresas con necesidades específicas y equipos en múltiples áreas.",
     buttonText: "Comprar",
-    href: "/contact",
+    href: "#",
     isPopular: false,
   },
 ];
 
 const PricingSection: React.FC = () => {
+  const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
+
+  const handlePurchaseClick = () => {
+    setIsSignUpModalOpen(true);
+  };
+
   return (
-    // <div className="rounded-2xl items-center bg-background/60 shadow-medium backdrop-blur-sm backdrop-saturate-150 dark:bg-default-100/50 ">
-    <div>
+    <>
       <Pricing
-        plans={demoPlans}
+        plans={demoPlans.map(plan => ({
+          ...plan,
+          onClick: handlePurchaseClick
+        }))}
       />
-    </div>
+      <CompanySignUpForm
+        isOpen={isSignUpModalOpen}
+        onClose={() => setIsSignUpModalOpen(false)}
+      />
+    </>
   );
 };
 
