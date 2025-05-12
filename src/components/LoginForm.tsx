@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
     Modal,
     ModalContent,
@@ -6,7 +6,8 @@ import {
     ModalBody,
     ModalFooter,
     Input,
-    Button
+    Button,
+    ButtonGroup
 } from "@heroui/react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/config/config";
@@ -24,6 +25,17 @@ export default function LoginForm({ isOpen, onClose }: LoginFormProps) {
         email: '',
         password: '',
     });
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        if (!isOpen) {
+            setFormState({
+                email: '',
+                password: '',
+            });
+            setIsLoading(false);
+        }
+    }, [isOpen]);
 
     const validateEmail = (value: string) => value.match(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+.[A-Z]{2,4}$/i);
 
@@ -40,12 +52,18 @@ export default function LoginForm({ isOpen, onClose }: LoginFormProps) {
         e.preventDefault();
         const { email, password } = formState;
 
+        if (!email || !password) {
+            toast.error("Por favor, complete todos los campos");
+            return;
+        }
+
         if (isInvalid) {
             toast.error("Por favor, ingrese un correo electrónico válido.");
             return;
         }
 
         try {
+            setIsLoading(true);
             await signInWithEmailAndPassword(auth, email, password);
             setFormState({
                 email: '',
@@ -55,6 +73,14 @@ export default function LoginForm({ isOpen, onClose }: LoginFormProps) {
             onClose();
         } catch (error) {
             toast.error("Error en el inicio de sesión. Verifica tus credenciales.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === "Enter") {
+            handleSubmit(e as any);
         }
     };
 
@@ -63,20 +89,23 @@ export default function LoginForm({ isOpen, onClose }: LoginFormProps) {
             isOpen={isOpen}
             onClose={onClose}
             placement="top-center"
+            hideCloseButton
         >
             <ModalContent>
-                <ModalHeader className="flex flex-col gap-1">Inicio de sesión</ModalHeader>
-                <ModalBody>
-                    <form onSubmit={handleSubmit} className="space-y-2">
+                <form onSubmit={handleSubmit} className="space-y-2">
+                    <ModalHeader className="flex flex-col gap-1">Inicio de sesión</ModalHeader>
+                    <ModalBody>
                         <Input
                             isRequired
                             autoFocus
+                            onKeyDown={handleKeyDown}
                             endContent={
                                 <MailIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
                             }
                             label="Correo"
                             placeholder="Ingresa tu correo"
                             variant="bordered"
+                            type="email"
                             value={formState.email}
                             onChange={(e) => handleInputChange('email', e.target.value)}
                             isInvalid={isInvalid}
@@ -84,6 +113,7 @@ export default function LoginForm({ isOpen, onClose }: LoginFormProps) {
                         />
                         <Input
                             isRequired
+                            onKeyDown={handleKeyDown}
                             endContent={
                                 <LockIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
                             }
@@ -94,14 +124,23 @@ export default function LoginForm({ isOpen, onClose }: LoginFormProps) {
                             value={formState.password}
                             onChange={(e) => handleInputChange('password', e.target.value)}
                         />
+                    </ModalBody>
 
-                        <ModalFooter>
-                            <Button color="primary" type="submit">
+                    <ModalFooter>
+                        <ButtonGroup>
+                            <Button
+                                color="danger"
+                                variant="light"
+                                onPress={onClose}
+                            >
+                                Cancelar
+                            </Button>
+                            <Button color="primary" type="submit" isLoading={isLoading}>
                                 Iniciar sesión
                             </Button>
-                        </ModalFooter>
-                    </form>
-                </ModalBody>
+                        </ButtonGroup>
+                    </ModalFooter>
+                </form>
             </ModalContent>
         </Modal>
     );
