@@ -20,6 +20,7 @@ interface PricingPlan {
   buttonText: string;
   href: string;
   isPopular: boolean;
+  onClick?: () => void;
 }
 
 interface PricingProps {
@@ -178,6 +179,9 @@ export function Pricing({
                     ? "bg-neutral-900 text-neutral-50 dark:bg-neutral-50 dark:text-neutral-900"
                     : "bg-white text-neutral-950 dark:bg-neutral-950 dark:text-neutral-50",
                 )}
+                onPress={() => {
+                  plan.onClick?.();
+                }}
               >
                 {plan.buttonText}
               </Link>
