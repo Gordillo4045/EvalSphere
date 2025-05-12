@@ -1,4 +1,4 @@
-import { Accordion, AccordionItem, Button, Kbd, Link, Popover, PopoverContent, PopoverTrigger, Tooltip, User } from "@heroui/react"
+import { Accordion, AccordionItem, Button, Divider, Kbd, Link, Popover, PopoverContent, PopoverTrigger, Tooltip, User } from "@heroui/react"
 import { motion, useAnimationControls } from "framer-motion"
 import { useState, useEffect, useRef } from "react"
 import { useAuth } from "@/hooks/useAuth"
@@ -134,12 +134,49 @@ const Sidebar = ({ setActiveTab }: Props) => {
                                             wrapper: "max-w-[120px] md:max-w-[150px]",
                                             description: "text-xs",
                                         }}
-
                                     />
                                 </PopoverTrigger>
-                                <PopoverContent className="p-1">
-                                    <div className="">{user.email}</div>
-                                    <Link href="/" isBlock className="cursor-pointer w-full text-xs md:text-base" color="foreground">Regresar a Home</Link>
+                                <PopoverContent className="p-4 w-[280px]">
+                                    <div className="flex flex-col gap-3">
+                                        <div className="flex items-center gap-3">
+                                            <User
+                                                name={user.displayName || "Usuario"}
+                                                description={user.email}
+                                                avatarProps={{
+                                                    src: user.photoURL || "https://i.pravatar.cc/150",
+                                                    size: "lg",
+                                                    showFallback: true,
+                                                    className: "ring-2 ring-primary/30"
+                                                }}
+                                            />
+                                        </div>
+                                        <Divider />
+                                        <div className="flex flex-col gap-2 text-sm">
+                                            <div className="flex items-center gap-2">
+                                                <div className="bg-warning/10 dark:bg-warning/20 p-2 rounded-full">
+                                                    <FaQuestionCircle size={18} className="text-warning" />
+                                                </div>
+                                                <Link onPress={() => { setActiveTab('support'); }} color="foreground" isBlock className="overflow-clip whitespace-nowrap tracking-wide flex gap-3 cursor-pointer w-full">
+                                                    Centro de ayuda
+                                                </Link>
+                                            </div>
+                                        </div>
+                                        <Divider />
+                                        <div className="flex flex-col gap-2">
+                                            <p className="text-xs text-gray-500">
+                                                Última sesión: {new Date().toLocaleDateString()}
+                                            </p>
+                                            <Button
+                                                color="danger"
+                                                variant="flat"
+                                                onPress={handleLogout}
+                                                startContent={<MdOutlineLogout size={18} />}
+                                                className="w-full justify-start"
+                                            >
+                                                Cerrar sesión
+                                            </Button>
+                                        </div>
+                                    </div>
                                 </PopoverContent>
                             </Popover>
                         )}
