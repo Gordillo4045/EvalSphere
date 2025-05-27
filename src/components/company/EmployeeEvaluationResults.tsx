@@ -101,7 +101,7 @@ export default function EmployeeEvaluationResults({ employeeId }: EvaluationResu
                 const evaluationsSnapshot = await getDocs(evaluationsQuery);
                 const evaluationsCompleted = evaluationsSnapshot.docs.length;
 
-                const remaining = departmentEmployees - evaluationsCompleted;
+                const remaining = (departmentEmployees) - evaluationsCompleted;
                 setRemainingEvaluations(remaining > 0 ? remaining : 0);
 
             } catch (error) {
