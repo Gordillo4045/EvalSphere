@@ -40,6 +40,7 @@ interface EvaluationHistoryTableProps {
     clearSelectedEmployee: () => void;
     onSelectEmployee: (employeeId: string, chartData: any[]) => void;
     onExport: () => void;
+    isGeneratingPdf?: boolean;
 }
 
 const CATEGORIES = [
@@ -75,6 +76,7 @@ export default function EvaluationHistoryTable({
     clearSelectedEmployee,
     onSelectEmployee,
     onExport,
+    isGeneratingPdf = false,
 }: EvaluationHistoryTableProps) {
     const [filterValue, setFilterValue] = useState("");
     const [page, setPage] = useState(1);
@@ -192,11 +194,12 @@ export default function EvaluationHistoryTable({
                                 color='secondary'
                                 variant="light"
                                 size="sm"
-                                startContent={<FaFileExport size={20} />}
+                                startContent={isGeneratingPdf ? <Spinner size="sm" /> : <FaFileExport size={20} />}
                                 aria-label="Exportar resultados de la encuesta"
                                 onPress={onExport}
+                                isDisabled={isGeneratingPdf}
                             >
-                                Exportar Resultados
+                                {isGeneratingPdf ? 'Generando PDF...' : 'Exportar Resultados'}
                             </Button>
                             <Button
                                 color="danger"
@@ -213,7 +216,7 @@ export default function EvaluationHistoryTable({
                 </div>
             </div>
         );
-    }, [filterValue, onSearchChange, selectedEmployeeId, clearSelectedEmployee]);
+    }, [filterValue, onSearchChange, selectedEmployeeId, clearSelectedEmployee, isGeneratingPdf, onExport]);
 
     const bottomContent = useMemo(() => {
         return (

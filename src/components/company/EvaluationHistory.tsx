@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, CardHeader, CardBody, Spinner, Select, SelectItem, Textarea, DatePicker, Button, SharedSelection, Accordion, AccordionItem, Chip, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, ScrollShadow } from "@heroui/react";
+import { Card, CardHeader, CardBody, Spinner, Select, SelectItem, Textarea, DatePicker, Button, SharedSelection, Accordion, AccordionItem, Chip, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, ScrollShadow, ButtonGroup } from "@heroui/react";
 import { doc, getDoc, collection, getDocs, setDoc } from 'firebase/firestore';
 import { db } from '@/config/config';
 import { Employee, Position } from '@/types/applicaciontypes';
@@ -149,6 +149,9 @@ export default function EvaluationHistory({
     }>>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState<{ id: string, status: string } | null>(null);
+    const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
+    const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
+    const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
     useEffect(() => {
         const processData = async () => {
@@ -325,10 +328,9 @@ export default function EvaluationHistory({
     const generatePDF = async () => {
         if (!selectedEmployeeId || !chartData) return;
 
+        setIsGeneratingPdf(true);
         try {
             const loadingToast = toast.loading('Generando PDF...');
-
-
 
             // Crear un contenedor temporal para el reporte con mejor formato
             const reportContainer = document.createElement('div');
@@ -674,20 +676,45 @@ export default function EvaluationHistory({
             );
 
             await addQuestionDetailsPages();
-            // Descargar el PDF directamente
-            const employeeName = processedEvaluationData.find(e => e.id === selectedEmployeeId)?.name.replace(/\s+/g, '_');
-            pdf.save(`evaluacion_${employeeName}.pdf`);
+
+            // Generar URL del PDF para previsualización
+            const pdfBlob = pdf.output('blob');
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            setPdfPreviewUrl(pdfUrl);
+            setIsPdfPreviewOpen(true);
 
             // Limpiar
             document.body.removeChild(reportContainer);
             document.body.removeChild(tempRadarContainer);
 
             toast.dismiss(loadingToast);
-            toast.success('PDF descargado correctamente');
+            setIsGeneratingPdf(false);
 
         } catch (error) {
             console.error('Error al generar PDF:', error);
             toast.error('Error al generar el PDF');
+            setIsGeneratingPdf(false);
+        }
+    };
+
+    const downloadPDF = () => {
+        if (pdfPreviewUrl) {
+            const link = document.createElement('a');
+            link.href = pdfPreviewUrl;
+            const employeeName = processedEvaluationData.find(e => e.id === selectedEmployeeId)?.name.replace(/\s+/g, '_');
+            link.download = `evaluacion_${employeeName}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            toast.success('PDF descargado correctamente');
+        }
+    };
+
+    const closePdfPreview = () => {
+        setIsPdfPreviewOpen(false);
+        if (pdfPreviewUrl) {
+            URL.revokeObjectURL(pdfPreviewUrl);
+            setPdfPreviewUrl(null);
         }
     };
 
@@ -858,6 +885,7 @@ export default function EvaluationHistory({
                         }}
                         onSelectEmployee={handleSelectEmployee}
                         onExport={generatePDF}
+                        isGeneratingPdf={isGeneratingPdf}
                     />
 
                 </CardBody>
@@ -1099,6 +1127,70 @@ export default function EvaluationHistory({
                         >
                             Confirmar
                         </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
+            {/* Modal de Previsualización del PDF */}
+            <Modal
+                isOpen={isPdfPreviewOpen}
+                onClose={closePdfPreview}
+                size="5xl"
+                scrollBehavior="inside"
+                placement="center"
+            >
+                <ModalContent>
+                    <ModalHeader className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                <span className="text-lg font-medium text-primary">📄</span>
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-semibold">Previsualización del PDF</h3>
+                                <p className="text-sm text-gray-500">
+                                    Reporte de evaluación para {processedEvaluationData.find(e => e.id === selectedEmployeeId)?.name}
+                                </p>
+                            </div>
+                        </div>
+                    </ModalHeader>
+                    <ModalBody className="p-0">
+                        {pdfPreviewUrl ? (
+                            <div className="w-full h-[70vh] bg-gray-100 rounded-lg overflow-hidden">
+                                <iframe
+                                    src={pdfPreviewUrl}
+                                    className="w-full h-full border-0"
+                                    title="Previsualización del PDF"
+                                />
+                            </div>
+                        ) : (
+                            <div className="flex items-center justify-center h-[70vh]">
+                                <Spinner label="Cargando previsualización..." />
+                            </div>
+                        )}
+                    </ModalBody>
+                    <ModalFooter className="flex gap-2">
+                        <ButtonGroup>
+                            <Button
+                                color="danger"
+                                variant="light"
+                                onPress={closePdfPreview}
+                            >
+                                Cerrar
+                            </Button>
+                            <Button
+                                color="success"
+                                onPress={downloadPDF}
+                                variant="flat"
+                                isDisabled={!pdfPreviewUrl}
+                                startContent={
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                }
+                            >
+                                Descargar PDF
+                            </Button>
+                        </ButtonGroup>
                     </ModalFooter>
                 </ModalContent>
             </Modal>
